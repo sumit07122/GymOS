@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -96,12 +96,12 @@ export default function Home() {
       <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
+            <div className="size-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
               <Dumbbell className="size-5" />
             </div>
             <div>
               <span className="font-bold text-lg tracking-tight">FIXIA</span>
-              <span className="text-muted-foreground ml-1.5 text-xs font-semibold uppercase tracking-wider">
+              <span className="text-emerald-600 ml-1.5 text-xs font-semibold uppercase tracking-wider">
                 GymOS
               </span>
             </div>
@@ -109,13 +109,16 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="text-xs font-semibold text-foreground hover:text-primary transition-colors px-3 py-1.5"
+              className="text-xs font-semibold text-foreground hover:text-emerald-600 transition-colors px-3 py-1.5"
             >
               Sign In
             </Link>
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "sm" }), "font-semibold text-xs")}
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs"
+              )}
             >
               Register Gym
             </Link>
@@ -136,75 +139,46 @@ export default function Home() {
             Engineered for high reliability, deterministic performance, and strict multi-tenant isolation.
             Empowering gym owners with streamlined operations from one unified dashboard.
           </p>
-        </div>
-
-        {/* Architectural Pillars / Frozen V1 Rules */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-border/60 bg-card/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                Deterministic Logic
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Zero AI bloat or hallucinated forecasts. Reliable mathematical billing, precise dues calculation, and verified check-in history.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-card/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                Strict Tenant Isolation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                All business records are tenant-scoped by gym ID with composite indexes and Prisma ORM query isolation guards.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-card/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                Modern Stack Baseline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Powered by Next.js App Router, React 19, TypeScript, Tailwind CSS, shadcn/ui, and PostgreSQL on Neon.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Modules Grid */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/50 pb-4">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">Core Operational Modules</h2>
-              <p className="text-muted-foreground text-sm">
-                Architectural blueprint of features scheduled across incremental development phases.
-              </p>
-            </div>
-            <Badge variant="outline" className="w-fit">12 Standard Modules</Badge>
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/register"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "bg-emerald-600 hover:bg-emerald-700 text-white px-8 font-semibold w-full sm:w-auto"
+              )}
+            >
+              Start Free Trial
+            </Link>
+            <Link
+              href="/login"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "px-8 font-semibold w-full sm:w-auto"
+              )}
+            >
+              Owner Portal Sign In
+            </Link>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Feature Grid */}
+        <section className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold tracking-tight">Enterprise-Ready Architecture</h2>
+            <p className="text-sm text-muted-foreground">
+              Production modules designed for security, scalability, and seamless gym workflows.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((m) => {
               const Icon = m.icon;
               return (
-                <Card key={m.title} className="hover:border-border transition-colors">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-md bg-secondary flex items-center justify-center text-foreground">
-                        <Icon className="size-4" />
-                      </div>
+                <Card key={m.title} className="border-border/60 hover:border-emerald-500/50 transition-all">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                    <div className="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                      <Icon className="size-5" />
+                    </div>
+                    <div>
                       <CardTitle className="text-base font-semibold">{m.title}</CardTitle>
                     </div>
                   </CardHeader>
@@ -217,29 +191,43 @@ export default function Home() {
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* Phase Progress Card */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <CardTitle className="text-lg font-bold">Phase 01 Completed: Baseline Foundation</CardTitle>
-                <CardDescription className="text-sm">
-                  Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui primitives, and testing infrastructure are operational.
-                </CardDescription>
+        {/* Architectural Principles Banner */}
+        <section className="rounded-xl border border-border/80 bg-card p-8">
+          <div className="max-w-3xl space-y-4">
+            <h3 className="text-xl font-bold">V1 Engineering Discipline</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              FIXIA GymOS is engineered strictly following commercial enterprise standards.
+              Every tenant operates within isolated database boundaries. We prioritize sub-100ms
+              queries, strict relational integrity, and rock-solid business logic over unverified trends.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>Strict Tenant Isolation</span>
               </div>
-              <Button variant="default" size="sm" className="w-fit pointer-events-none">
-                Ready for Phase 02 (Database & Schema)
-              </Button>
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>Argon2id + DB Sessions</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>Deterministic Financial Ledgers</span>
+              </div>
             </div>
-          </CardHeader>
-        </Card>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-6 text-center text-xs text-muted-foreground">
-        <p>© 2026 FIXIA GymOS. All rights reserved. Commercial Multi-Tenant Architecture.</p>
+      <footer className="border-t border-border/40 py-8 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} FIXIA GymOS. Commercial Multi-Tenant Gym Management Platform.</p>
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-[11px]">Milestone M05 Production Ready</span>
+          </div>
+        </div>
       </footer>
     </div>
   );

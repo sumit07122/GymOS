@@ -251,6 +251,7 @@ model Gym {
   timezone        String       @default("UTC")
   taxRate         Decimal      @default(0.00) @db.Decimal(5, 2)
   taxNumber       String?
+  openingHours    String?      @db.Text // JSON or formatted schedule string e.g. Mon-Fri 06:00-22:00
   status          GymStatus    @default(ACTIVE)
   qrSigningSecret String       // Secret used for cryptographic HMAC-SHA256 QR check-ins
 
