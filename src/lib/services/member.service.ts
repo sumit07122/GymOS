@@ -224,6 +224,9 @@ export async function getMemberById(ctx: TenantContext, id: string) {
         orderBy: { startDate: "desc" },
         include: {
           plan: true,
+          auditLogs: {
+            orderBy: { createdAt: "desc" },
+          },
         },
       },
       invoices: {

@@ -19,6 +19,13 @@ import {
   Activity,
   Receipt,
   ArrowLeft,
+  Clock,
+  RotateCw,
+  Pause,
+  Play,
+  XCircle,
+  History,
+  PlusCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,12 +50,22 @@ import {
   unarchiveMemberAction,
   addWorkoutRecordAction,
 } from "@/lib/actions/member";
+import {
+  AssignMembershipModal,
+  RenewMembershipModal,
+  ExtendMembershipModal,
+  PauseMembershipModal,
+  CancelMembershipModal,
+  PlanOption,
+} from "@/components/memberships/membership-lifecycle-modals";
+import { resumeMembershipAction } from "@/lib/actions/membership";
 
 interface MemberProfileProps {
   gymId: string;
   gymSlug: string;
   currency: string;
   member: any; // Full member record with relations
+  availablePlans?: PlanOption[];
 }
 
 export function MemberProfile({
@@ -56,10 +73,26 @@ export function MemberProfile({
   gymSlug,
   currency,
   member,
+  availablePlans = [],
 }: MemberProfileProps) {
   const [activeTab, setActiveTab] = React.useState<
     "overview" | "memberships" | "financial" | "attendance" | "workouts" | "timeline"
   >("overview");
+
+  // Membership lifecycle modal states
+  const [isAssignOpen, setIsAssignOpen] = React.useState(false);
+  const [renewTarget, setRenewTarget] = React.useState<any | null>(null);
+  const [extendTarget, setExtendTarget] = React.useState<any | null>(null);
+  const [pauseTarget, setPauseTarget] = React.useState<any | null>(null);
+  const [cancelTarget, setCancelTarget] = React.useState<any | null>(null);
+  const [expandedAuditId, setExpandedAuditId] = React.useState<string | null>(null);
+  const [isResumePending, startResumeTransition] = React.useTransition();
+
+  const handleResume = (membershipId: string) => {
+    startResumeTransition(async () => {
+      await resumeMembershipAction(gymId, membershipId, gymSlug, member.id);
+    });
+  };
 
   // Modal dialog states
   const [isWorkoutModalOpen, setIsWorkoutModalOpen] = React.useState(false);
@@ -424,58 +457,255 @@ export function MemberProfile({
       {/* TAB 2: Memberships */}
       {activeTab === "memberships" && (
         <Card className="border-slate-200 shadow-xs">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold text-slate-900">
-              Membership Contracts & History
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold text-slate-900">
+                Membership Contracts & History
+              </CardTitle>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Contract lifecycles, historical pricing snapshots, extensions, and audit trails.
+              </p>
+            </div>
+            {availablePlans.length > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setIsAssignOpen(true)}
+                className="text-xs h-8 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-xs"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span>Assign Plan</span>
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {member.memberships.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
-                No memberships assigned to this member yet. Membership plan assignment is configured in Milestone M07.
+              <div className="py-10 text-center text-xs text-slate-500">
+                <p>No memberships assigned to this member yet.</p>
+                {availablePlans.length > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setIsAssignOpen(true)}
+                    className="mt-3 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span>Assign First Membership Plan</span>
+                  </Button>
+                )}
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">Plan</TableHead>
-                    <TableHead className="text-xs">Price</TableHead>
-                    <TableHead className="text-xs">Start Date</TableHead>
-                    <TableHead className="text-xs">End Date</TableHead>
-                    <TableHead className="text-xs text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {member.memberships.map((m: any) => (
-                    <TableRow key={m.id}>
-                      <TableCell className="text-xs font-semibold text-slate-900">
-                        {m.plan.name}
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        {formatMoney(Number(m.pricePaid))}
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-600">
-                        {new Date(m.startDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-600">
-                        {new Date(m.endDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-xs text-right">
-                        <Badge
-                          variant="outline"
-                          className={
-                            m.status === "ACTIVE"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px]"
-                              : "bg-slate-100 text-slate-700 text-[10px]"
-                          }
-                        >
-                          {m.status}
-                        </Badge>
-                      </TableCell>
+              <div className="space-y-4">
+                <Table>
+                  <TableHeader className="bg-slate-50/70">
+                    <TableRow>
+                      <TableHead className="text-xs font-semibold text-slate-700">Contract Plan</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-700">Price Paid</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-700">Start Date</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-700">End Date</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-700">Status</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-700 text-right">
+                        Actions
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {member.memberships.map((m: any) => {
+                      const isExpanded = expandedAuditId === m.id;
+                      const hasAudit = m.auditLogs && m.auditLogs.length > 0;
+
+                      return (
+                        <React.Fragment key={m.id}>
+                          <TableRow className="hover:bg-slate-50/50">
+                            <TableCell className="text-xs font-semibold text-slate-900">
+                              <div>{m.planNameSnapshot || m.plan.name}</div>
+                              {Number(m.admissionFeePaid) > 0 && (
+                                <span className="text-[10px] text-slate-400 font-normal">
+                                  + {formatMoney(Number(m.admissionFeePaid))} admission
+                                </span>
+                              )}
+                            </TableCell>
+
+                            <TableCell className="text-xs font-mono font-medium text-slate-900">
+                              {formatMoney(Number(m.pricePaid))}
+                            </TableCell>
+
+                            <TableCell className="text-xs text-slate-600">
+                              {new Date(m.startDate).toLocaleDateString()}
+                            </TableCell>
+
+                            <TableCell className="text-xs text-slate-600">
+                              <div className="flex items-center gap-1.5">
+                                <span>{new Date(m.endDate).toLocaleDateString()}</span>
+                                {m.extendedDays > 0 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px] py-0 px-1"
+                                    title={`Extended by ${m.extendedDays} days: ${m.extensionReason || "No reason recorded"}`}
+                                  >
+                                    +{m.extendedDays}d
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="text-xs">
+                              <div className="space-y-0.5">
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    m.status === "ACTIVE"
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px]"
+                                      : m.status === "PAUSED"
+                                      ? "bg-amber-50 text-amber-800 border-amber-200 text-[10px]"
+                                      : m.status === "CANCELLED"
+                                      ? "bg-rose-50 text-rose-800 border-rose-200 text-[10px]"
+                                      : "bg-slate-100 text-slate-700 text-[10px]"
+                                  }
+                                >
+                                  {m.status}
+                                </Badge>
+                                {m.status === "PAUSED" && m.pauseReason && (
+                                  <div className="text-[10px] text-amber-700 italic">
+                                    {m.pauseReason}
+                                  </div>
+                                )}
+                                {m.status === "CANCELLED" && m.cancellationReason && (
+                                  <div className="text-[10px] text-rose-700 italic">
+                                    {m.cancellationReason}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="text-xs text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                {/* Renew Button */}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setRenewTarget(m)}
+                                  className="h-7 px-2 text-xs text-emerald-700 hover:bg-emerald-50"
+                                  title="Renew contract"
+                                >
+                                  <RotateCw className="h-3 w-3 mr-1" />
+                                  <span>Renew</span>
+                                </Button>
+
+                                {/* Extend Button */}
+                                {m.status !== "CANCELLED" && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setExtendTarget(m)}
+                                    className="h-7 px-2 text-xs text-slate-700 hover:bg-slate-100"
+                                    title="Extend days"
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    <span>Extend</span>
+                                  </Button>
+                                )}
+
+                                {/* Pause or Resume */}
+                                {m.status === "ACTIVE" && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setPauseTarget(m)}
+                                    className="h-7 px-2 text-xs text-amber-700 hover:bg-amber-50"
+                                    title="Pause membership"
+                                  >
+                                    <Pause className="h-3 w-3 mr-1" />
+                                    <span>Pause</span>
+                                  </Button>
+                                )}
+
+                                {m.status === "PAUSED" && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={isResumePending}
+                                    onClick={() => handleResume(m.id)}
+                                    className="h-7 px-2 text-xs text-emerald-700 hover:bg-emerald-50 font-semibold"
+                                    title="Resume membership"
+                                  >
+                                    <Play className="h-3 w-3 mr-1" />
+                                    <span>Resume</span>
+                                  </Button>
+                                )}
+
+                                {/* Cancel */}
+                                {(m.status === "ACTIVE" || m.status === "PAUSED") && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setCancelTarget(m)}
+                                    className="h-7 px-2 text-xs text-rose-700 hover:bg-rose-50"
+                                    title="Cancel contract"
+                                  >
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    <span>Cancel</span>
+                                  </Button>
+                                )}
+
+                                {/* Audit Log Toggle */}
+                                {hasAudit && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      setExpandedAuditId(isExpanded ? null : m.id)
+                                    }
+                                    className={`h-7 px-1.5 text-xs ${
+                                      isExpanded ? "text-emerald-700 bg-emerald-50" : "text-slate-500 hover:text-slate-800"
+                                    }`}
+                                    title="View contract audit log"
+                                  >
+                                    <History className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+
+                          {/* Expanded Audit Log Panel */}
+                          {isExpanded && hasAudit && (
+                            <TableRow className="bg-slate-50/80">
+                              <TableCell colSpan={6} className="py-2.5 px-4">
+                                <div className="space-y-1.5">
+                                  <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <History className="h-3 w-3 text-emerald-600" />
+                                    <span>Contract Audit Trail (#{m.id.slice(0, 8)})</span>
+                                  </div>
+                                  <div className="space-y-1 pl-4 border-l-2 border-slate-200">
+                                    {m.auditLogs.map((log: any) => (
+                                      <div key={log.id} className="text-xs text-slate-600 flex items-baseline gap-2">
+                                        <Badge variant="outline" className="text-[9px] py-0 px-1 font-mono uppercase bg-white">
+                                          {log.action}
+                                        </Badge>
+                                        <span className="font-mono text-[10px] text-slate-400">
+                                          {new Date(log.createdAt).toLocaleString()}
+                                        </span>
+                                        <span className="text-slate-700">{log.details}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -817,6 +1047,69 @@ export function MemberProfile({
           </form>
         </DialogContent>
       </Dialog>
+      {/* MEMBERSHIP LIFECYCLE MODALS */}
+      {isAssignOpen && (
+        <AssignMembershipModal
+          isOpen={isAssignOpen}
+          onClose={() => setIsAssignOpen(false)}
+          gymId={gymId}
+          gymSlug={gymSlug}
+          currency={currency}
+          plans={availablePlans}
+          preselectedMemberId={member.id}
+          preselectedMemberName={`${member.firstName} ${member.lastName}`}
+        />
+      )}
+
+      {renewTarget && (
+        <RenewMembershipModal
+          isOpen={Boolean(renewTarget)}
+          onClose={() => setRenewTarget(null)}
+          gymId={gymId}
+          gymSlug={gymSlug}
+          currency={currency}
+          membershipId={renewTarget.id}
+          memberName={`${member.firstName} ${member.lastName}`}
+          currentPlanName={renewTarget.planNameSnapshot || renewTarget.plan.name}
+          currentEndDate={renewTarget.endDate}
+          isCurrentlyActive={renewTarget.status === "ACTIVE"}
+          plans={availablePlans}
+        />
+      )}
+
+      {extendTarget && (
+        <ExtendMembershipModal
+          isOpen={Boolean(extendTarget)}
+          onClose={() => setExtendTarget(null)}
+          gymId={gymId}
+          gymSlug={gymSlug}
+          membershipId={extendTarget.id}
+          memberName={`${member.firstName} ${member.lastName}`}
+          currentEndDate={extendTarget.endDate}
+        />
+      )}
+
+      {pauseTarget && (
+        <PauseMembershipModal
+          isOpen={Boolean(pauseTarget)}
+          onClose={() => setPauseTarget(null)}
+          gymId={gymId}
+          gymSlug={gymSlug}
+          membershipId={pauseTarget.id}
+          memberName={`${member.firstName} ${member.lastName}`}
+        />
+      )}
+
+      {cancelTarget && (
+        <CancelMembershipModal
+          isOpen={Boolean(cancelTarget)}
+          onClose={() => setCancelTarget(null)}
+          gymId={gymId}
+          gymSlug={gymSlug}
+          membershipId={cancelTarget.id}
+          memberName={`${member.firstName} ${member.lastName}`}
+        />
+      )}
     </div>
   );
 }

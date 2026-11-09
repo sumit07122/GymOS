@@ -3,7 +3,9 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { resolveTenantContext } from "@/lib/tenant/resolver";
 import { getMemberById, MemberNotFoundError } from "@/lib/services/member.service";
+import { getPlansList } from "@/lib/services/membership.service";
 import { MemberProfile } from "@/components/members/member-profile";
+import { PlanOption } from "@/components/memberships/membership-lifecycle-modals";
 import { Loader2 } from "lucide-react";
 
 interface MemberDetailPageProps {
@@ -26,8 +28,20 @@ async function MemberDetailContent({ params }: MemberDetailPageProps) {
   const ctx = await resolveTenantContext(gymSlug);
 
   let member;
+  let plans: PlanOption[] = [];
   try {
-    member = await getMemberById(ctx, memberId);
+    const [fetchedMember, fetchedPlans] = await Promise.all([
+      getMemberById(ctx, memberId),
+      getPlansList(ctx, { activeOnly: true }),
+    ]);
+    member = fetchedMember;
+    plans = fetchedPlans.map((p) => ({
+      id: p.id,
+      name: p.name,
+      durationDays: p.durationDays,
+      price: Number(p.price),
+      admissionFee: Number(p.admissionFee),
+    }));
   } catch (err: unknown) {
     if (err instanceof MemberNotFoundError) {
       notFound();
@@ -41,6 +55,7 @@ async function MemberDetailContent({ params }: MemberDetailPageProps) {
       gymSlug={gymSlug}
       currency={member.currency}
       member={member}
+      availablePlans={plans}
     />
   );
 }

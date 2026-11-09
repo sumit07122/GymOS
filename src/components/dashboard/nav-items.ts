@@ -42,8 +42,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Memberships",
     href: "/memberships",
     icon: CreditCard,
-    milestone: "M07",
-    isAvailable: false,
+    isAvailable: true,
     description: "Membership plans, pricing tiers, renewals, and expiration rules.",
   },
   {
