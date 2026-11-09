@@ -63,8 +63,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Leads & CRM",
     href: "/leads",
     icon: UserPlus,
-    milestone: "M12",
-    isAvailable: false,
+    milestone: "M10",
+    isAvailable: true,
     description: "Inquiries pipeline, follow-ups, trial bookings, and conversion tracking.",
   },
   {

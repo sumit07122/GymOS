@@ -111,11 +111,13 @@ enum LeadSource {
   REFERRAL
   PHONE
   SOCIAL_MEDIA
+  OTHER
 }
 
 enum LeadStage {
   NEW
   CONTACTED
+  INTERESTED
   TRIAL_SCHEDULED
   TRIAL_COMPLETED
   CONVERTED
@@ -128,6 +130,9 @@ enum LeadActivityType {
   EMAIL
   VISIT_NOTE
   STAGE_CHANGE
+  FOLLOW_UP_SCHEDULED
+  FOLLOW_UP_COMPLETED
+  CONVERTED
 }
 
 enum ClassStatus {
@@ -377,6 +382,7 @@ model MembershipPlan {
 
   gym                 Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
   memberships         Membership[]
+  leads               Lead[]
 
   @@unique([gymId, name])
   @@index([gymId, isActive])
@@ -602,29 +608,35 @@ model AttendanceAuditLog {
 // ------------------------------------------------------------------------------
 
 model Lead {
-  id                String         @id @default(uuid())
+  id                String          @id @default(uuid())
   gymId             String
   firstName         String
   lastName          String
   email             String?
   phone             String
-  source            LeadSource     @default(WALK_IN)
-  stage             LeadStage      @default(NEW)
+  source            LeadSource      @default(WALK_IN)
+  stage             LeadStage       @default(NEW)
+  interestedPlanId  String?
   assignedStaffId   String?
   trialDate         DateTime?
-  convertedMemberId String?        // Linked Member ID if converted
+  followUpDate      DateTime?
+  followUpNotes     String?         @db.Text
+  convertedMemberId String?         // Linked Member ID if converted
+  convertedAt       DateTime?
   lostReason        String?
-  notes             String?        @db.Text
+  notes             String?         @db.Text
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
-  gym               Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  assignedStaff     User?          @relation("AssignedStaff", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  gym               Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  interestedPlan    MembershipPlan? @relation(fields: [interestedPlanId], references: [id], onDelete: SetNull)
+  assignedStaff     User?           @relation("AssignedStaff", fields: [assignedStaffId], references: [id], onDelete: SetNull)
   activities        LeadActivity[]
 
   @@index([gymId, stage])
   @@index([gymId, phone])
+  @@index([gymId, followUpDate])
   @@index([assignedStaffId])
 }
 
@@ -632,14 +644,15 @@ model LeadActivity {
   id          String           @id @default(uuid())
   gymId       String
   leadId      String
-  staffUserId String
+  staffUserId String?
+  staffName   String?
   type        LeadActivityType
   notes       String           @db.Text
   performedAt DateTime         @default(now())
 
   gym         Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
   lead        Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  staffUser   User             @relation("StaffLeadActivities", fields: [staffUserId], references: [id], onDelete: Restrict)
+  staffUser   User?            @relation("StaffLeadActivities", fields: [staffUserId], references: [id], onDelete: SetNull)
 
   @@index([gymId, leadId])
   @@index([staffUserId])
