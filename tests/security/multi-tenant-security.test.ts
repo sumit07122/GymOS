@@ -73,7 +73,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       // Gym A owner attempts to read Gym B's member
       await expect(
@@ -104,7 +104,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       await expect(
         memberRepository.update(gymAContext, "member-b-999", {
@@ -131,7 +131,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       await expect(
         memberRepository.delete(gymAContext, "member-b-999")
@@ -162,7 +162,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       // BUT the plan belongs to Gym B!
       vi.spyOn(db.membershipPlan, "findUnique").mockResolvedValue({
@@ -177,7 +177,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       await expect(
         membershipRepository.create(gymAContext, {
@@ -306,7 +306,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       await expect(
         attendanceRepository.recordCheckIn(gymAContext, {
@@ -340,7 +340,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       // Staff does NOT have MEMBER_DELETE permission
       await expect(
@@ -388,7 +388,7 @@ describe("Milestone M04: Multi-Tenant Security & Authorization Enforcement", () 
         status: MemberStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as any);
 
       await memberRepository.create(gymAContext, {
         memberCode: "MEM-IF-999",

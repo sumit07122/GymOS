@@ -46,9 +46,11 @@ enum UserStatus {
 
 enum MemberStatus {
   ACTIVE
+  INACTIVE
   EXPIRED
   FROZEN
   CANCELLED
+  ARCHIVED
 }
 
 enum MembershipStatus {
@@ -279,6 +281,8 @@ model Gym {
   classBookings   ClassBooking[]
   inventoryItems  InventoryItem[]
   stockMovements  StockMovement[]
+  workoutRecords  WorkoutRecord[]
+  memberActivities MemberActivity[]
 
   @@index([slug])
   @@index([status])
@@ -313,14 +317,20 @@ model Member {
   memberCode            String        // Tenant-scoped human-readable code e.g. MEM-1001
   firstName             String
   lastName              String
+  photoUrl              String?
   email                 String?
   phone                 String?
   dateOfBirth           DateTime?
   gender                String?
+  address               String?
   emergencyContactName  String?
   emergencyContactPhone String?
+  joiningDate           DateTime      @default(now())
   medicalNotes          String?       @db.Text
+  internalNotes         String?       @db.Text
   status                MemberStatus  @default(ACTIVE)
+  archivedAt            DateTime?
+  archivedReason        String?
 
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
@@ -335,6 +345,8 @@ model Member {
   attendanceRecords     AttendanceRecord[]
   attendanceAuditLogs   AttendanceAuditLog[]
   classBookings         ClassBooking[]
+  workoutRecords        WorkoutRecord[]
+  activities            MemberActivity[]
 
   @@unique([gymId, memberCode])
   @@index([gymId, status])
@@ -756,3 +768,42 @@ model StockMovement {
   @@index([gymId, createdAt])
   @@index([recordedByUserId])
 }
+
+// ------------------------------------------------------------------------------
+// 8. FITNESS & MEMBER AUDIT EXTENSIONS (M06)
+// ------------------------------------------------------------------------------
+
+model WorkoutRecord {
+  id          String    @id @default(uuid())
+  gymId       String
+  memberId    String
+  title       String
+  date        DateTime  @default(now())
+  notes       String?   @db.Text
+  recordedBy  String?   // Name or User ID of trainer/staff
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gym         Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member      Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, memberId, date])
+}
+
+model MemberActivity {
+  id          String    @id @default(uuid())
+  gymId       String
+  memberId    String
+  action      String    // e.g. CREATED, UPDATED, ARCHIVED, UNARCHIVED, NOTE_ADDED
+  details     String?   @db.Text
+  performedBy String?   // Staff name or system
+
+  createdAt   DateTime  @default(now())
+
+  gym         Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member      Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, memberId, createdAt])
+}
+
