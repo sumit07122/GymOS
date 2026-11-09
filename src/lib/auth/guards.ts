@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getDatabaseSession, AuthenticatedSession } from "./session";
 import { SystemRole, GymRole } from "@prisma/client";
-import { TenantContext } from "@/lib/tenant/context";
+import { TenantContext, createTenantContext } from "@/lib/tenant/context";
 
 // ==============================================================================
 // FIXIA GymOS — Server-Side Role-Based Authorization Guards
@@ -61,12 +61,12 @@ export async function requireGymAccess(
   if (session.user.role === SystemRole.SUPER_ADMIN) {
     return {
       session,
-      context: {
+      context: createTenantContext({
         gymId,
         userId: session.user.id,
         role: SystemRole.SUPER_ADMIN,
         userEmail: session.user.email ?? undefined,
-      },
+      }),
     };
   }
 
@@ -83,12 +83,12 @@ export async function requireGymAccess(
 
   return {
     session,
-    context: {
+    context: createTenantContext({
       gymId: matchingRole.gymId,
       userId: session.user.id,
       role: matchingRole.role,
       userEmail: session.user.email ?? undefined,
-    },
+    }),
   };
 }
 

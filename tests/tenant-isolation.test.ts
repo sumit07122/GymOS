@@ -1,26 +1,26 @@
 import { describe, it, expect } from "vitest";
 import {
-  TenantContext,
   TenantAccessViolationError,
   assertTenantOwnership,
   withTenantFilter,
+  createTenantContext,
 } from "@/lib/tenant/context";
 import { GymRole, SystemRole } from "@prisma/client";
 
 describe("Multi-Tenant Security: TenantContext & Authorization", () => {
-  const gymAContext: TenantContext = {
+  const gymAContext = createTenantContext({
     gymId: "gym-aaa-111",
     userId: "user-aaa-owner",
     role: GymRole.OWNER,
     userEmail: "owner@gym-a.com",
-  };
+  });
 
-  const gymBContext: TenantContext = {
+  const gymBContext = createTenantContext({
     gymId: "gym-bbb-222",
     userId: "user-bbb-staff",
     role: GymRole.STAFF,
     userEmail: "staff@gym-b.com",
-  };
+  });
 
   it("permits access when entity belongs to the authorized tenant", () => {
     expect(() => {
@@ -69,11 +69,11 @@ describe("Multi-Tenant Security: TenantContext & Authorization", () => {
   });
 
   it("supports typed system role contexts", () => {
-    const adminContext: TenantContext = {
+    const adminContext = createTenantContext({
       gymId: "system-platform",
       userId: "user-superadmin",
       role: SystemRole.SUPER_ADMIN,
-    };
+    });
     expect(adminContext.role).toBe(SystemRole.SUPER_ADMIN);
   });
 });
