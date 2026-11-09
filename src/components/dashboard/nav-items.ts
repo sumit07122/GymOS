@@ -56,8 +56,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Payments & Dues",
     href: "/payments",
     icon: Receipt,
-    milestone: "M08",
-    isAvailable: false,
+    isAvailable: true,
     description: "Invoice generation, payment receipts, outstanding balances, and refunds.",
   },
   {

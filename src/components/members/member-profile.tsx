@@ -60,6 +60,10 @@ import {
 } from "@/components/memberships/membership-lifecycle-modals";
 import { MemberQrPassModal } from "@/components/attendance/member-qr-pass-modal";
 import { resumeMembershipAction } from "@/lib/actions/membership";
+import { CreateInvoiceModal } from "@/components/payments/create-invoice-modal";
+import { RecordPaymentModal } from "@/components/payments/record-payment-modal";
+import { InvoiceStatementModal } from "@/components/payments/invoice-statement-modal";
+import { PaymentReceiptModal } from "@/components/payments/payment-receipt-modal";
 
 interface MemberProfileProps {
   gymId: string;
@@ -103,6 +107,14 @@ export function MemberProfile({
   const [isWorkoutPending, setIsWorkoutPending] = React.useState(false);
 
   const [isArchivePending, setIsArchivePending] = React.useState(false);
+
+  // Financial modal states
+  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = React.useState(false);
+  const [isRecordPaymentOpen, setIsRecordPaymentOpen] = React.useState(false);
+  const [selectedInvoiceForStatement, setSelectedInvoiceForStatement] = React.useState<any | null>(null);
+  const [isStatementOpen, setIsStatementOpen] = React.useState(false);
+  const [selectedPaymentForReceipt, setSelectedPaymentForReceipt] = React.useState<any | null>(null);
+  const [isReceiptOpen, setIsReceiptOpen] = React.useState(false);
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -730,10 +742,26 @@ export function MemberProfile({
           {/* Invoices */}
           <Card className="border-slate-200 shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-semibold text-slate-900">
-                Invoices & Billing Statements
-              </CardTitle>
-              <Receipt className="h-4 w-4 text-slate-400" />
+              <div>
+                <CardTitle className="text-sm font-semibold text-slate-900">
+                  Invoices & Billing Statements
+                </CardTitle>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Tax invoices issued to this member.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsCreateInvoiceOpen(true)}
+                  className="h-8 gap-1.5 text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Issue Invoice
+                </Button>
+                <Receipt className="h-4 w-4 text-slate-400" />
+              </div>
             </CardHeader>
             <CardContent>
               {member.invoices.length === 0 ? (
@@ -748,7 +776,7 @@ export function MemberProfile({
                       <TableHead className="text-xs">Issued Date</TableHead>
                       <TableHead className="text-xs">Total Amount</TableHead>
                       <TableHead className="text-xs">Balance Due</TableHead>
-                      <TableHead className="text-xs text-right">Status</TableHead>
+                      <TableHead className="text-xs text-right">Status & Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -767,9 +795,42 @@ export function MemberProfile({
                           {formatMoney(Number(inv.dueAmount))}
                         </TableCell>
                         <TableCell className="text-xs text-right">
-                          <Badge variant="outline" className="text-[10px]">
-                            {inv.status}
-                          </Badge>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Badge variant="outline" className="text-[10px]">
+                              {inv.status}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-slate-500 hover:text-slate-900 cursor-pointer"
+                              onClick={() => {
+                                setSelectedInvoiceForStatement({
+                                  ...inv,
+                                  subtotal: Number(inv.subtotal),
+                                  taxAmount: Number(inv.taxAmount),
+                                  totalAmount: Number(inv.totalAmount),
+                                  paidAmount: Number(inv.paidAmount),
+                                  dueAmount: Number(inv.dueAmount),
+                                  createdAt: inv.createdAt,
+                                  member: {
+                                    fullName: `${member.firstName} ${member.lastName}`,
+                                    memberNumber: member.memberCode,
+                                    email: member.email,
+                                    phone: member.phone,
+                                    address: member.address,
+                                  },
+                                  gym: {
+                                    name: "Fitness Gym",
+                                    currency,
+                                  },
+                                });
+                                setIsStatementOpen(true);
+                              }}
+                              title="View Invoice Statement"
+                            >
+                              <Receipt className="h-3.5 w-3.5 text-indigo-600" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -782,10 +843,25 @@ export function MemberProfile({
           {/* Payments */}
           <Card className="border-slate-200 shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-semibold text-slate-900">
-                Payment Receipts
-              </CardTitle>
-              <CreditCard className="h-4 w-4 text-slate-400" />
+              <div>
+                <CardTitle className="text-sm font-semibold text-slate-900">
+                  Payment Receipts
+                </CardTitle>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Transactions and receipts recorded for this member.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => setIsRecordPaymentOpen(true)}
+                  className="h-8 gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Record Payment
+                </Button>
+                <CreditCard className="h-4 w-4 text-slate-400" />
+              </div>
             </CardHeader>
             <CardContent>
               {member.payments.length === 0 ? (
@@ -800,7 +876,7 @@ export function MemberProfile({
                       <TableHead className="text-xs">Date</TableHead>
                       <TableHead className="text-xs">Amount</TableHead>
                       <TableHead className="text-xs">Method</TableHead>
-                      <TableHead className="text-xs text-right">Status</TableHead>
+                      <TableHead className="text-xs text-right">Status & Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -819,9 +895,35 @@ export function MemberProfile({
                           {p.method.toLowerCase().replace("_", " ")}
                         </TableCell>
                         <TableCell className="text-xs text-right">
-                          <Badge variant="outline" className="text-[10px] text-emerald-800 bg-emerald-50">
-                            {p.status}
-                          </Badge>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Badge variant="outline" className="text-[10px] text-emerald-800 bg-emerald-50">
+                              {p.status}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-slate-500 hover:text-slate-900 cursor-pointer"
+                              onClick={() => {
+                                setSelectedPaymentForReceipt({
+                                  ...p,
+                                  amount: Number(p.amount),
+                                  member: {
+                                    fullName: `${member.firstName} ${member.lastName}`,
+                                    memberNumber: member.memberCode,
+                                    email: member.email,
+                                    phone: member.phone,
+                                  },
+                                  gym: {
+                                    name: "Fitness Gym",
+                                  },
+                                });
+                                setIsReceiptOpen(true);
+                              }}
+                              title="View Official Receipt"
+                            >
+                              <Receipt className="h-3.5 w-3.5 text-emerald-600" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -1132,6 +1234,56 @@ export function MemberProfile({
           memberId={member.id}
           memberName={`${member.firstName} ${member.lastName}`}
           memberCode={member.memberCode}
+        />
+      )}
+
+      {/* Financial modals */}
+      <CreateInvoiceModal
+        gymId={gymId}
+        gymSlug={gymSlug}
+        members={[
+          {
+            id: member.id,
+            fullName: `${member.firstName} ${member.lastName}`,
+            memberNumber: member.memberCode,
+            email: member.email,
+            phone: member.phone,
+          },
+        ]}
+        preselectedMemberId={member.id}
+        open={isCreateInvoiceOpen}
+        onOpenChange={setIsCreateInvoiceOpen}
+      />
+
+      <RecordPaymentModal
+        gymId={gymId}
+        gymSlug={gymSlug}
+        members={[
+          {
+            id: member.id,
+            fullName: `${member.firstName} ${member.lastName}`,
+            memberNumber: member.memberCode,
+          },
+        ]}
+        preselectedMemberId={member.id}
+        prefilledAmount={member.outstandingDues > 0 ? member.outstandingDues : undefined}
+        open={isRecordPaymentOpen}
+        onOpenChange={setIsRecordPaymentOpen}
+      />
+
+      {selectedInvoiceForStatement && (
+        <InvoiceStatementModal
+          invoice={selectedInvoiceForStatement}
+          open={isStatementOpen}
+          onOpenChange={setIsStatementOpen}
+        />
+      )}
+
+      {selectedPaymentForReceipt && (
+        <PaymentReceiptModal
+          payment={selectedPaymentForReceipt}
+          open={isReceiptOpen}
+          onOpenChange={setIsReceiptOpen}
         />
       )}
     </div>

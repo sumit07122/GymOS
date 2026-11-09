@@ -262,3 +262,4 @@ export function ManualCheckinModal({
     </Dialog>
   );
 }
+
