@@ -49,8 +49,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Attendance",
     href: "/attendance",
     icon: QrCode,
-    milestone: "M10",
-    isAvailable: false,
+    isAvailable: true,
     description: "QR-code check-ins, front desk kiosk, and attendance audit logs.",
   },
   {

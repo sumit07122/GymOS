@@ -58,6 +58,7 @@ import {
   CancelMembershipModal,
   PlanOption,
 } from "@/components/memberships/membership-lifecycle-modals";
+import { MemberQrPassModal } from "@/components/attendance/member-qr-pass-modal";
 import { resumeMembershipAction } from "@/lib/actions/membership";
 
 interface MemberProfileProps {
@@ -86,6 +87,7 @@ export function MemberProfile({
   const [pauseTarget, setPauseTarget] = React.useState<any | null>(null);
   const [cancelTarget, setCancelTarget] = React.useState<any | null>(null);
   const [expandedAuditId, setExpandedAuditId] = React.useState<string | null>(null);
+  const [isQrModalOpen, setIsQrModalOpen] = React.useState(false);
   const [isResumePending, startResumeTransition] = React.useTransition();
 
   const handleResume = (membershipId: string) => {
@@ -230,6 +232,17 @@ export function MemberProfile({
 
           {/* Quick Actions */}
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsQrModalOpen(true)}
+              className="text-xs h-9 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+            >
+              <QrCode className="h-3.5 w-3.5 text-emerald-700" />
+              <span>Attendance QR Pass</span>
+            </Button>
+
             <Button
               type="button"
               variant="outline"
@@ -837,7 +850,7 @@ export function MemberProfile({
           <CardContent>
             {member.attendanceRecords.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-500">
-                No check-in history recorded for this member yet. Front desk QR scanning activates in Milestone M10.
+                No check-in history recorded for this member yet. Scan the member&apos;s dynamic QR code at the turnstile or front desk to register check-in.
               </div>
             ) : (
               <Table>
@@ -1108,6 +1121,17 @@ export function MemberProfile({
           gymSlug={gymSlug}
           membershipId={cancelTarget.id}
           memberName={`${member.firstName} ${member.lastName}`}
+        />
+      )}
+
+      {isQrModalOpen && (
+        <MemberQrPassModal
+          isOpen={isQrModalOpen}
+          onClose={() => setIsQrModalOpen(false)}
+          gymId={gymId}
+          memberId={member.id}
+          memberName={`${member.firstName} ${member.lastName}`}
+          memberCode={member.memberCode}
         />
       )}
     </div>
