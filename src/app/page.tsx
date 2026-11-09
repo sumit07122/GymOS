@@ -1,4 +1,6 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -105,10 +107,18 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="gap-1.5 py-1 px-2.5">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              Phase 01: Scaffolding Ready
-            </Badge>
+            <Link
+              href="/login"
+              className="text-xs font-semibold text-foreground hover:text-primary transition-colors px-3 py-1.5"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className={cn(buttonVariants({ size: "sm" }), "font-semibold text-xs")}
+            >
+              Register Gym
+            </Link>
           </div>
         </div>
       </header>

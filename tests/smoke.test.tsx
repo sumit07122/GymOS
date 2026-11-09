@@ -21,6 +21,8 @@ describe("FIXIA GymOS Baseline Smoke Test", () => {
     expect(screen.getByText("Billing & Invoicing")).toBeDefined();
     expect(screen.getByText("Leads & Enquiries CRM")).toBeDefined();
     expect(screen.getByText("Strict Tenant Isolation")).toBeDefined();
+    expect(screen.getByText("Sign In")).toBeDefined();
+    expect(screen.getByText("Register Gym")).toBeDefined();
   });
 });
 
