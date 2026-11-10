@@ -1,3 +1,5 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/bricolage-grotesque";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -7,9 +9,19 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: 'Geist Variable', var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+
+  --color-pine: #0B6B4F;
+  --color-pine-deep: #062E23;
+  --color-pine-soft: #E4F2EB;
+  --color-canvas: #F5F6F4;
+  --color-ink: #111613;
+  --color-faint: #94A099;
+  --color-line: #E3E7E4;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -133,5 +145,80 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+.font-display {
+  font-family: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.rise {
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.page-in {
+  animation: fade 0.4s ease both;
+}
+
+.draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.8s 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ringfill {
+  animation: fill 1.4s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.breathe {
+  transform-origin: center;
+  animation: breathe 7s ease-in-out infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fill {
+  from {
+    stroke-dashoffset: var(--c);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(1.06);
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  .draw {
+    stroke-dashoffset: 0;
   }
 }
