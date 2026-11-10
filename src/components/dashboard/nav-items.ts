@@ -79,8 +79,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Classes & Schedules",
     href: "/classes",
     icon: Calendar,
-    milestone: "M14",
-    isAvailable: false,
+    milestone: "M12",
+    isAvailable: true,
     description: "Group classes, personal training slots, and instructor schedules.",
   },
   {
