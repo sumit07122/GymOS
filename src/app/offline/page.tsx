@@ -1,78 +1,120 @@
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
-import { WifiOff, RefreshCw, Dumbbell, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import {
+  WifiOff,
+  RefreshCw,
+  QrCode,
+  Dumbbell,
+  ArrowRight,
+  ShieldCheck,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function OfflinePage() {
-  return (
-    <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-8 sm:p-6 md:p-8 relative overflow-y-auto selection:bg-indigo-500 selection:text-white">
-      {/* Background Decorative Ambient Glows */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-600/20 via-purple-600/10 to-transparent blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-[450px] h-[320px] bg-indigo-900/10 blur-3xl pointer-events-none" />
+  const router = useRouter();
+  const [isChecking, setIsChecking] = React.useState(false);
 
-      {/* Main Centered Container */}
-      <div className="w-full max-w-md relative z-10 flex flex-col items-center my-auto">
-        {/* Brand Header */}
-        <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="size-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold shadow-xl shadow-indigo-600/25 ring-1 ring-white/10 group-hover:scale-105 transition-transform duration-200">
-              <Dumbbell className="size-6 text-white" />
+  const handleRetry = () => {
+    setIsChecking(true);
+    setTimeout(() => {
+      if (typeof window !== "undefined") {
+        if (navigator.onLine) {
+          router.push("/");
+        } else {
+          setIsChecking(false);
+        }
+      }
+    }, 1000);
+  };
+
+  return (
+    <div
+      className="min-h-screen w-full bg-[#062E23] text-white flex flex-col items-center justify-center p-4 py-8 sm:p-8 relative overflow-hidden font-sans"
+      style={{
+        backgroundImage:
+          "radial-gradient(90% 100% at 50% 20%, #0F4A38 0%, #083327 50%, #041E16 100%)",
+      }}
+    >
+      {/* Decorative ambient subtle lines & glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(#7FD6B2_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#0B6B4F]/30 blur-3xl breathe pointer-events-none" />
+
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-md my-auto flex flex-col items-center animate-in zoom-in-95 duration-200">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-[#E4F2EB]/70 hover:text-white mb-6 transition"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back to FIXIA GymOS Home</span>
+        </Link>
+
+        {/* Card Surface */}
+        <div className="w-full rounded-2xl border border-white/10 bg-white p-6 sm:p-8 text-[#0F172A] shadow-2xl backdrop-blur-xs">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] mx-auto mb-3">
+              <WifiOff className="h-6 w-6" />
             </div>
-            <div className="text-left">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-2xl tracking-tight text-white">FIXIA</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest bg-indigo-950/90 border border-indigo-700/60 text-indigo-300 px-2.5 py-0.5 rounded-full shadow-inner">
-                  GymOS
-                </span>
+
+            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+              You&apos;re Currently Offline
+            </h1>
+            <p className="mt-1.5 text-xs text-[#5F6B65] leading-relaxed">
+              FIXIA GymOS is operating in local offline resilience mode. Your cached passes and local records remain ready for use.
+            </p>
+          </div>
+
+          {/* Cached Features List */}
+          <div className="space-y-3 rounded-xl border border-[#E3E7E4] bg-[#F8FAFC] p-4 text-xs">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+              Available Offline Capabilities
+            </div>
+
+            <div className="flex items-center gap-2.5 text-[#0F172A]">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#E4F2EB] text-[#0B6B4F]">
+                <QrCode className="h-3.5 w-3.5" />
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Enterprise Multi-Tenant Cloud Platform
-              </p>
+              <span className="font-medium">Cached Member Passes & Attendance QR</span>
             </div>
-          </Link>
+
+            <div className="flex items-center gap-2.5 text-[#0F172A]">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#E4F2EB] text-[#0B6B4F]">
+                <Dumbbell className="h-3.5 w-3.5" />
+              </div>
+              <span className="font-medium">Assigned Training Workouts & Routines</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-6 flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isChecking}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B6B4F] py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-[#09543E] transition-colors disabled:opacity-60 cursor-pointer"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isChecking ? "animate-spin" : ""}`} />
+              <span>{isChecking ? "Checking Connection..." : "Check Connection & Retry"}</span>
+            </button>
+
+            <Link
+              href="/member/home"
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E3E7E4] bg-white py-2 text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors"
+            >
+              <span>Open Member Pass</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
 
-        {/* Centered Offline Card */}
-        <Card className="w-full border-slate-800/80 bg-slate-900/85 shadow-2xl shadow-indigo-950/70 backdrop-blur-2xl text-slate-100 rounded-3xl overflow-hidden relative before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/50 before:to-transparent">
-          <CardHeader className="space-y-3 pb-4 text-center border-b border-slate-800/60 bg-slate-950/50">
-            <div className="size-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-1 shadow-lg shadow-amber-500/10">
-              <WifiOff className="size-7" />
-            </div>
-            <div>
-              <CardTitle className="text-xl font-bold text-white tracking-tight">
-                You&apos;re Currently Offline
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-400 mt-1 leading-relaxed">
-                FIXIA GymOS requires an active network connection to verify dynamic attendance QR tokens, synchronize member records, and record financial transactions.
-              </CardDescription>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4 pt-6 px-6">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400 leading-relaxed">
-              Cached shell assets and offline profiles remain available locally. Please reconnect to Wi-Fi or mobile data to resume live synchronization.
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col gap-3 pt-2 pb-6 px-6">
-            <Link href="/" className="w-full">
-              <Button className="w-full h-11 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 rounded-xl transition-all duration-200 active:scale-[0.99]">
-                <RefreshCw className="size-3.5" />
-                <span>Check Connection & Retry</span>
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-
-        {/* Security Subtext */}
-        <div className="mt-6 text-center text-xs text-slate-500 space-y-1">
-          <p className="flex items-center justify-center gap-1.5">
-            <Sparkles className="size-3 text-indigo-400" />
-            <span>Progressive Web App Shell • Stale-While-Revalidate Engine</span>
-          </p>
-          <p className="text-[11px] text-slate-600">
-            Official FIXIA Cloud Platform &bull; <strong className="text-slate-400">https://gms.fixia.in</strong>
-          </p>
+        {/* Security Reassurance */}
+        <div className="mt-6 flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-1 text-xs text-[#E4F2EB]/80 backdrop-blur-xs">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#7FD6B2]" />
+          <span>Progressive Web App Shell • Stale-While-Revalidate Engine</span>
         </div>
       </div>
     </div>

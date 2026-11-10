@@ -1,98 +1,136 @@
+"use client";
+
 import Link from "next/link";
-import { Mail, ArrowRight, Lock, Dumbbell, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  ArrowLeft,
+  Headphones,
+} from "lucide-react";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-8 sm:p-6 md:p-8 relative overflow-y-auto selection:bg-indigo-500 selection:text-white">
-      {/* Background Decorative Ambient Glows */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-600/20 via-purple-600/10 to-transparent blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-[450px] h-[320px] bg-indigo-900/10 blur-3xl pointer-events-none" />
+    <div
+      className="min-h-screen w-full bg-[#062E23] text-white flex flex-col items-center justify-center p-4 py-10 sm:p-8 relative overflow-hidden"
+      style={{
+        backgroundImage:
+          "radial-gradient(90% 100% at 50% 20%, #0F4A38 0%, #083327 50%, #041E16 100%)",
+      }}
+    >
+      {/* Decorative ambient subtle lines & glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(#7FD6B2_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#0B6B4F]/30 blur-3xl breathe pointer-events-none" />
 
-      {/* Main Centered Container */}
-      <div className="w-full max-w-md relative z-10 flex flex-col items-center my-auto">
-        {/* Brand Header */}
-        <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="size-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold shadow-xl shadow-indigo-600/25 ring-1 ring-white/10 group-hover:scale-105 transition-transform duration-200">
-              <Dumbbell className="size-6 text-white" />
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-lg my-auto flex flex-col items-center animate-in zoom-in-95 duration-200">
+        {/* Navigation back */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-[#E4F2EB]/70 hover:text-white mb-6 transition"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back to FIXIA GymOS Home</span>
+        </Link>
+
+        {/* Card Surface */}
+        <div className="w-full rounded-2xl border border-white/10 bg-white p-6 sm:p-8 text-[#0F172A] shadow-2xl backdrop-blur-xs">
+          {/* Top Badge & Header */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FFFBEB] px-3 py-1 text-xs font-semibold text-[#92400E] border border-[#FDE68A] mb-3">
+              <Lock className="h-3.5 w-3.5" />
+              <span>Register Gym — Invitation-Only Onboarding</span>
             </div>
-            <div className="text-left">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-2xl tracking-tight text-white">FIXIA</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest bg-indigo-950/90 border border-indigo-700/60 text-indigo-300 px-2.5 py-0.5 rounded-full shadow-inner">
-                  GymOS
-                </span>
+
+            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+              Manual Tenant Provisioning Policy
+            </h1>
+            <p className="mt-1.5 text-xs text-[#5F6B65] leading-relaxed max-w-md mx-auto">
+              Public self-service gym registration is closed. Every gym tenant workspace, owner credentials, and feature entitlements are directly configured by FIXIA SaaS Platform Administrators.
+            </p>
+          </div>
+
+          {/* 3-Step Process Explainer */}
+          <div className="space-y-3 rounded-xl border border-[#E3E7E4] bg-[#F8FAFC] p-4 text-xs">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+              Commercial Onboarding Workflow
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0B6B4F] text-white text-[11px] font-bold">
+                1
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Enterprise Multi-Tenant Cloud Platform
+              <div>
+                <p className="font-semibold text-[#0F172A]">Consultation & Quota Sizing</p>
+                <p className="text-[11px] text-[#5F6B65]">
+                  We determine your gym location, member capacity, staff seats, and WhatsApp notification volume.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0B6B4F] text-white text-[11px] font-bold">
+                2
+              </div>
+              <div>
+                <p className="font-semibold text-[#0F172A]">Tenant Provisioning & Database Isolation</p>
+                <p className="text-[11px] text-[#5F6B65]">
+                  Our platform architects initialize your dedicated tenant workspace, database schema, and security keys.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0B6B4F] text-white text-[11px] font-bold">
+                3
+              </div>
+              <div>
+                <p className="font-semibold text-[#0F172A]">Owner Credentials Handover</p>
+                <p className="text-[11px] text-[#5F6B65]">
+                  You receive encrypted credentials, front-desk scanner guides, and digital passes ready for your members.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Box */}
+          <div className="mt-5 rounded-xl border border-[#E4F2EB] bg-[#ECFDF5] p-4 text-xs flex items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-[#065F46] flex items-center gap-1.5">
+                <Headphones className="h-4 w-4" />
+                <span>Ready to onboard your gym?</span>
+              </p>
+              <p className="text-[11px] text-[#065F46]/80 mt-0.5">
+                Contact our onboarding desk directly:
               </p>
             </div>
-          </Link>
+            <a
+              href="mailto:onboarding@fixia.in"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#0B6B4F] px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#09543E] transition-colors shrink-0"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              <span>onboarding@fixia.in</span>
+            </a>
+          </div>
+
+          {/* Action to Login */}
+          <div className="mt-6 pt-5 border-t border-[#E3E7E4] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-[#5F6B65]">Already have an active gym account?</span>
+            <Link
+              href="/login"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E3E7E4] bg-white px-4 py-2 font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors"
+            >
+              <span>Sign In</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
 
-        {/* Centered Glassmorphic Card */}
-        <Card className="w-full border-slate-800/80 bg-slate-900/85 shadow-2xl shadow-indigo-950/70 backdrop-blur-2xl text-slate-100 rounded-3xl overflow-hidden relative before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/50 before:to-transparent">
-          <CardHeader className="space-y-3 pb-4 text-center border-b border-slate-800/60 bg-slate-950/50">
-            <div className="size-13 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto mb-1 shadow-lg shadow-amber-500/10">
-              <Lock className="size-7" />
-            </div>
-            <div>
-              <CardTitle className="text-xl font-bold text-white tracking-tight">
-                Invitation-Only Platform
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Public self-registration is closed. Every gym tenant workspace, owner account, and feature entitlement is manually provisioned directly by FIXIA SaaS administrators.
-              </CardDescription>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4 pt-6 px-6">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 space-y-2.5">
-              <div className="text-xs font-semibold text-slate-200">
-                Are you a Gym Owner interested in FIXIA GymOS?
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                We configure your custom branding, pricing plans, member quotas, and WhatsApp integrations tailored specifically for your fitness club operations.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono text-indigo-300 bg-indigo-950/50 border border-indigo-900/60 p-2.5 rounded-xl">
-                <Mail className="h-4 w-4 shrink-0 text-indigo-400" />
-                <a href="mailto:onboarding@fixia.in" className="hover:underline text-indigo-200 font-semibold">
-                  onboarding@fixia.in
-                </a>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/40 p-4 space-y-1.5">
-              <div className="text-xs font-semibold text-slate-300">
-                Already have an active account?
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Gym owners and members can access their workspaces using the verified login portal.
-              </p>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col gap-3 pt-3 pb-6 px-6">
-            <Link href="/login" className="w-full">
-              <Button className="w-full h-11 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 rounded-xl transition-all duration-200 active:scale-[0.99]">
-                <span>Go to Secure Login</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-
-        {/* Security Subtext */}
-        <div className="mt-6 text-center text-xs text-slate-500 space-y-1">
-          <p className="flex items-center justify-center gap-1.5">
-            <Sparkles className="size-3 text-indigo-400" />
-            <span>Strict Tenant Isolation • Controlled Provisioning</span>
-          </p>
-          <p className="text-[11px] text-slate-600">
-            Official FIXIA Cloud Platform &bull; <strong className="text-slate-400">https://gms.fixia.in</strong>
-          </p>
+        {/* Zero-Trust Security Reassurance */}
+        <div className="mt-6 flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-1 text-xs text-[#E4F2EB]/80 backdrop-blur-xs">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#7FD6B2]" />
+          <span>Strict Tenant Isolation • Controlled Provisioning • 256-Bit Cryptography</span>
         </div>
       </div>
     </div>

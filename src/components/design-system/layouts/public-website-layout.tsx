@@ -236,3 +236,4 @@ export function PublicWebsiteLayout({ gym, children }: PublicWebsiteLayoutProps)
     </div>
   );
 }
+

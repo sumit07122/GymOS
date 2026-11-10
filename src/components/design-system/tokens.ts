@@ -104,3 +104,4 @@ export const typography = {
   fontSans: "'Geist Variable', var(--font-sans), system-ui, sans-serif",
   fontHeading: "'Bricolage Grotesque Variable', 'Geist Variable', sans-serif",
 } as const;
+
