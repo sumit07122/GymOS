@@ -87,8 +87,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Inventory & POS",
     href: "/inventory",
     icon: Package,
-    milestone: "M15",
-    isAvailable: false,
+    milestone: "M13",
+    isAvailable: true,
     description: "Supplements, merchandise, retail stock tracking, and point of sale.",
   },
   {
