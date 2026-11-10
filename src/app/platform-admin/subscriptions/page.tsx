@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/auth/guards";
-import { CreditCard, ExternalLink } from "lucide-react";
+import { CreditCard, ExternalLink, DollarSign, AlertCircle, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const statusColors: Record<string, string> = {
-  ACTIVE: "bg-emerald-950 text-emerald-300 border-emerald-800",
-  TRIALING: "bg-amber-950 text-amber-300 border-amber-800",
-  PAST_DUE: "bg-rose-950 text-rose-300 border-rose-800",
-  SUSPENDED: "bg-red-950 text-red-300 border-red-800",
-  CANCELLED: "bg-slate-800 text-slate-400 border-slate-700",
-};
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
+import { StatusBadge } from "@/components/design-system/status-badge";
 
 export default async function PlatformAdminSubscriptionsPage() {
   await requireSuperAdmin("/platform-admin/subscriptions");
@@ -69,46 +64,79 @@ export default async function PlatformAdminSubscriptionsPage() {
     return acc + monthlyEquivalent * 12;
   }, 0);
 
+  const activeCount = subscriptions.filter((s) => s.status === "ACTIVE").length;
+  const delinquentCount = subscriptions.filter((s) => s.status === "PAST_DUE" || s.status === "SUSPENDED").length;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-            <CreditCard className="h-6 w-6 text-indigo-400" />
-            <span>SaaS Subscriptions Management</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Overview of tenant billing agreements, renewal cycles, and pricing overrides.
-          </p>
-        </div>
+      {/* Header */}
+      <PageHeader
+        title="SaaS Subscriptions Management"
+        description="Overview of commercial tenant billing agreements, renewal cycles, active licenses, and pricing overrides."
+        breadcrumbs={[
+          { label: "Overview", href: "/platform-admin" },
+          { label: "Subscriptions" },
+        ]}
+        actions={
+          <Link
+            href="/platform-admin/plans"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-pine bg-pine-soft hover:bg-pine/20 border border-pine/30 transition"
+          >
+            <CreditCard className="h-3.5 w-3.5" />
+            <span>Configure SaaS Plans</span>
+          </Link>
+        }
+      />
 
-        <div className="flex items-center gap-3">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-right">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Estimated SaaS ARR</span>
-            <div className="text-base font-extrabold text-emerald-400">
-              ₹{totalArr.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-            </div>
-          </div>
-        </div>
+      {/* KPI Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Estimated SaaS ARR"
+          value={`₹${totalArr.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`}
+          icon={DollarSign}
+          trend={{ value: "Annual Run-rate", isPositive: true }}
+          subtext="Contracted recurring"
+        />
+        <StatCard
+          label="Monthly Equivalent (MRR)"
+          value={`₹${Math.round(totalArr / 12).toLocaleString("en-IN")}`}
+          icon={CreditCard}
+          subtext="Monthly SaaS run-rate"
+        />
+        <StatCard
+          label="Active Subscriptions"
+          value={activeCount}
+          icon={ShieldCheck}
+          trend={{ value: `${subscriptions.length} total`, isPositive: true }}
+          subtext="Operational billing"
+        />
+        <StatCard
+          label="Past Due / Suspended"
+          value={delinquentCount}
+          icon={AlertCircle}
+          trend={delinquentCount > 0 ? { value: "Needs collection", isPositive: false } : undefined}
+          subtext="Delinquent accounts"
+        />
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 shadow-lg overflow-hidden">
+      {/* Subscriptions Table */}
+      <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-slate-800">
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 text-xs font-semibold">Gym Tenant</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Tier Plan</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Billing Period</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Effective Price</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Renewal / Trial</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold text-right">Action</TableHead>
+          <TableHeader className="bg-canvas border-b border-line">
+            <TableRow className="border-line hover:bg-transparent">
+              <TableHead className="text-muted text-xs font-semibold">Gym Tenant</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Tier Plan</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Billing Period</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Effective Price</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Status</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Renewal / Trial</TableHead>
+              <TableHead className="text-muted text-xs font-semibold text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {subscriptions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-xs text-slate-500">
+                <TableCell colSpan={7} className="h-32 text-center text-xs text-muted">
                   No subscriptions found on the platform.
                 </TableCell>
               </TableRow>
@@ -130,54 +158,52 @@ export default async function PlatformAdminSubscriptionsPage() {
                     : planMonthly;
 
                 return (
-                  <TableRow key={sub.id} className="border-slate-800/60 hover:bg-slate-900/40">
-                    <TableCell className="font-medium text-xs text-white">
-                      <div className="font-bold">{sub.gym.name}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">/{sub.gym.slug}</div>
+                  <TableRow key={sub.id} className="border-line/60 hover:bg-canvas/50">
+                    <TableCell className="font-medium text-xs text-ink">
+                      <div className="font-bold text-ink">{sub.gym.name}</div>
+                      <div className="text-[11px] text-muted font-mono">/{sub.gym.slug}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-indigo-950 text-indigo-300 border-indigo-800 text-[10px]">
+                      <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30 text-[10px] font-semibold">
                         {sub.plan.name}
                       </Badge>
                       {sub.addons.length > 0 && (
-                        <span className="ml-1.5 text-[10px] text-slate-400 font-mono">
+                        <span className="ml-1.5 text-[10px] text-muted font-mono">
                           +{sub.addons.length} add-on{sub.addons.length > 1 ? "s" : ""}
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-300 font-mono">
+                    <TableCell className="text-xs text-ink font-mono">
                       {sub.billingPeriod}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-200 font-bold">
-                      {sub.gym.currency} {effectivePrice.toLocaleString("en-IN")}
-                      {sub.customMonthlyPrice || sub.customYearlyPrice ? (
-                        <Badge variant="outline" className="ml-1 text-[9px] bg-amber-950 text-amber-300 border-amber-800">
-                          Custom
-                        </Badge>
-                      ) : null}
+                    <TableCell className="text-xs font-bold text-ink">
+                      ₹{effectivePrice.toLocaleString("en-IN")}
+                      {sub.customMonthlyPrice != null && (
+                        <span className="ml-1 text-[10px] text-amber-700 font-normal">
+                          (Custom)
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`${statusColors[sub.status] || "bg-slate-800"} text-[10px]`}>
-                        {sub.status}
-                      </Badge>
+                      <StatusBadge status={sub.status} />
                     </TableCell>
-                    <TableCell className="text-xs text-slate-400">
-                      {sub.status === "TRIALING" && sub.trialEndsAt ? (
-                        <span className="text-amber-400">
+                    <TableCell className="text-xs text-muted">
+                      {sub.trialEndsAt && new Date(sub.trialEndsAt) > new Date() ? (
+                        <span className="text-blue-700 font-medium">
                           Trial ends {new Date(sub.trialEndsAt).toLocaleDateString()}
                         </span>
                       ) : sub.currentPeriodEnd ? (
                         <span>Renews {new Date(sub.currentPeriodEnd).toLocaleDateString()}</span>
                       ) : (
-                        "—"
+                        <span>Continuous License</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
                         href={`/platform-admin/gyms/${sub.gym.id}`}
-                        className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+                        className="inline-flex items-center gap-1 text-xs text-pine font-semibold hover:underline"
                       >
-                        <span>Manage</span>
+                        <span>Workspace</span>
                         <ExternalLink className="h-3 w-3" />
                       </Link>
                     </TableCell>

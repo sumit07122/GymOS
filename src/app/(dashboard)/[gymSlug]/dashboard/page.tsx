@@ -13,12 +13,14 @@ import {
   Calendar,
   Sparkles,
   ArrowRight,
-  TrendingUp,
   Receipt,
+  UserPlus,
   Loader2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
+import { ChartCard } from "@/components/design-system/chart-card";
+import { StatusBadge } from "@/components/design-system/status-badge";
 import {
   Table,
   TableBody,
@@ -36,8 +38,8 @@ interface DashboardPageProps {
 function DashboardSkeleton() {
   return (
     <div className="flex h-96 w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-slate-500 text-xs">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="flex flex-col items-center gap-3 text-muted text-xs">
+        <Loader2 className="h-6 w-6 animate-spin text-pine" />
         <span>Loading gym dashboard...</span>
       </div>
     </div>
@@ -61,9 +63,9 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
 
   // Currency Formatter
   const formatMoney = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: metrics.currency || "USD",
+      currency: metrics.currency || "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -79,68 +81,99 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
   return (
     <div className="space-y-6">
       {/* Top Header & Range Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Gym Overview
-          </h1>
-          <p className="text-xs text-slate-500">
-            Real-time operational metrics and attendance intelligence for this workspace.
-          </p>
-        </div>
+      <PageHeader
+        title="Gym Command Center"
+        description="Real-time operational metrics, member consistency trends, and financial performance."
+        actions={
+          <div className="flex items-center gap-1 rounded-[10px] bg-canvas border border-line p-1 text-xs">
+            {[
+              { label: "Today", value: "today" },
+              { label: "7 Days", value: "7d" },
+              { label: "30 Days", value: "30d" },
+              { label: "This Month", value: "month" },
+              { label: "This Year", value: "year" },
+            ].map((tab) => {
+              const isSelected = range === tab.value;
+              return (
+                <Link
+                  key={tab.value}
+                  href={`/${gymSlug}/dashboard?range=${tab.value}`}
+                  className={`rounded-[8px] px-2.5 py-1.5 font-medium transition ${
+                    isSelected
+                      ? "bg-white text-ink shadow-xs font-semibold"
+                      : "text-muted hover:text-ink"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
+        }
+      />
 
-        {/* Date Filter Tabs */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-200/70 p-1 text-xs">
-          {[
-            { label: "Today", value: "today" },
-            { label: "7 Days", value: "7d" },
-            { label: "30 Days", value: "30d" },
-            { label: "This Month", value: "month" },
-            { label: "This Year", value: "year" },
-          ].map((tab) => {
-            const isSelected = range === tab.value;
-            return (
-              <Link
-                key={tab.value}
-                href={`/${gymSlug}/dashboard?range=${tab.value}`}
-                className={`rounded-lg px-2.5 py-1.5 font-medium transition ${
-                  isSelected
-                    ? "bg-white text-slate-900 shadow-xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {tab.label}
-              </Link>
-            );
-          })}
-        </div>
+      {/* Quick Action Ribbon */}
+      <div className="flex flex-wrap items-center gap-2.5 bg-white p-3 rounded-[16px] border border-line shadow-xs">
+        <span className="text-xs font-medium text-muted px-2">
+          Quick actions:
+        </span>
+        <Link
+          href={`/${gymSlug}/members/new`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-pine text-white hover:bg-pine/90 shadow-xs transition"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          <span>New Member</span>
+        </Link>
+
+        <Link
+          href={`/${gymSlug}/attendance`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
+        >
+          <QrCode className="h-3.5 w-3.5 text-pine" />
+          <span>Scan QR Attendance</span>
+        </Link>
+
+        <Link
+          href={`/${gymSlug}/payments`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
+        >
+          <Receipt className="h-3.5 w-3.5 text-pine" />
+          <span>Record Payment</span>
+        </Link>
+
+        <Link
+          href={`/${gymSlug}/leads`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-pine" />
+          <span>Pipeline & Leads</span>
+        </Link>
       </div>
 
       {/* Brand-New Gym Zero-Data Setup Guidance */}
       {isBrandNewGym && (
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 p-6 shadow-xs">
+        <div className="relative overflow-hidden rounded-[16px] border border-pine/30 bg-pine-soft/40 p-6 shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pine text-white">
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  New Gym Workspace Ready
+                <span className="text-xs font-semibold text-pine">
+                  New gym workspace ready
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="font-display text-lg font-bold text-ink">
                 Welcome to your FIXIA GymOS command center!
               </h2>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Your database tables and tenant security sandbox are provisioned.
-                This dashboard displays 100% verified database metrics with no synthetic
-                or mock data. Follow the staged rollout to prepare your gym for launch.
+              <p className="text-xs text-muted leading-relaxed">
+                Your database tables and multi-tenant security sandbox are provisioned.
+                This dashboard displays 100% verified database records with zero synthetic or mock data.
               </p>
             </div>
             <Link
               href={`/${gymSlug}/settings`}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-700/20 hover:bg-emerald-700 transition shrink-0"
+              className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-pine px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-pine/90 transition shrink-0"
             >
               <span>Configure Settings & Hours</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -148,47 +181,47 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
           </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-              <div className="text-[10px] font-bold text-emerald-600 uppercase">
+            <div className="rounded-[10px] border border-line bg-white p-3.5 shadow-xs">
+              <div className="text-[11px] font-semibold text-pine">
                 Step 1: Active
               </div>
-              <div className="mt-1 text-xs font-bold text-slate-900">
+              <div className="mt-1 text-xs font-bold text-ink">
                 Operating Profile
               </div>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-muted">
                 Opening hours, tax rates, contact info and location.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <div className="text-[10px] font-bold text-slate-400 uppercase">
-                Step 2: Milestone M06
+            <div className="rounded-[10px] border border-line bg-canvas p-3.5">
+              <div className="text-[11px] font-semibold text-muted">
+                Step 2
               </div>
-              <div className="mt-1 text-xs font-semibold text-slate-700">
+              <div className="mt-1 text-xs font-semibold text-ink">
                 Membership Plans
               </div>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-muted">
                 Monthly, quarterly, and annual billing tiers.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <div className="text-[10px] font-bold text-slate-400 uppercase">
-                Step 3: Milestone M07
+            <div className="rounded-[10px] border border-line bg-canvas p-3.5">
+              <div className="text-[11px] font-semibold text-muted">
+                Step 3
               </div>
-              <div className="mt-1 text-xs font-semibold text-slate-700">
+              <div className="mt-1 text-xs font-semibold text-ink">
                 Member Directory
               </div>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-muted">
                 Add members, assign plans, and issue digital passes.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <div className="text-[10px] font-bold text-slate-400 uppercase">
-                Step 4: Milestone M10
+            <div className="rounded-[10px] border border-line bg-canvas p-3.5">
+              <div className="text-[11px] font-semibold text-muted">
+                Step 4
               </div>
-              <div className="mt-1 text-xs font-semibold text-slate-700">
+              <div className="mt-1 text-xs font-semibold text-ink">
                 QR Attendance Kiosk
               </div>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-muted">
                 HMAC-signed contactless mobile check-ins.
               </p>
             </div>
@@ -197,204 +230,104 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
       )}
 
       {/* Primary KPI Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Members */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-600">
-              Total Members
-            </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-              <Users className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tracking-tight text-slate-900">
-              {metrics.totalMembers.toLocaleString()}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Registered in this gym workspace
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Active Members */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-600">
-              Active Members
-            </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-              <UserCheck className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tracking-tight text-emerald-700">
-              {metrics.activeMembers.toLocaleString()}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {metrics.totalMembers > 0
-                ? `${Math.round((metrics.activeMembers / metrics.totalMembers) * 100)}% of total roster`
-                : "No active memberships"}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Today's Attendance */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-600">
-              Today&apos;s Attendance
-            </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-              <QrCode className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tracking-tight text-slate-900">
-              {metrics.todayAttendance.toLocaleString()}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Verified check-ins since midnight
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Expiring Memberships */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-600">
-              Expiring Soon
-            </CardTitle>
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                metrics.expiringMemberships > 0
-                  ? "bg-amber-50 text-amber-700"
-                  : "bg-slate-100 text-slate-600"
-              }`}
-            >
-              <Clock className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`text-2xl font-bold tracking-tight ${
-                metrics.expiringMemberships > 0
-                  ? "text-amber-700"
-                  : "text-slate-900"
-              }`}
-            >
-              {metrics.expiringMemberships.toLocaleString()}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Ending within next 7 days
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Members"
+          value={metrics.totalMembers.toLocaleString()}
+          icon={Users}
+          subtext="Registered gym members"
+        />
+        <StatCard
+          label="Active Members"
+          value={metrics.activeMembers.toLocaleString()}
+          icon={UserCheck}
+          subtext={
+            metrics.totalMembers > 0
+              ? `${Math.round((metrics.activeMembers / metrics.totalMembers) * 100)}% of total roster`
+              : "No active memberships"
+          }
+        />
+        <StatCard
+          label="Today's Attendance"
+          value={metrics.todayAttendance.toLocaleString()}
+          icon={QrCode}
+          subtext="Verified check-ins today"
+        />
+        <StatCard
+          label="Expiring Soon"
+          value={metrics.expiringMemberships.toLocaleString()}
+          icon={Clock}
+          subtext="Ending within 7 days"
+        />
       </div>
 
       {/* Financial Overview & Attendance Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Financial Cards (1 col) */}
         <div className="space-y-4">
-          {/* Revenue */}
-          <Card className="border-slate-200 shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium text-slate-600">
-                Period Collected Revenue
-              </CardTitle>
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                <DollarSign className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold tracking-tight text-slate-900">
-                {formatMoney(metrics.periodRevenue)}
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-emerald-600" />
-                <span>Verified payments ({range})</span>
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Period Revenue Collected"
+            value={formatMoney(metrics.periodRevenue)}
+            icon={DollarSign}
+            trend={{
+              value: `${range} verified`,
+              isPositive: true,
+            }}
+            subtext="Total receipts cleared"
+          />
 
-          {/* Pending Dues */}
-          <Card className="border-slate-200 shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium text-slate-600">
-                Outstanding Dues
-              </CardTitle>
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  metrics.pendingDues > 0
-                    ? "bg-rose-50 text-rose-700"
-                    : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                <AlertTriangle className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`text-2xl font-bold tracking-tight ${
-                  metrics.pendingDues > 0 ? "text-rose-700" : "text-slate-900"
-                }`}
-              >
-                {formatMoney(metrics.pendingDues)}
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Uncollected across open & overdue invoices
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Outstanding Dues"
+            value={formatMoney(metrics.pendingDues)}
+            icon={AlertTriangle}
+            trend={
+              metrics.pendingDues > 0
+                ? { value: "Pending collection", isPositive: false }
+                : undefined
+            }
+            subtext="Uncollected across open invoices"
+          />
         </div>
 
         {/* 7-Day Attendance Trend Chart (2 cols) */}
-        <Card className="lg:col-span-2 border-slate-200 shadow-xs flex flex-col justify-between">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <CardTitle className="text-sm font-semibold text-slate-900">
-                7-Day Attendance Flow
-              </CardTitle>
-              <p className="text-xs text-slate-500">
-                Daily member check-in counts across the past week
-              </p>
-            </div>
-            <Badge variant="outline" className="text-[11px]">
-              <Calendar className="h-3 w-3 mr-1 text-slate-500" />
-              Daily Log
-            </Badge>
-          </CardHeader>
-
-          <CardContent className="pt-4">
-            <div className="flex h-44 items-end justify-between gap-2 sm:gap-4 px-2">
+        <div className="lg:col-span-2">
+          <ChartCard
+            title="7-Day Attendance Flow"
+            description="Daily member check-in counts across the past week"
+            actions={
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-pine bg-pine-soft px-2.5 py-1 rounded-md">
+                <Calendar className="h-3 w-3" /> Daily Log
+              </span>
+            }
+          >
+            <div className="flex h-48 items-end justify-between gap-2 sm:gap-4 px-2 pt-4">
               {metrics.attendanceTrends.map((trend) => {
                 const heightPercent =
-                  trend.count > 0 ? Math.max((trend.count / maxTrend) * 100, 12) : 6;
+                  trend.count > 0 ? Math.max((trend.count / maxTrend) * 100, 14) : 8;
 
                 return (
                   <div
                     key={trend.date}
                     className="flex flex-1 flex-col items-center gap-2 group"
                   >
-                    <div className="text-[10px] font-semibold text-slate-600 transition group-hover:text-emerald-700">
+                    <div className="text-[10px] font-semibold text-muted transition group-hover:text-pine">
                       {trend.count}
                     </div>
                     <div className="relative w-full max-w-[42px] flex-1 flex items-end">
                       <div
                         style={{ height: `${heightPercent}%` }}
-                        className={`w-full rounded-t-md transition-all duration-300 ${
+                        className={`w-full rounded-t-lg transition-all duration-300 ${
                           trend.count > 0
-                            ? "bg-emerald-600 group-hover:bg-emerald-700 shadow-xs"
-                            : "bg-slate-200/80"
+                            ? "bg-pine group-hover:bg-pine/80 shadow-xs"
+                            : "bg-line/70"
                         }`}
                       />
                     </div>
                     <div className="text-center">
-                      <div className="text-[10px] font-medium text-slate-600">
+                      <div className="text-[10px] font-semibold text-ink">
                         {trend.dayLabel}
                       </div>
-                      <div className="text-[9px] text-slate-400 hidden sm:block">
+                      <div className="text-[9px] text-muted hidden sm:block">
                         {trend.date.slice(5)}
                       </div>
                     </div>
@@ -402,134 +335,112 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
+          </ChartCard>
+        </div>
       </div>
 
       {/* Recent Activity: Payments & Members Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Payments */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="rounded-[16px] border border-line bg-white shadow-xs overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold text-slate-900">
-                Recent Payment Records
-              </CardTitle>
-              <p className="text-xs text-slate-500">
-                Latest transactions received in this workspace
-              </p>
+              <h3 className="font-display text-sm font-bold text-ink">Recent Payment Records</h3>
+              <p className="text-xs text-muted">Latest transactions processed in this workspace</p>
             </div>
-            <Receipt className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
+            <Receipt className="h-4 w-4 text-muted" />
+          </div>
+
+          <div className="p-0">
             {metrics.recentPayments.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
-                No payments recorded yet. Financial tracking begins with invoices in M08.
+              <div className="py-12 text-center text-xs text-muted">
+                No payments recorded yet. Financial tracking begins with your first invoice.
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">Member</TableHead>
-                    <TableHead className="text-xs">Amount</TableHead>
-                    <TableHead className="text-xs">Method</TableHead>
-                    <TableHead className="text-xs text-right">Status</TableHead>
+                <TableHeader className="bg-canvas border-b border-line">
+                  <TableRow className="border-line hover:bg-transparent">
+                    <TableHead className="text-xs text-muted font-semibold">Member</TableHead>
+                    <TableHead className="text-xs text-muted font-semibold">Amount</TableHead>
+                    <TableHead className="text-xs text-muted font-semibold">Method</TableHead>
+                    <TableHead className="text-xs text-muted font-semibold text-right">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {metrics.recentPayments.map((p) => (
-                    <TableRow key={p.id}>
+                    <TableRow key={p.id} className="border-line/60 hover:bg-canvas/60 transition">
                       <TableCell className="py-2.5">
-                        <div className="text-xs font-medium text-slate-900">
+                        <div className="text-xs font-semibold text-ink">
                           {p.memberName}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[10px] text-muted">
                           {p.memberEmail}
                         </div>
                       </TableCell>
-                      <TableCell className="py-2.5 text-xs font-semibold text-slate-900">
+                      <TableCell className="py-2.5 text-xs font-bold text-ink tabular-nums">
                         {formatMoney(p.amount)}
                       </TableCell>
-                      <TableCell className="py-2.5 text-[11px] text-slate-600 capitalize">
+                      <TableCell className="py-2.5 text-[11px] text-muted capitalize">
                         {p.paymentMethod.toLowerCase().replace("_", " ")}
                       </TableCell>
                       <TableCell className="py-2.5 text-right">
-                        <Badge
-                          variant="outline"
-                          className={
-                            p.status === "COMPLETED"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-800 text-[10px]"
-                              : "border-slate-200 text-slate-600 text-[10px]"
-                          }
-                        >
-                          {p.status}
-                        </Badge>
+                        <StatusBadge
+                          status={p.status === "COMPLETED" ? "ACTIVE" : "PENDING"}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Recent Members */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="rounded-[16px] border border-line bg-white shadow-xs overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold text-slate-900">
-                Recent Member Registrations
-              </CardTitle>
-              <p className="text-xs text-slate-500">
-                Latest member profiles added to your gym roster
-              </p>
+              <h3 className="font-display text-sm font-bold text-ink">Recent Member Registrations</h3>
+              <p className="text-xs text-muted">Latest member profiles added to your gym roster</p>
             </div>
-            <Users className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
+            <Users className="h-4 w-4 text-muted" />
+          </div>
+
+          <div className="p-4">
             {metrics.recentMembers.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
-                No members registered yet. Member onboarding launches in Milestone M07.
+              <div className="py-12 text-center text-xs text-muted">
+                No members registered yet. Add your first member to launch your directory.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-line">
                 {metrics.recentMembers.map((m) => (
                   <div
                     key={m.id}
                     className="flex items-center justify-between py-2.5"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-semibold text-xs text-slate-700">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pine-soft font-bold text-xs text-pine">
                         {m.firstName.charAt(0)}
                         {m.lastName.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-slate-900">
+                        <div className="text-xs font-semibold text-ink">
                           {m.firstName} {m.lastName}
                         </div>
-                        <div className="text-[10px] text-slate-500">
+                        <div className="text-[10px] text-muted">
                           {m.email}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        className={
-                          m.status === "ACTIVE"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-800 text-[10px]"
-                            : "border-slate-200 text-slate-600 text-[10px]"
-                        }
-                      >
-                        {m.status}
-                      </Badge>
+                      <StatusBadge status={m.status} />
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

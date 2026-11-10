@@ -74,7 +74,7 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1 min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
+            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#111613] truncate">
               {title}
             </h1>
             {badge && <div className="shrink-0">{badge}</div>}

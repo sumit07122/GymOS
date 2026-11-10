@@ -15,6 +15,9 @@ import {
   Send,
   Copy,
   ExternalLink,
+  ChevronRight,
+  ChevronLeft,
+  Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,8 +38,17 @@ interface OnboardGymFormProps {
   }>;
 }
 
+const STEPS = [
+  { id: 1, title: "Gym Profile", desc: "Identity & routing", icon: Building2 },
+  { id: 2, title: "Owner Account", desc: "Credentials & admin", icon: User },
+  { id: 3, title: "SaaS Package", desc: "Pricing & tier", icon: CreditCard },
+  { id: 4, title: "Entitlements", desc: "Modules & flags", icon: Sliders },
+  { id: 5, title: "Review & Provision", desc: "Confirm & launch", icon: ShieldCheck },
+];
+
 export function OnboardGymForm({ plans }: OnboardGymFormProps) {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = React.useState(1);
   const [isPending, setIsPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [resultData, setResultData] = React.useState<any | null>(null);
@@ -82,7 +94,7 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
     BUSINESS_ANALYTICS: true,
   });
 
-  // Auto-generate slug from name if slug not touched
+  // Auto-generate slug from name if slug not manually edited
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     const generatedSlug = val
@@ -110,6 +122,34 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
       pass += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     setFormData((prev) => ({ ...prev, ownerPassword: pass }));
+  };
+
+  // Step validation before advancing
+  const canAdvance = (step: number): boolean => {
+    if (step === 1) {
+      return Boolean(formData.name.trim() && formData.slug.trim() && formData.phone.trim() && formData.email.trim() && formData.city.trim());
+    }
+    if (step === 2) {
+      return Boolean(formData.ownerName.trim() && formData.ownerEmail.trim());
+    }
+    if (step === 3) {
+      return Boolean(formData.planId);
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    setError(null);
+    if (!canAdvance(currentStep)) {
+      setError("Please fill in all mandatory fields with valid values before proceeding.");
+      return;
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
+  };
+
+  const handleBack = () => {
+    setError(null);
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,62 +195,63 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
   const [copied, setCopied] = React.useState(false);
   const copyCredentials = () => {
     if (!resultData) return;
-    const text = `FIXIA GymOS Workspace Provisioned!\nGym: ${resultData.gym.name}\nDashboard URL: https://gms.fixia.in/owner/dashboard\nGym Website: https://gms.fixia.in/g/${resultData.gym.slug}\nOwner Email: ${resultData.owner.email}\nTemporary Password: ${resultData.temporaryPassword || "(as set)"}\nInvitation Code: ${resultData.invitation?.token || "N/A"}`;
+    const text = `FIXIA GymOS Workspace Provisioned!\nGym: ${resultData.gym.name}\nDashboard URL: https://gms.fixia.in/owner/dashboard\nGym Website: https://gms.fixia.in/g/${resultData.gym.slug}\nOwner Email: ${resultData.owner.email}\nTemporary Password: ${resultData.temporaryPassword || "(as configured)"}\nInvitation Code: ${resultData.invitation?.token || "N/A"}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
   };
 
+  // Success view
   if (resultData) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/40 p-6 text-slate-100 shadow-xl backdrop-blur-sm">
+        <div className="rounded-xl border border-pine/30 bg-white p-6 text-ink shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pine-soft text-pine">
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">
-                Workspace Successfully Provisioned!
+              <h2 className="text-lg font-bold text-ink">
+                Gym Workspace Successfully Provisioned!
               </h2>
-              <p className="text-xs text-emerald-300">
-                Tenant <strong>{resultData.gym.name}</strong> is live and initialized with isolated database context.
+              <p className="text-xs text-muted">
+                Tenant <strong>{resultData.gym.name}</strong> is live and initialized with strict tenant database isolation.
               </p>
             </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-2">
-              <div className="text-[11px] font-bold uppercase text-slate-400">Gym Workspace</div>
-              <div className="font-semibold text-white text-sm">{resultData.gym.name}</div>
-              <div className="text-slate-400">Slug: <span className="font-mono text-indigo-400">/{resultData.gym.slug}</span></div>
-              <div className="text-slate-400">Plan: <Badge variant="outline" className="bg-indigo-950 text-indigo-300 border-indigo-800">{resultData.subscription.plan.name}</Badge></div>
-              <div className="text-slate-400">Trial Period: <strong className="text-white">{resultData.subscription.trialEndsAt ? new Date(resultData.subscription.trialEndsAt).toLocaleDateString() : "None"}</strong></div>
+            <div className="rounded-lg border border-line bg-canvas p-4 space-y-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">Gym Workspace</div>
+              <div className="font-semibold text-ink text-sm">{resultData.gym.name}</div>
+              <div className="text-muted">Slug: <span className="font-mono text-pine">/{resultData.gym.slug}</span></div>
+              <div className="text-muted">Plan: <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30">{resultData.subscription.plan.name}</Badge></div>
+              <div className="text-muted">Trial Period: <strong className="text-ink">{resultData.subscription.trialEndsAt ? new Date(resultData.subscription.trialEndsAt).toLocaleDateString() : "None"}</strong></div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-2">
-              <div className="text-[11px] font-bold uppercase text-slate-400">Owner Credentials</div>
-              <div className="font-semibold text-white text-sm">{resultData.owner.name}</div>
-              <div className="text-slate-400">Email: <span className="font-mono text-slate-200">{resultData.owner.email}</span></div>
-              <div className="text-slate-400">
-                Password: <span className="font-mono bg-slate-950 px-2 py-0.5 rounded text-amber-400 border border-slate-800">{resultData.temporaryPassword || "(Entered during onboarding)"}</span>
+            <div className="rounded-lg border border-line bg-canvas p-4 space-y-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">Owner Credentials</div>
+              <div className="font-semibold text-ink text-sm">{resultData.owner.name}</div>
+              <div className="text-muted">Email: <span className="font-mono text-ink">{resultData.owner.email}</span></div>
+              <div className="text-muted">
+                Password: <span className="font-mono bg-white px-2 py-0.5 rounded text-amber-700 border border-line">{resultData.temporaryPassword || "(Entered during onboarding)"}</span>
               </div>
-              <div className="text-slate-400">Status: <Badge variant="outline" className="bg-emerald-950 text-emerald-300 border-emerald-800">ACTIVE</Badge></div>
+              <div className="text-muted">Role: <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30">OWNER</Badge></div>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center gap-3 pt-4 border-t border-line">
             <Button
               onClick={copyCredentials}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs gap-2"
+              className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 rounded-lg gap-2 shadow-xs transition"
             >
-              <Copy className="h-4 w-4" />
-              <span>{copied ? "Copied Credentials!" : "Copy Welcome Packet"}</span>
+              <Copy className="h-3.5 w-3.5" />
+              <span>{copied ? "Copied Welcome Packet!" : "Copy Welcome Packet"}</span>
             </Button>
             <Button
               variant="outline"
               onClick={() => router.push(`/platform-admin/gyms/${resultData.gym.id}`)}
-              className="border-slate-700 bg-slate-800 hover:bg-slate-700 text-white text-xs gap-1.5"
+              className="border-line text-ink hover:bg-canvas text-xs h-9 gap-1.5"
             >
               <span>View Gym Details</span>
               <ExternalLink className="h-3.5 w-3.5" />
@@ -219,6 +260,7 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
               variant="ghost"
               onClick={() => {
                 setResultData(null);
+                setCurrentStep(1);
                 setFormData((prev) => ({
                   ...prev,
                   name: "",
@@ -231,7 +273,7 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
                   ownerPassword: "",
                 }));
               }}
-              className="text-slate-400 hover:text-white text-xs"
+              className="text-muted hover:text-ink text-xs h-9"
             >
               Onboard Another Gym
             </Button>
@@ -241,335 +283,480 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
     );
   }
 
+  const selectedPlan = plans.find((p) => p.id === formData.planId) || plans[0];
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* 5-Step Stepper Ribbon */}
+      <div className="bg-white rounded-xl border border-line p-3 sm:p-4 shadow-xs">
+        <div className="grid grid-cols-5 gap-2 text-center">
+          {STEPS.map((s) => {
+            const Icon = s.icon;
+            const isCompleted = currentStep > s.id;
+            const isCurrent = currentStep === s.id;
+
+            return (
+              <button
+                type="button"
+                key={s.id}
+                onClick={() => {
+                  if (s.id < currentStep) setCurrentStep(s.id);
+                }}
+                disabled={s.id > currentStep}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition text-left sm:text-center ${
+                  isCurrent
+                    ? "bg-pine-soft text-pine font-bold"
+                    : isCompleted
+                    ? "text-pine cursor-pointer hover:bg-canvas"
+                    : "text-muted opacity-50 cursor-not-allowed"
+                }`}
+              >
+                <div
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                    isCurrent
+                      ? "bg-pine text-white"
+                      : isCompleted
+                      ? "bg-pine/20 text-pine"
+                      : "bg-canvas text-muted border border-line"
+                  }`}
+                >
+                  {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-3.5 w-3.5" />}
+                </div>
+                <div className="hidden sm:block">
+                  <div className="text-xs leading-none font-semibold">{s.title}</div>
+                  <div className="text-[10px] text-muted mt-0.5">{s.desc}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-300 flex items-start gap-2.5">
-          <AlertCircle className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" />
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 flex items-start gap-2.5">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
           <div>
-            <div className="font-bold text-rose-200">Onboarding Validation Error</div>
+            <div className="font-bold">Validation Error</div>
             <p className="mt-0.5">{error}</p>
           </div>
         </div>
       )}
 
-      {/* 1. Gym Business Details */}
-      <Card className="border-slate-800 bg-slate-950/70 text-slate-100 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-            <Building2 className="h-5 w-5 text-indigo-400" />
-            <span>1. Gym Business Information</span>
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-400">
-            Legal identity, localization, and public routing identifiers.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-xs font-semibold text-slate-300">Gym Legal / Display Name *</label>
-            <Input
-              required
-              placeholder="e.g. IronForge Elite Fitness"
-              value={formData.name}
-              onChange={handleNameChange}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+      {/* Wizard Step Content */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Step 1: Gym Business Profile */}
+        {currentStep === 1 && (
+          <Card className="border-line bg-white shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-ink">
+                <Building2 className="h-4 w-4 text-pine" />
+                <span>Step 1: Gym Business Information</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted">
+                Official business identity, localization, and public routing identifiers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-ink">Gym Legal / Display Name *</label>
+                <Input
+                  required
+                  placeholder="e.g. IronForge Elite Fitness"
+                  value={formData.name}
+                  onChange={handleNameChange}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Tenant Slug (URL Identifier) *</label>
-            <div className="flex items-center">
-              <span className="text-xs text-slate-500 bg-slate-900 border border-r-0 border-slate-700 px-2.5 h-9 flex items-center rounded-l-md font-mono">
-                /g/
-              </span>
-              <Input
-                required
-                placeholder="ironforge-elite"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "") })}
-                className="bg-slate-900 border-slate-700 text-white text-xs h-9 rounded-l-none font-mono"
-              />
-            </div>
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Tenant Slug (URL Identifier) *</label>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted bg-canvas border border-r-0 border-line px-2.5 h-9 flex items-center rounded-l-md font-mono">
+                    /g/
+                  </span>
+                  <Input
+                    required
+                    placeholder="ironforge-elite"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""),
+                      })
+                    }
+                    className="bg-white border-line text-ink text-xs h-9 rounded-l-none font-mono focus:ring-pine/30 focus:border-pine"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Official Gym Phone *</label>
-            <Input
-              required
-              placeholder="+91 98765 43210"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Official Gym Phone *</label>
+                <Input
+                  required
+                  placeholder="+91 98765 43210"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Official Gym Email *</label>
-            <Input
-              required
-              type="email"
-              placeholder="contact@ironforge.in"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Official Gym Email *</label>
+                <Input
+                  required
+                  type="email"
+                  placeholder="contact@ironforge.in"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">City *</label>
-            <Input
-              required
-              placeholder="e.g. Mumbai, Bengaluru"
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">City *</label>
+                <Input
+                  required
+                  placeholder="e.g. Mumbai, Bengaluru"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Country Code</label>
-            <Input
-              value={formData.country}
-              onChange={(e) => setFormData({ ...formData, country: e.target.value.toUpperCase() })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9 font-mono"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Country Code</label>
+                <Input
+                  value={formData.country}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value.toUpperCase() })}
+                  className="bg-white border-line text-ink text-xs h-9 font-mono"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Currency Code</label>
-            <Input
-              value={formData.currency}
-              onChange={(e) => setFormData({ ...formData, currency: e.target.value.toUpperCase() })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9 font-mono"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Currency Code</label>
+                <Input
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value.toUpperCase() })}
+                  className="bg-white border-line text-ink text-xs h-9 font-mono"
+                />
+              </div>
 
-          <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-xs font-semibold text-slate-300">Operating Schedule</label>
-            <Input
-              placeholder="Mon-Sat: 6:00 AM - 10:00 PM, Sun: Closed"
-              value={formData.openingHours}
-              onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-ink">Operating Schedule</label>
+                <Input
+                  placeholder="Mon-Sat: 6:00 AM - 10:00 PM, Sun: Closed"
+                  value={formData.openingHours}
+                  onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* 2. Gym Owner Account */}
-      <Card className="border-slate-800 bg-slate-950/70 text-slate-100 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-            <User className="h-5 w-5 text-emerald-400" />
-            <span>2. Gym Owner Credentials</span>
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-400">
-            The primary administrator assigned with OWNER role authority for this gym.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Owner Full Name *</label>
-            <Input
-              required
-              placeholder="e.g. Rajesh Sharma"
-              value={formData.ownerName}
-              onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+        {/* Step 2: Owner Account */}
+        {currentStep === 2 && (
+          <Card className="border-line bg-white shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-ink">
+                <User className="h-4 w-4 text-pine" />
+                <span>Step 2: Gym Owner Credentials</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted">
+                The primary administrator provisioned with OWNER role authority for this gym tenant.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Owner Full Name *</label>
+                <Input
+                  required
+                  placeholder="e.g. Rajesh Sharma"
+                  value={formData.ownerName}
+                  onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Owner Email Address *</label>
-            <Input
-              required
-              type="email"
-              placeholder="owner@ironforge.in"
-              value={formData.ownerEmail}
-              onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Owner Business Email *</label>
+                <Input
+                  required
+                  type="email"
+                  placeholder="owner@ironforge.in"
+                  value={formData.ownerEmail}
+                  onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5 sm:col-span-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-300">Password</label>
-              <button
-                type="button"
-                onClick={generateRandomPassword}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
-              >
-                Auto-generate secure password
-              </button>
-            </div>
-            <Input
-              type="text"
-              placeholder="Leave blank to auto-generate, or enter at least 8 characters"
-              value={formData.ownerPassword}
-              onChange={(e) => setFormData({ ...formData, ownerPassword: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9 font-mono"
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-1.5 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-ink">Password</label>
+                  <button
+                    type="button"
+                    onClick={generateRandomPassword}
+                    className="text-[11px] text-pine hover:underline font-semibold flex items-center gap-1"
+                  >
+                    <Key className="h-3 w-3" />
+                    <span>Auto-generate secure password</span>
+                  </button>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Leave blank to auto-generate, or enter at least 8 characters"
+                  value={formData.ownerPassword}
+                  onChange={(e) => setFormData({ ...formData, ownerPassword: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* 3. SaaS Subscription Package */}
-      <Card className="border-slate-800 bg-slate-950/70 text-slate-100 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-            <CreditCard className="h-5 w-5 text-indigo-400" />
-            <span>3. SaaS Subscription Package & Custom Pricing</span>
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-400">
-            Select base plan, configure custom price overrides, and set trial periods.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Base SaaS Tier *</label>
-            <select
-              value={formData.planId}
-              onChange={(e) => setFormData({ ...formData, planId: e.target.value })}
-              className="w-full bg-slate-900 border border-slate-700 rounded-md text-white text-xs h-9 px-3"
-            >
-              {plans.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({formData.currency} {p.monthlyPrice}/mo &bull; {p.maxMembers ? `Max ${p.maxMembers} members` : "Unlimited"})
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Step 3: SaaS Subscription Package & Custom Pricing */}
+        {currentStep === 3 && (
+          <Card className="border-line bg-white shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-ink">
+                <CreditCard className="h-4 w-4 text-pine" />
+                <span>Step 3: SaaS Subscription Package & Custom Pricing</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted">
+                Select base commercial tier, negotiate custom price overrides, and configure trial windows.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Base SaaS Tier *</label>
+                <select
+                  value={formData.planId}
+                  onChange={(e) => setFormData({ ...formData, planId: e.target.value })}
+                  className="w-full bg-white border border-line rounded-lg text-ink text-xs h-9 px-3 focus:ring-pine/30 focus:border-pine"
+                >
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({formData.currency} {p.monthlyPrice}/mo &bull; {p.maxMembers ? `Max ${p.maxMembers} members` : "Unlimited"})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Billing Cycle</label>
-            <select
-              value={formData.billingPeriod}
-              onChange={(e) => setFormData({ ...formData, billingPeriod: e.target.value })}
-              className="w-full bg-slate-900 border border-slate-700 rounded-md text-white text-xs h-9 px-3"
-            >
-              <option value="MONTHLY">Monthly</option>
-              <option value="QUARTERLY">Quarterly</option>
-              <option value="YEARLY">Annual (Yearly)</option>
-            </select>
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Billing Cycle</label>
+                <select
+                  value={formData.billingPeriod}
+                  onChange={(e) => setFormData({ ...formData, billingPeriod: e.target.value })}
+                  className="w-full bg-white border border-line rounded-lg text-ink text-xs h-9 px-3 focus:ring-pine/30 focus:border-pine"
+                >
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="QUARTERLY">Quarterly</option>
+                  <option value="YEARLY">Annual (Yearly)</option>
+                </select>
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Custom Price Override (Optional)</label>
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="e.g. 1999 (Overrides plan price)"
-              value={formData.customPricingOverride}
-              onChange={(e) => setFormData({ ...formData, customPricingOverride: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Custom Price Override (Optional)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 1999 (Overrides plan price)"
+                  value={formData.customPricingOverride}
+                  onChange={(e) => setFormData({ ...formData, customPricingOverride: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Trial Period (Days)</label>
-            <Input
-              type="number"
-              min="0"
-              max="365"
-              value={formData.trialDays}
-              onChange={(e) => setFormData({ ...formData, trialDays: parseInt(e.target.value) || 0 })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Trial Period (Days)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="365"
+                  value={formData.trialDays}
+                  onChange={(e) => setFormData({ ...formData, trialDays: parseInt(e.target.value) || 0 })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Max Member Limit Override</label>
-            <Input
-              type="number"
-              placeholder="Leave blank for plan default"
-              value={formData.maxMembersOverride}
-              onChange={(e) => setFormData({ ...formData, maxMembersOverride: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Max Member Limit Override</label>
+                <Input
+                  type="number"
+                  placeholder="Leave blank for plan default"
+                  value={formData.maxMembersOverride}
+                  onChange={(e) => setFormData({ ...formData, maxMembersOverride: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Administrative Notes</label>
-            <Input
-              placeholder="e.g. Negotiated annual contract"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white text-xs h-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ink">Administrative Notes</label>
+                <Input
+                  placeholder="e.g. Negotiated annual contract"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* 4. Feature Entitlements */}
-      <Card className="border-slate-800 bg-slate-950/70 text-slate-100 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-            <Sliders className="h-5 w-5 text-amber-400" />
-            <span>4. Feature Entitlement Flags</span>
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-400">
-            Granularly grant or restrict platform modules for this tenant workspace.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {Object.entries(featureOverrides).map(([key, enabled]) => (
-              <button
-                type="button"
-                key={key}
-                onClick={() => handleFeatureToggle(key)}
-                className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                  enabled
-                    ? "bg-indigo-950/40 border-indigo-700 text-white"
-                    : "bg-slate-900/60 border-slate-800 text-slate-400"
-                }`}
-              >
-                <div>
-                  <div className="text-xs font-bold">{key.replace(/_/g, " ")}</div>
-                  <div className="text-[10px] text-slate-400">
-                    {enabled ? "Enabled in workspace" : "Disabled / Locked"}
+        {/* Step 4: Feature Entitlement Flags */}
+        {currentStep === 4 && (
+          <Card className="border-line bg-white shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-ink">
+                <Sliders className="h-4 w-4 text-pine" />
+                <span>Step 4: Feature Entitlement Flags</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted">
+                Granularly grant or restrict platform capabilities for this tenant workspace.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {Object.entries(featureOverrides).map(([key, enabled]) => (
+                  <button
+                    type="button"
+                    key={key}
+                    onClick={() => handleFeatureToggle(key)}
+                    className={`p-3 rounded-lg border text-left transition flex items-center justify-between cursor-pointer ${
+                      enabled
+                        ? "bg-pine-soft/40 border-pine/30 text-ink"
+                        : "bg-canvas border-line text-muted"
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-bold">{key.replace(/_/g, " ")}</div>
+                      <div className="text-[10px] text-muted">
+                        {enabled ? "Enabled in workspace" : "Disabled / Locked"}
+                      </div>
+                    </div>
+                    <div
+                      className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
+                        enabled
+                          ? "bg-pine border-pine text-white"
+                          : "border-line bg-white"
+                      }`}
+                    >
+                      {enabled && <CheckCircle2 className="h-3 w-3" />}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 5: Review & Provision */}
+        {currentStep === 5 && (
+          <Card className="border-line bg-white shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-ink">
+                <ShieldCheck className="h-4 w-4 text-pine" />
+                <span>Step 5: Pre-Flight Review & Workspace Provisioning</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted">
+                Inspect configured parameters before executing the transactional provisioning workflow.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="rounded-lg border border-line bg-canvas p-3.5 space-y-1.5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Gym Workspace</div>
+                  <div className="font-bold text-sm text-ink">{formData.name || "Untitled"}</div>
+                  <div className="text-muted font-mono">/g/{formData.slug}</div>
+                  <div className="text-muted">{formData.phone} • {formData.email}</div>
+                  <div className="text-muted">{formData.city}, {formData.country} ({formData.currency})</div>
+                </div>
+
+                <div className="rounded-lg border border-line bg-canvas p-3.5 space-y-1.5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Owner Credentials</div>
+                  <div className="font-bold text-sm text-ink">{formData.ownerName || "Unassigned"}</div>
+                  <div className="text-muted font-mono">{formData.ownerEmail}</div>
+                  <div className="text-muted">Password: <span className="font-mono">{formData.ownerPassword ? "Custom password provided" : "Will auto-generate"}</span></div>
+                  <div className="text-muted">Role: <span className="font-semibold text-pine">OWNER</span></div>
+                </div>
+
+                <div className="rounded-lg border border-line bg-canvas p-3.5 space-y-1.5 sm:col-span-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Subscription Agreement</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-ink">{selectedPlan?.name}</span>
+                    <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30 text-[10px]">
+                      {formData.billingPeriod}
+                    </Badge>
+                  </div>
+                  <div className="text-muted">
+                    Effective Pricing:{" "}
+                    <strong>
+                      {formData.currency}{" "}
+                      {formData.customPricingOverride || selectedPlan?.monthlyPrice}
+                    </strong>{" "}
+                    / month &bull; Trial: <strong>{formData.trialDays} days</strong> &bull; Capacity Limit:{" "}
+                    <strong>{formData.maxMembersOverride || selectedPlan?.maxMembers || "Unlimited"}</strong>
                   </div>
                 </div>
-                <div
-                  className={`size-4 rounded-full border flex items-center justify-center ${
-                    enabled
-                      ? "bg-indigo-600 border-indigo-500 text-white"
-                      : "border-slate-700 bg-slate-950"
-                  }`}
-                >
-                  {enabled && <CheckCircle2 className="h-3 w-3" />}
-                </div>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
 
-      {/* Submit Action */}
-      <div className="pt-2 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
-          <span>Provisioning creates isolated tenant RLS boundaries and audit logs.</span>
-        </div>
+              <div className="p-3 rounded-lg bg-pine-soft/40 border border-pine/20 text-xs text-pine flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 shrink-0" />
+                <span>
+                  Executing this transaction initializes tenant database schemas, triggers password hashing, and logs immutable audit records.
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs h-11 px-6 gap-2 shadow-lg shadow-indigo-600/30"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Provisioning Workspace...</span>
-            </>
+        {/* Wizard Controls */}
+        <div className="flex items-center justify-between pt-2">
+          {currentStep > 1 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleBack}
+              disabled={isPending}
+              className="border-line text-ink hover:bg-canvas text-xs h-9 gap-1"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <span>Back</span>
+            </Button>
           ) : (
-            <>
-              <Send className="h-4 w-4" />
-              <span>Complete Gym Onboarding</span>
-            </>
+            <div />
           )}
-        </Button>
-      </div>
-    </form>
+
+          {currentStep < 5 ? (
+            <Button
+              type="button"
+              onClick={handleNext}
+              className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 px-5 gap-1.5 rounded-lg shadow-xs transition"
+            >
+              <span>Next Step</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="bg-pine hover:bg-pine/90 text-white font-bold text-xs h-10 px-6 gap-2 rounded-lg shadow-xs transition"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Provisioning Workspace...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="h-3.5 w-3.5" />
+                  <span>Execute Provisioning</span>
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

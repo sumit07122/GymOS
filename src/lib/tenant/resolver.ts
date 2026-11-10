@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/lib/db";
 import { getDatabaseSession } from "@/lib/auth/session";
 import {
@@ -52,13 +53,17 @@ export async function resolveTenantContext(
   if (user.role === SystemRole.SUPER_ADMIN) {
     let targetGymId = "system-platform";
     if (gymSlugOrId) {
-      const targetGym = await db.gym.findFirst({
-        where: {
-          OR: [{ id: gymSlugOrId }, { slug: gymSlugOrId }],
-        },
-      });
-      if (targetGym) {
-        targetGymId = targetGym.id;
+      try {
+        const targetGym = await db.gym.findFirst({
+          where: {
+            OR: [{ id: gymSlugOrId }, { slug: gymSlugOrId }],
+          },
+        });
+        if (targetGym) {
+          targetGymId = targetGym.id;
+        }
+      } catch (err) {
+        console.warn("DB offline in resolveTenantContext super admin check:", err);
       }
     }
     return createTenantContext({
@@ -71,18 +76,35 @@ export async function resolveTenantContext(
 
   // 2. Tenant Scoping by URL Gym Identifier (Slug or ID)
   if (gymSlugOrId) {
-    const targetGym = await db.gym.findFirst({
-      where: {
-        OR: [{ id: gymSlugOrId }, { slug: gymSlugOrId }],
-      },
-    });
+    let targetGym: any = null;
+    try {
+      targetGym = await db.gym.findFirst({
+        where: {
+          OR: [{ id: gymSlugOrId }, { slug: gymSlugOrId }],
+        },
+      });
+    } catch (err) {
+      console.warn("DB offline in resolveTenantContext gym lookup:", err);
+    }
+
+    if (!targetGym) {
+      // Offline fallback: match against user's existing gymRoles
+      const matchingGymRole = user.gymRoles.find(
+        (gr) => gr.gym?.slug === gymSlugOrId || gr.gymId === gymSlugOrId || gr.gym?.id === gymSlugOrId
+      );
+      if (matchingGymRole) {
+        targetGym = matchingGymRole.gym;
+      }
+    }
 
     if (!targetGym) {
       throw new TenantNotFoundError(gymSlugOrId);
     }
 
     // Verify user membership in target gym
-    const matchingRole = user.gymRoles.find((gr) => gr.gymId === targetGym.id);
+    const matchingRole = user.gymRoles.find(
+      (gr) => gr.gymId === targetGym.id || gr.gym?.slug === targetGym.slug
+    );
 
     if (!matchingRole) {
       throw new TenantAccessViolationError(targetGym.id, "UNAUTHORIZED_GYM");

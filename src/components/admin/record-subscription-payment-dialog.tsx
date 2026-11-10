@@ -88,35 +88,35 @@ export function RecordSubscriptionPaymentDialog({ invoices }: RecordSubscription
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs gap-1.5 shadow-md shadow-indigo-600/30"
+        className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 rounded-lg gap-1.5 shadow-xs transition"
       >
-        <PlusCircle className="h-4 w-4" />
+        <PlusCircle className="h-3.5 w-3.5" />
         <span>Record SaaS Payment</span>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-md">
+        <DialogContent className="bg-white border-line text-ink sm:max-w-md rounded-xl shadow-xl">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle className="text-white text-base">Record Platform Payment</DialogTitle>
-              <DialogDescription className="text-slate-400 text-xs">
-                Log an incoming subscription fee paid by a gym owner to FIXIA.
+              <DialogTitle className="text-ink text-base font-bold">Record Platform Payment</DialogTitle>
+              <DialogDescription className="text-muted text-xs">
+                Log an incoming commercial subscription fee paid by a gym owner to FIXIA.
               </DialogDescription>
             </DialogHeader>
 
             {error && (
-              <div className="mt-3 rounded-lg bg-rose-950/50 border border-rose-800 p-2.5 text-xs text-rose-300">
+              <div className="mt-3 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700">
                 {error}
               </div>
             )}
 
             <div className="space-y-3 py-4 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Select Invoice *</label>
+                <label className="text-ink font-semibold">Select Invoice *</label>
                 <select
                   value={selectedInvoiceId}
                   onChange={(e) => handleInvoiceChange(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md text-white text-xs h-9 px-3"
+                  className="w-full bg-white border border-line rounded-lg text-ink text-xs h-9 px-3 focus:ring-pine/30 focus:border-pine"
                 >
                   {invoices.map((inv) => (
                     <option key={inv.id} value={inv.id}>
@@ -127,23 +127,23 @@ export function RecordSubscriptionPaymentDialog({ invoices }: RecordSubscription
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Payment Amount (₹) *</label>
+                <label className="text-ink font-semibold">Payment Amount (₹) *</label>
                 <Input
                   required
                   type="number"
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Payment Channel</label>
+                <label className="text-ink font-semibold">Payment Channel</label>
                 <select
                   value={method}
                   onChange={(e) => setMethod(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md text-white text-xs h-9 px-3"
+                  className="w-full bg-white border border-line rounded-lg text-ink text-xs h-9 px-3 focus:ring-pine/30 focus:border-pine"
                 >
                   <option value="BANK_TRANSFER">Bank Wire / IMPS / NEFT</option>
                   <option value="UPI">UPI / QR Code</option>
@@ -154,41 +154,41 @@ export function RecordSubscriptionPaymentDialog({ invoices }: RecordSubscription
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Transaction / UTR Reference</label>
+                <label className="text-ink font-semibold">Transaction / UTR Reference</label>
                 <Input
                   placeholder="UTR number or gateway transaction ID"
                   value={gatewayRef}
                   onChange={(e) => setGatewayRef(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9 font-mono"
+                  className="bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Notes</label>
+                <label className="text-ink font-semibold">Notes</label>
                 <Input
                   placeholder="Payment verified by accounts team"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                 />
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-2 border-t border-line">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-muted hover:text-ink text-xs h-9 border-line"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                className="bg-pine hover:bg-pine/90 text-white text-xs font-semibold h-9"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Record Payment"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : "Record Payment"}
               </Button>
             </DialogFooter>
           </form>

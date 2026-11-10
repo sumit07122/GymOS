@@ -99,14 +99,18 @@ export function PortalScheduleTab({
   };
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="space-y-4 pb-6">
       {/* Sub-tab Switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+      <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-3">
         <Button
           size="sm"
           variant={activeSubTab === "schedule" ? "default" : "outline"}
           onClick={() => setActiveSubTab("schedule")}
-          className="text-xs h-8 gap-1.5"
+          className={`text-xs h-8 gap-1.5 ${
+            activeSubTab === "schedule"
+              ? "bg-[#0B6B4F] text-white hover:bg-[#047857]"
+              : "border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"
+          }`}
         >
           <Calendar className="h-3.5 w-3.5" />
           <span>Upcoming Classes ({classes.upcoming.length})</span>
@@ -115,7 +119,11 @@ export function PortalScheduleTab({
           size="sm"
           variant={activeSubTab === "bookings" ? "default" : "outline"}
           onClick={() => setActiveSubTab("bookings")}
-          className="text-xs h-8 gap-1.5"
+          className={`text-xs h-8 gap-1.5 ${
+            activeSubTab === "bookings"
+              ? "bg-[#0B6B4F] text-white hover:bg-[#047857]"
+              : "border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"
+          }`}
         >
           <CheckCircle2 className="h-3.5 w-3.5" />
           <span>My Bookings ({classes.myBookings.length})</span>
@@ -130,8 +138,8 @@ export function PortalScheduleTab({
       )}
 
       {actionSuccess && (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+        <div className="flex items-center gap-2 rounded-xl bg-[#E4F2EB] border border-[#A7F3D0] p-3 text-xs text-[#064E3B]">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-[#0B6B4F]" />
           <span>{actionSuccess}</span>
         </div>
       )}
@@ -148,35 +156,35 @@ export function PortalScheduleTab({
               return (
                 <div
                   key={cls.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm hover:border-indigo-200 transition-all"
+                  className="rounded-xl border border-[#E2E8F0] bg-white p-4 sm:p-5 shadow-xs hover:border-[#0B6B4F] transition-all"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-slate-900">
+                        <h3 className="text-base font-bold text-[#0F172A]">
                           {cls.className}
                         </h3>
                         {cls.isBooked && (
-                          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
+                          <Badge className="bg-[#E4F2EB] text-[#0B6B4F] border-[#A7F3D0] text-[10px]">
                             Booked
                           </Badge>
                         )}
                         {isFull && !cls.isBooked && (
-                          <Badge variant="outline" className="text-slate-400 text-[10px]">
+                          <Badge variant="outline" className="text-[#94A3B8] border-[#E2E8F0] text-[10px]">
                             Class Full
                           </Badge>
                         )}
                       </div>
 
                       {cls.description && (
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                        <p className="text-xs text-[#64748B] mt-1 line-clamp-2">
                           {cls.description}
                         </p>
                       )}
 
-                      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-600">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-800">
-                          <Clock className="h-3.5 w-3.5 text-indigo-500" />
+                      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#64748B]">
+                        <div className="flex items-center gap-1.5 font-medium text-[#0F172A]">
+                          <Clock className="h-3.5 w-3.5 text-[#0B6B4F]" />
                           <span>
                             {new Date(cls.startTime).toLocaleDateString(
                               undefined,
@@ -197,20 +205,20 @@ export function PortalScheduleTab({
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <User className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1 text-[#64748B]">
+                          <User className="h-3.5 w-3.5 text-[#0B6B4F]" />
                           <span>{cls.instructorName}</span>
                         </div>
 
                         {cls.roomLocation && (
-                          <div className="flex items-center gap-1 text-slate-500">
-                            <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                          <div className="flex items-center gap-1 text-[#64748B]">
+                            <MapPin className="h-3.5 w-3.5 text-[#0B6B4F]" />
                             <span>{cls.roomLocation}</span>
                           </div>
                         )}
 
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <Users className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1 text-[#64748B]">
+                          <Users className="h-3.5 w-3.5 text-[#0B6B4F]" />
                           <span>
                             {cls.spotsRemaining} of {cls.capacity} spots open
                           </span>
@@ -231,7 +239,7 @@ export function PortalScheduleTab({
                             {isCancelling ? "Cancelling..." : "Cancel Booking"}
                           </Button>
                         ) : (
-                          <Badge className="bg-emerald-100 text-emerald-800 border-none">
+                          <Badge className="bg-[#E4F2EB] text-[#0B6B4F] border-[#A7F3D0]">
                             Confirmed
                           </Badge>
                         )
@@ -240,7 +248,7 @@ export function PortalScheduleTab({
                           size="sm"
                           onClick={() => handleBook(cls.id)}
                           disabled={isFull || isBooking}
-                          className="w-full sm:w-auto text-xs h-8 bg-indigo-600 hover:bg-indigo-700"
+                          className="w-full sm:w-auto text-xs h-8 bg-[#0B6B4F] hover:bg-[#047857] text-white"
                         >
                           {isBooking ? "Booking..." : isFull ? "Full" : "Book Spot"}
                         </Button>
@@ -251,8 +259,8 @@ export function PortalScheduleTab({
               );
             })
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-sm">
-              <Calendar className="mx-auto h-8 w-8 text-slate-300 mb-2" />
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 text-center text-xs text-[#64748B] shadow-xs">
+              <Calendar className="mx-auto h-8 w-8 text-[#94A3B8] mb-2" />
               <span>No upcoming classes currently scheduled for this gym.</span>
             </div>
           )}
@@ -268,30 +276,30 @@ export function PortalScheduleTab({
               return (
                 <div
                   key={bk.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                  className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-slate-900">
+                      <h4 className="text-sm font-bold text-[#0F172A]">
                         {bk.className}
                       </h4>
                       <Badge
                         variant="outline"
                         className={`text-[10px] ${
                           bk.status === "CONFIRMED"
-                            ? "border-emerald-300 text-emerald-700 bg-emerald-50"
+                            ? "border-[#A7F3D0] text-[#0B6B4F] bg-[#E4F2EB]"
                             : bk.status === "CANCELLED"
-                            ? "border-slate-200 text-slate-400"
-                            : "border-indigo-200 text-indigo-700"
+                            ? "border-[#E2E8F0] text-[#94A3B8]"
+                            : "border-[#A7F3D0] text-[#0B6B4F]"
                         }`}
                       >
                         {bk.status}
                       </Badge>
                     </div>
 
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                      <span className="flex items-center gap-1 font-medium text-slate-700">
-                        <Clock className="h-3 w-3" />
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#64748B]">
+                      <span className="flex items-center gap-1 font-medium text-[#0F172A]">
+                        <Clock className="h-3 w-3 text-[#0B6B4F]" />
                         {new Date(bk.startTime).toLocaleDateString(undefined, {
                           weekday: "short",
                           month: "short",
@@ -324,8 +332,8 @@ export function PortalScheduleTab({
               );
             })
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500 shadow-sm">
-              <CheckCircle2 className="mx-auto h-8 w-8 text-slate-300 mb-2" />
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 text-center text-xs text-[#64748B] shadow-xs">
+              <CheckCircle2 className="mx-auto h-8 w-8 text-[#94A3B8] mb-2" />
               <span>You have no active class bookings. Browse the schedule to book a spot!</span>
             </div>
           )}

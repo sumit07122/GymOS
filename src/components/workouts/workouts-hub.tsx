@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Dumbbell, ClipboardList, TrendingUp } from "lucide-react";
 import { WorkoutOverviewCards } from "./workout-overview-cards";
 import { ExerciseLibraryTable } from "./exercise-library-table";
@@ -13,6 +12,7 @@ import { AssignPlanModal } from "./assign-plan-modal";
 import { MemberFitnessModal } from "./member-fitness-modal";
 import { PlanWithEntries } from "@/lib/services/workout.service";
 import { Exercise } from "@prisma/client";
+import { PageHeader } from "@/components/design-system/page-header";
 
 interface WorkoutsHubProps {
   exercises: Exercise[];
@@ -52,44 +52,44 @@ export function WorkoutsHub({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Workouts & Fitness</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Maintain custom training routines, exercise movements, and track member body progress.
-          </p>
-        </div>
-        {canManage && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs h-8"
-              onClick={() => setFitnessModalOpen(true)}
-            >
-              <TrendingUp className="h-3.5 w-3.5 mr-1" />
-              Log Member Progress
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs h-8"
-              onClick={() => setExerciseModalOpen(true)}
-            >
-              <Dumbbell className="h-3.5 w-3.5 mr-1" />
-              New Movement
-            </Button>
-            <Button
-              size="sm"
-              className="text-xs h-8 bg-indigo-600 hover:bg-indigo-700"
-              onClick={() => setPlanModalOpen(true)}
-            >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Build Routine
-            </Button>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Workouts & Fitness"
+        description="Maintain custom training routines, exercise movements, and track member body progress."
+        actions={
+          canManage && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-9 border-line bg-white hover:bg-canvas text-ink rounded-lg shadow-xs"
+                onClick={() => setFitnessModalOpen(true)}
+              >
+                <TrendingUp className="h-3.5 w-3.5 text-pine mr-1" />
+                <span>Log Member Progress</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-9 border-line bg-white hover:bg-canvas text-ink rounded-lg shadow-xs"
+                onClick={() => setExerciseModalOpen(true)}
+              >
+                <Dumbbell className="h-3.5 w-3.5 text-pine mr-1" />
+                <span>New Movement</span>
+              </Button>
+
+              <Button
+                size="sm"
+                className="text-xs h-9 bg-pine hover:bg-pine/90 text-white rounded-lg shadow-xs transition"
+                onClick={() => setPlanModalOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                <span>Build Routine</span>
+              </Button>
+            </div>
+          )
+        }
+      />
 
       {/* Overview Cards */}
       <WorkoutOverviewCards
@@ -100,106 +100,114 @@ export function WorkoutsHub({
       />
 
       {/* Tabs navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <Button
-          variant={activeTab === "plans" ? "default" : "ghost"}
-          size="sm"
+      <div className="flex border-b border-line text-xs font-semibold">
+        <button
+          type="button"
           onClick={() => setActiveTab("plans")}
-          className={`text-xs gap-1.5 ${
-            activeTab === "plans" ? "bg-slate-900 text-white" : "text-slate-600"
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
+            activeTab === "plans"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <ClipboardList className="h-3.5 w-3.5" />
-          Training Routines ({plans.length})
-        </Button>
+          <ClipboardList className="h-4 w-4" />
+          <span>Training Routines ({plans.length})</span>
+        </button>
 
-        <Button
-          variant={activeTab === "library" ? "default" : "ghost"}
-          size="sm"
+        <button
+          type="button"
           onClick={() => setActiveTab("library")}
-          className={`text-xs gap-1.5 ${
-            activeTab === "library" ? "bg-slate-900 text-white" : "text-slate-600"
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
+            activeTab === "library"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <Dumbbell className="h-3.5 w-3.5" />
-          Exercise Library ({exercises.length})
-        </Button>
+          <Dumbbell className="h-4 w-4" />
+          <span>Exercise Library ({exercises.length})</span>
+        </button>
       </div>
 
       {/* Tab content */}
       {activeTab === "plans" && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-slate-700">
+        <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-line">
+            <h3 className="text-xs font-bold text-ink uppercase tracking-wider">
               Configured Workout Routines
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
+            </h3>
+          </div>
+          <div className="p-4">
             <WorkoutPlanList
               plans={plans}
               onAssign={handleAssign}
               canManage={canManage}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {activeTab === "library" && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-slate-700">
+        <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-line flex flex-row items-center justify-between">
+            <h3 className="text-xs font-bold text-ink uppercase tracking-wider">
               Exercise Library
-            </CardTitle>
+            </h3>
             {canManage && (
               <Button
                 size="sm"
                 variant="outline"
-                className="text-xs h-7"
+                className="text-xs h-8 border-line hover:bg-canvas rounded-lg"
                 onClick={() => setExerciseModalOpen(true)}
               >
                 + Add Movement
               </Button>
             )}
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <ExerciseLibraryTable exercises={exercises} />
-          </CardContent>
-        </Card>
+          </div>
+          <div className="p-0">
+            <ExerciseLibraryTable
+              exercises={exercises}
+            />
+          </div>
+        </div>
       )}
 
       {/* Modals */}
       <ExerciseModal
         open={exerciseModalOpen}
+        onClose={() => setExerciseModalOpen(false)}
         gymId={gymId}
         gymSlug={gymSlug}
-        onClose={() => setExerciseModalOpen(false)}
       />
 
       <WorkoutPlanModal
         open={planModalOpen}
+        onClose={() => setPlanModalOpen(false)}
         exercises={exercises}
         gymId={gymId}
         gymSlug={gymSlug}
-        onClose={() => setPlanModalOpen(false)}
       />
 
-      <AssignPlanModal
-        open={assignModalOpen}
-        plan={selectedPlanToAssign}
-        members={members}
-        gymId={gymId}
-        gymSlug={gymSlug}
-        onClose={() => setAssignModalOpen(false)}
-      />
+      {selectedPlanToAssign && (
+        <AssignPlanModal
+          open={assignModalOpen}
+          onClose={() => {
+            setAssignModalOpen(false);
+            setSelectedPlanToAssign(null);
+          }}
+          plan={selectedPlanToAssign}
+          members={members}
+          gymId={gymId}
+          gymSlug={gymSlug}
+        />
+      )}
 
       <MemberFitnessModal
         open={fitnessModalOpen}
+        onClose={() => setFitnessModalOpen(false)}
         members={members}
         gymId={gymId}
         gymSlug={gymSlug}
-        onClose={() => setFitnessModalOpen(false)}
       />
     </div>
   );
 }
-

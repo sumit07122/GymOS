@@ -17,7 +17,7 @@ interface WebsitePlansProps {
     price: number;
     admissionFee: number;
     benefits: string[];
-    accessRestrictions: string[];
+    accessRestrictions?: string[] | null;
   }>;
   primaryColor: string;
   onSelectPlan?: (planId: string) => void;
@@ -125,7 +125,7 @@ export function WebsitePlans({
                     </div>
 
                     {/* Restrictions if any */}
-                    {plan.accessRestrictions.length > 0 && (
+                    {plan.accessRestrictions && plan.accessRestrictions.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-slate-800/80">
                         {plan.accessRestrictions.map((res, rIdx) => (
                           <div key={rIdx} className="text-[11px] text-slate-400 flex items-center gap-1.5">

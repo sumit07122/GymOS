@@ -1,4 +1,7 @@
+import fs from "fs";
+import path from "path";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Users,
   QrCode,
@@ -12,7 +15,6 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { Photo } from "@/components/ui";
 
 const feats = [
   {
@@ -54,10 +56,13 @@ const feats = [
 ];
 
 export default function Home() {
+  const heroPhotoPath = path.join(process.cwd(), "public", "photos", "hero.jpg");
+  const heroPhotoExists = fs.existsSync(heroPhotoPath);
+
   return (
-    <div className="bg-white text-ink min-h-screen flex flex-col font-sans selection:bg-pine-soft selection:text-pine">
+    <div className="bg-canvas text-ink min-h-screen flex flex-col font-sans selection:bg-pine-soft selection:text-pine">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
@@ -66,17 +71,38 @@ export default function Home() {
             </div>
           </Link>
 
-          <nav className="hidden gap-8 text-sm text-muted sm:flex font-medium">
-            <a href="#features" className="hover:text-ink transition">Features</a>
-            <a href="#portals" className="hover:text-ink transition">Portals</a>
-            <a href="#members" className="hover:text-ink transition">Member App</a>
-            <a href="#security" className="hover:text-ink transition">Zero-Trust</a>
+          {/* Nav links with readable contrast (WCAG AA >= 4.5:1) */}
+          <nav className="hidden gap-1 text-sm text-[#475569] sm:flex font-medium items-center">
+            <a
+              href="#features"
+              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#portals"
+              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
+            >
+              Portals
+            </a>
+            <a
+              href="#members"
+              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
+            >
+              Member App
+            </a>
+            <a
+              href="#security"
+              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
+            >
+              Zero-Trust
+            </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link
               href="/platform-admin/login"
-              className="hidden lg:flex items-center gap-1.5 text-xs text-muted hover:text-ink font-medium px-2.5 py-1.5 rounded-lg transition"
+              className="hidden lg:flex items-center gap-1.5 text-xs text-[#334155] hover:text-ink hover:bg-black/[0.04] font-medium px-3 py-1.5 rounded-[10px] border border-line transition-colors"
             >
               <ShieldCheck className="size-3.5 text-pine" />
               <span>Platform Admin</span>
@@ -84,14 +110,14 @@ export default function Home() {
 
             <Link
               href="/register"
-              className="text-xs text-muted hover:text-ink font-medium px-3 py-1.5 rounded-lg border border-line hover:bg-canvas transition"
+              className="hidden sm:inline-flex text-xs text-ink hover:bg-black/[0.04] font-semibold px-3.5 py-1.5 rounded-[10px] border border-line bg-white transition-colors"
             >
               <span>Register Gym</span>
             </Link>
 
             <Link
               href="/login"
-              className="rounded-xl bg-pine hover:bg-pine-deep text-white px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.99] flex items-center gap-1.5"
+              className="rounded-[10px] bg-pine hover:bg-pine-deep text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 active:scale-[0.99]"
             >
               <Lock className="size-3.5" />
               <span>Sign In</span>
@@ -102,26 +128,26 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 lg:grid-cols-[1.1fr_1fr] lg:pt-20">
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 lg:grid-cols-[1.1fr_1fr] lg:pt-16 lg:pb-20">
           <div>
-            <div className="rise inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pine-soft text-pine text-xs font-semibold mb-6">
-              <Sparkles className="size-3.5" />
-              <span>The Complete Operating System for Gyms & Fitness Businesses</span>
+            <div className="rise inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pine-soft text-pine text-[11px] sm:text-xs font-semibold mb-6 border border-pine/20 max-w-full">
+              <Sparkles className="size-3.5 text-pine shrink-0" />
+              <span className="truncate">The Complete Operating System for Gyms & Fitness Businesses</span>
             </div>
 
-            <h1 className="rise text-4xl sm:text-6xl font-semibold leading-[1.05] tracking-tight">
+            <h1 className="rise text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-ink font-display">
               Run your gym without the spreadsheets.
             </h1>
 
-            <p className="rise mt-6 max-w-lg text-base sm:text-lg text-muted leading-relaxed" style={{ animationDelay: ".12s" }}>
+            <p className="rise mt-5 max-w-lg text-base sm:text-lg text-muted leading-relaxed font-normal" style={{ animationDelay: ".12s" }}>
               Members, attendance, payments and renewals in one calm, dense workspace.
               Set up, hosted and supported directly by FIXIA.
             </p>
 
-            <div className="rise mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: ".24s" }}>
+            <div className="rise mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: ".24s" }}>
               <Link
                 href="/login"
-                className="rounded-xl bg-pine px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-pine-deep transition-all active:scale-[0.99] flex items-center gap-2"
+                className="rounded-[10px] bg-pine px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-pine-deep transition-colors flex items-center gap-2 active:scale-[0.99]"
               >
                 <span>Access your gym</span>
                 <ArrowRight className="size-4" />
@@ -129,38 +155,86 @@ export default function Home() {
 
               <Link
                 href="/register"
-                className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-canvas transition"
+                className="rounded-[10px] border border-line bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-canvas transition-colors shadow-xs"
               >
                 Onboarding Policy
               </Link>
             </div>
+
+            {/* Quick Proof Pills */}
+            <div className="rise mt-8 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted" style={{ animationDelay: ".3s" }}>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-pine shrink-0" />
+                <span className="font-medium text-ink">Strict PostgreSQL RLS</span>
+              </div>
+              <span className="text-line hidden sm:inline">•</span>
+              <div className="flex items-center gap-1.5">
+                <QrCode className="size-4 text-pine shrink-0" />
+                <span className="font-medium text-ink">Anti-Passback QR</span>
+              </div>
+              <span className="text-line hidden sm:inline">•</span>
+              <div className="flex items-center gap-1.5">
+                <Building2 className="size-4 text-pine shrink-0" />
+                <span className="font-medium text-ink">Zero Public Self-Signup</span>
+              </div>
+            </div>
           </div>
 
-          <div className="rise relative" style={{ animationDelay: ".2s" }}>
-            <Photo src="/photos/hero.jpg" className="aspect-[4/5] rounded-[24px] sm:aspect-[5/5] shadow-lg" />
-            
-            {/* Live Stats Floating Cards */}
-            <div className="absolute -bottom-6 -left-4 w-[82%] rounded-2xl border border-line bg-white p-4 shadow-xl sm:-left-8">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted font-medium">Check-ins today</span>
-                <span className="num font-display text-2xl font-bold text-pine">86</span>
-              </div>
-              <svg viewBox="0 0 200 50" className="mt-2 w-full" aria-hidden>
-                <path
-                  className="draw"
-                  pathLength={1}
-                  d="M0 40 C20 38 30 18 50 22 S80 44 100 30 S130 6 150 14 S185 26 200 8"
-                  fill="none"
-                  stroke="#0B6B4F"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+          {/* Hero Preview Box — Single outer container, thin 1px border, 28px radius, no heavy shadows */}
+          <div className="rise mt-4 lg:mt-0" style={{ animationDelay: ".2s" }}>
+            <div className="relative rounded-[28px] border border-line bg-white overflow-hidden shadow-xs">
+              {/* Photo Slot */}
+              <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full bg-gradient-to-br from-[#0B4A38] via-[#083327] to-[#041E16] overflow-hidden">
+                {heroPhotoExists ? (
+                  <Image
+                    src="/photos/hero.jpg"
+                    alt="FIXIA GymOS Training Floor"
+                    fill
+                    priority
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0B4A38] via-[#083327] to-[#041E16]" />
+                )}
 
-            <div className="absolute -right-3 top-8 rounded-full bg-white border border-line px-4 py-1.5 text-xs font-semibold shadow-md flex items-center gap-2">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Renewal paid &bull; Meera J.</span>
+                {/* Dark gradient overlay for legibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111613]/85 via-[#111613]/30 to-black/20 pointer-events-none" />
+
+                {/* Existing Chips on Top */}
+                <div className="absolute top-3 sm:top-4 left-3 sm:left-4 inline-flex items-center gap-1.5 sm:gap-2 rounded-[10px] bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white border border-white/15">
+                  <span className="size-1.5 sm:size-2 rounded-full bg-[#7FD6B2] animate-pulse" />
+                  <span>Floor & Turnstile Zone</span>
+                </div>
+
+                <div className="absolute top-3 sm:top-4 right-3 sm:right-4 inline-flex items-center gap-1 sm:gap-1.5 rounded-[10px] bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white border border-white/15">
+                  <QrCode className="size-3 sm:size-3.5 text-[#7FD6B2]" />
+                  <span>60s Dynamic Pass</span>
+                </div>
+              </div>
+
+              {/* Integrated Bottom Info Row (One container, no nested inner card) */}
+              <div className="border-t border-line p-5 sm:p-6 bg-white grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <div>
+                  <p className="text-[13px] font-medium text-muted">Check-ins today</p>
+                  <div className="mt-1 flex items-baseline gap-2.5">
+                    <span className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tight num">
+                      86
+                    </span>
+                    <span className="inline-flex items-center text-xs font-semibold text-pine bg-pine-soft px-2 py-0.5 rounded-full border border-pine/20">
+                      +14% vs avg
+                    </span>
+                  </div>
+                </div>
+
+                <div className="sm:border-l sm:border-line sm:pl-5">
+                  <p className="text-[13px] font-medium text-muted">Latest activity</p>
+                  <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-ink">
+                    <span className="size-2 rounded-full bg-pine shrink-0" />
+                    <span className="truncate">Renewal paid · Meera J.</span>
+                  </div>
+                  <p className="text-xs text-muted mt-0.5">Annual Pro · GST invoice issued</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -170,76 +244,78 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-5">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-pine">
-                  Segregated Access Realms
+                <span className="text-xs font-semibold text-pine">
+                  Segregated access realms
                 </span>
-                <h2 className="text-3xl font-semibold mt-1">Platform Portals & Workspaces</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-ink mt-1 font-display">
+                  Platform Portals & Workspaces
+                </h2>
               </div>
-              <p className="text-xs text-muted max-w-md">
+              <p className="text-sm text-muted max-w-md leading-relaxed">
                 Three isolated realms ensuring members, gym owners, and platform administrators access strictly authorized datasets.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition">
+              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
                 <div>
-                  <div className="size-9 rounded-lg bg-pine-soft text-pine flex items-center justify-center font-bold mb-3">
+                  <div className="size-10 rounded-[10px] bg-pine-soft text-pine flex items-center justify-center font-bold mb-3.5 border border-pine/20">
                     <Building2 className="size-5" />
                   </div>
-                  <h3 className="text-base font-semibold">Gym Owner Portal</h3>
-                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                  <h3 className="text-base font-bold text-ink font-display">Gym Owner Portal</h3>
+                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
                     Member KYC, cash ledgers, attendance records, staff controls, and P&L analytics.
                   </p>
                 </div>
-                <Link href="/login" className="mt-5 text-xs font-semibold text-pine hover:text-pine-deep inline-flex items-center gap-1">
+                <Link href="/login" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
                   <span>Sign In as Owner</span>
                   <ArrowRight className="size-3" />
                 </Link>
               </div>
 
-              <div className="rounded-xl border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition">
+              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
                 <div>
-                  <div className="size-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center font-bold mb-3">
+                  <div className="size-10 rounded-[10px] bg-teal-50 text-teal-700 flex items-center justify-center font-bold mb-3.5 border border-teal-200">
                     <Smartphone className="size-5" />
                   </div>
-                  <h3 className="text-base font-semibold">Member Pass App</h3>
-                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                  <h3 className="text-base font-bold text-ink font-display">Member Pass App</h3>
+                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
                     Dynamic HMAC-SHA256 QR code, workout routines, progress metrics, and receipts.
                   </p>
                 </div>
-                <Link href="/login?gym=spartan-athletics" className="mt-5 text-xs font-semibold text-pine hover:text-pine-deep inline-flex items-center gap-1">
+                <Link href="/login?gym=spartan-athletics" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
                   <span>Access Member Pass</span>
                   <ArrowRight className="size-3" />
                 </Link>
               </div>
 
-              <div className="rounded-xl border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition">
+              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
                 <div>
-                  <div className="size-9 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center font-bold mb-3">
+                  <div className="size-10 rounded-[10px] bg-sky-50 text-sky-700 flex items-center justify-center font-bold mb-3.5 border border-sky-200">
                     <Building2 className="size-5" />
                   </div>
-                  <h3 className="text-base font-semibold">Branded Gym Website</h3>
-                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                  <h3 className="text-base font-bold text-ink font-display">Branded Gym Website</h3>
+                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
                     Public gym microsite with brand accent, facilities, schedules, and WhatsApp enquiry.
                   </p>
                 </div>
-                <Link href="/g/spartan-athletics" className="mt-5 text-xs font-semibold text-pine hover:text-pine-deep inline-flex items-center gap-1">
+                <Link href="/g/spartan-athletics" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
                   <span>View Sample Gym Site</span>
                   <ArrowRight className="size-3" />
                 </Link>
               </div>
 
-              <div className="rounded-xl border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition">
+              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
                 <div>
-                  <div className="size-9 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center font-bold mb-3">
+                  <div className="size-10 rounded-[10px] bg-purple-50 text-purple-700 flex items-center justify-center font-bold mb-3.5 border border-purple-200">
                     <ShieldCheck className="size-5" />
                   </div>
-                  <h3 className="text-base font-semibold">Platform Admin</h3>
-                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                  <h3 className="text-base font-bold text-ink font-display">Platform Admin</h3>
+                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
                     Restricted super admin suite for tenant onboarding, quota tracking, and audit logs.
                   </p>
                 </div>
-                <Link href="/platform-admin/login" className="mt-5 text-xs font-semibold text-pine hover:text-pine-deep inline-flex items-center gap-1">
+                <Link href="/platform-admin/login" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
                   <span>Super Admin Gateway</span>
                   <ArrowRight className="size-3" />
                 </Link>
@@ -248,14 +324,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6 Core Operational Modules */}
-        <section id="features" className="py-24">
+        {/* 6 Core Operational Modules (Feature Grid with Varied Card Sizes) */}
+        <section id="features" className="py-24 bg-white border-t border-line">
           <div className="mx-auto max-w-6xl px-5">
             <div className="text-center max-w-xl mx-auto mb-14">
-              <span className="text-xs font-bold uppercase tracking-wider text-pine">
-                Dense Professional Suite
+              <span className="text-xs font-semibold text-pine">
+                Dense professional suite
               </span>
-              <h2 className="text-3xl sm:text-4xl font-semibold mt-1">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink mt-1.5 font-display">
                 Everything the front desk does, in one tool.
               </h2>
             </div>
@@ -264,13 +340,13 @@ export default function Home() {
               {feats.map((f) => (
                 <div
                   key={f.t}
-                  className={`rounded-2xl border border-line bg-white p-7 transition hover:-translate-y-0.5 shadow-xs ${f.span}`}
+                  className={`rounded-[16px] border border-line bg-white p-7 transition-colors hover:border-slate-300 shadow-xs ${f.span}`}
                 >
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-pine-soft text-pine">
+                  <span className="grid h-10 w-10 place-items-center rounded-[10px] bg-pine-soft text-pine border border-pine/20">
                     <f.i size={19} />
                   </span>
-                  <h3 className="mt-5 text-lg font-semibold">{f.t}</h3>
-                  <p className="mt-2 text-[14px] text-muted leading-relaxed">{f.d}</p>
+                  <h3 className="mt-5 text-lg font-bold text-ink font-display">{f.t}</h3>
+                  <p className="mt-2 text-[14px] text-muted leading-relaxed font-normal">{f.d}</p>
                 </div>
               ))}
             </div>
@@ -280,33 +356,42 @@ export default function Home() {
         {/* Mobile Member App Showcase */}
         <section id="members" className="border-t border-line bg-canvas py-24">
           <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 lg:grid-cols-2">
-            <div className="mx-auto w-64 rounded-[36px] border-[6px] border-ink bg-pine-deep p-5 text-white shadow-2xl">
-              <p className="text-xs text-white/60">Welcome back</p>
-              <p className="font-display text-xl font-bold">Aarav</p>
-              <div className="mt-5 rounded-2xl bg-white/10 p-4">
-                <p className="text-xs text-white/60">Quarterly plan</p>
-                <p className="num font-display text-3xl font-bold">23 days left</p>
+            {/* Elegant Device Phone Mockup */}
+            <div className="mx-auto w-68 rounded-[28px] border-[6px] border-ink bg-pine-deep p-5 text-white shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] text-white/70 font-medium">Welcome back</p>
+                  <p className="font-display text-xl font-bold tracking-tight text-white">Aarav</p>
+                </div>
+                <div className="size-2 rounded-full bg-[#7FD6B2] animate-pulse" />
               </div>
-              <div className="mx-auto mt-5 grid h-28 w-28 place-items-center rounded-2xl bg-white text-ink shadow-inner">
-                <QrCode size={64} />
+
+              <div className="mt-4 rounded-[16px] bg-white/10 backdrop-blur-md p-3.5 border border-white/10">
+                <p className="text-[11px] text-white/80 uppercase tracking-wider font-semibold">Quarterly plan</p>
+                <p className="num font-display text-2xl font-bold text-[#A7F3D0] mt-0.5">23 days left</p>
               </div>
-              <p className="mt-3 text-center text-xs text-white/60">Show at the door</p>
+
+              {/* Framed QR Box */}
+              <div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[16px] bg-white text-ink p-2 shadow-inner border-2 border-dashed border-pine/30">
+                <QrCode size={76} />
+              </div>
+              <p className="mt-3 text-center text-[11px] text-white/70 font-medium">Show at the door · 60s HMAC</p>
             </div>
 
             <div>
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-pine-soft text-pine">
+              <span className="grid h-10 w-10 place-items-center rounded-[10px] bg-pine-soft text-pine border border-pine/20">
                 <Smartphone size={19} />
               </span>
-              <h2 className="mt-4 text-3xl sm:text-4xl font-semibold">
+              <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink font-display">
                 A member app that opens from the home screen.
               </h2>
-              <p className="mt-4 max-w-md text-base text-muted leading-relaxed">
+              <p className="mt-4 max-w-md text-base text-muted leading-relaxed font-normal">
                 Members check in with an anti-passback QR code, view their plan and follow customized routines. No app store download needed.
               </p>
               <div className="mt-6">
                 <Link
                   href="/login?gym=spartan-athletics"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-pine hover:text-pine-deep"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-pine hover:text-pine-deep"
                 >
                   <span>Launch Digital Member Demo</span>
                   <ArrowRight className="size-4" />
@@ -316,12 +401,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Zero-Trust Security Section (Dark Promotional per Rule 6) */}
-        <section id="security" className="mx-auto max-w-6xl px-5 py-24">
-          <div className="grid gap-8 rounded-[28px] bg-pine-deep p-10 text-white md:grid-cols-[1fr_1.2fr] md:p-14 shadow-xl">
+        {/* Zero-Trust Security Section (Calm Dark Promotional Surface) */}
+        <section id="security" className="mx-auto max-w-6xl px-5 py-20">
+          <div className="grid gap-8 rounded-[28px] bg-pine-deep p-10 text-white md:grid-cols-[1fr_1.2fr] md:p-14 shadow-md">
             <div>
               <ShieldCheck className="text-[#7FD6B2] size-8" />
-              <h2 className="mt-4 text-3xl sm:text-4xl font-semibold">Your gym&apos;s data stays yours.</h2>
+              <h2 className="mt-4 text-3xl sm:text-4xl font-bold font-display">Your gym&apos;s data stays yours.</h2>
               <p className="mt-4 text-sm text-white/70 leading-relaxed max-w-sm">
                 Built from the ground up on PostgreSQL Row-Level Security and strict session isolation.
               </p>
@@ -341,6 +426,37 @@ export default function Home() {
             </ul>
           </div>
         </section>
+
+        {/* Closing CTA Section */}
+        <section className="mx-auto max-w-6xl px-5 pb-20">
+          <div className="rounded-[28px] border border-line bg-white p-8 sm:p-14 text-center shadow-xs">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pine bg-pine-soft px-3 py-1 rounded-full border border-pine/20 mb-4">
+              <Sparkles className="size-3.5" />
+              <span>Get started with FIXIA GymOS</span>
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink font-display max-w-2xl mx-auto">
+              Run your facility with zero spreadsheets.
+            </h2>
+            <p className="mt-4 text-base text-muted max-w-lg mx-auto leading-relaxed">
+              Provisioned and supported directly by FIXIA platform architects. Sign in to your authorized gym workspace.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/login"
+                className="rounded-[10px] bg-pine px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-pine-deep transition-colors flex items-center gap-2"
+              >
+                <span>Sign in to your gym</span>
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-[10px] border border-line bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-canvas transition-colors shadow-xs"
+              >
+                Review onboarding policy
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
@@ -353,11 +469,11 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            <Link href="/login" className="hover:text-ink transition">Portal Login</Link>
+            <Link href="/login" className="hover:text-ink transition-colors">Portal Login</Link>
             <span>&bull;</span>
-            <Link href="/register" className="hover:text-ink transition">Onboarding Policy</Link>
+            <Link href="/register" className="hover:text-ink transition-colors">Onboarding Policy</Link>
             <span>&bull;</span>
-            <Link href="/platform-admin/login" className="hover:text-ink transition">Super Admin</Link>
+            <Link href="/platform-admin/login" className="hover:text-ink transition-colors">Super Admin</Link>
           </div>
         </div>
       </footer>

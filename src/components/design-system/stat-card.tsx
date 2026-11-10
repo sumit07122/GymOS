@@ -42,7 +42,7 @@ export function StatCard({
       onClick={onClick}
       role={isClickable ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      className={`relative overflow-hidden rounded-xl border border-[#E3E7E4] bg-white p-4 sm:p-5 shadow-xs transition-all ${
+      className={`relative overflow-hidden rounded-[16px] border border-[#E3E7E4] bg-white p-4 sm:p-5 shadow-xs transition-all ${
         isClickable
           ? "cursor-pointer hover:border-[#0B6B4F]/40 hover:shadow-sm"
           : ""
@@ -53,14 +53,14 @@ export function StatCard({
           {label}
         </p>
         {Icon && (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E4F2EB] text-[#0B6B4F]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#E4F2EB] text-[#0B6B4F]">
             <Icon className="h-4 w-4" />
           </div>
         )}
       </div>
 
       <div className="mt-2.5 flex items-baseline gap-2">
-        <span className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A] num">
+        <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#111613] tabular-nums">
           {value}
         </span>
       </div>
@@ -93,7 +93,7 @@ export function StatCard({
         </div>
       )}
 
-      {subtext && !trend && (
+      {subtext && (
         <p className="mt-2 text-xs text-[#64748B] truncate">{subtext}</p>
       )}
 

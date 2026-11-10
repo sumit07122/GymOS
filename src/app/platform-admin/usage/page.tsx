@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/auth/guards";
-import { Activity, ExternalLink, AlertTriangle } from "lucide-react";
+import { ExternalLink, AlertTriangle, Users, Calendar, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -12,6 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
 
 export default async function PlatformAdminUsagePage() {
   await requireSuperAdmin("/platform-admin/usage");
@@ -38,116 +40,157 @@ export default async function PlatformAdminUsagePage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const totalMembers = gyms.reduce((acc, g) => acc + g.members.length, 0);
+  const totalClasses = gyms.reduce((acc, g) => acc + g.classes.length, 0);
+  const totalWhatsApp = gyms.reduce((acc, g) => acc + g.whatsAppNotifications.length, 0);
+
+  const overQuotaCount = gyms.filter((g) => {
+    const max = g.subscription?.maxMembersOverride ?? g.subscription?.plan?.maxMembers;
+    if (max == null || max === -1) return false;
+    return g.members.length > max;
+  }).length;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-            <Activity className="h-6 w-6 text-indigo-400" />
-            <span>Platform Usage & Quota Consumption</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time tracking of active members, scheduled classes, and messaging volume per tenant.
-          </p>
-        </div>
+      {/* Header */}
+      <PageHeader
+        title="Platform Usage & Quota Consumption"
+        description="Real-time supervision of active members, scheduled classes, and automated WhatsApp notification consumption across all gym instances."
+        breadcrumbs={[
+          { label: "Overview", href: "/platform-admin" },
+          { label: "Usage" },
+        ]}
+      />
+
+      {/* KPI Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Active Platform Members"
+          value={totalMembers.toLocaleString()}
+          icon={Users}
+          subtext="Enrolled across all gyms"
+        />
+        <StatCard
+          label="Scheduled Classes"
+          value={totalClasses}
+          icon={Calendar}
+          subtext="Group training sessions"
+        />
+        <StatCard
+          label="WhatsApp Messages"
+          value={totalWhatsApp}
+          icon={MessageSquare}
+          subtext="Dispatched alerts"
+        />
+        <StatCard
+          label="Over-Quota Workspaces"
+          value={overQuotaCount}
+          icon={AlertTriangle}
+          trend={overQuotaCount > 0 ? { value: "Exceeding limit", isPositive: false } : undefined}
+          subtext="Review license tiers"
+        />
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 shadow-lg overflow-hidden">
+      {/* Usage Table */}
+      <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-slate-800">
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 text-xs font-semibold">Gym Tenant</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Tier Plan</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Active Members / Quota</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Scheduled Classes</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">WhatsApp Messages</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Capacity Status</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold text-right">Actions</TableHead>
+          <TableHeader className="bg-canvas border-b border-line">
+            <TableRow className="border-line hover:bg-transparent">
+              <TableHead className="text-muted text-xs font-semibold">Gym Workspace</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">SaaS Tier Plan</TableHead>
+              <TableHead className="text-muted text-xs font-semibold min-w-[220px]">
+                Member Quota Utilization
+              </TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Classes</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">WhatsApp Alerts</TableHead>
+              <TableHead className="text-muted text-xs font-semibold text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {gyms.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-xs text-slate-500">
-                  No gyms found on the platform.
+                <TableCell colSpan={6} className="h-32 text-center text-xs text-muted">
+                  No gym workspaces found.
                 </TableCell>
               </TableRow>
             ) : (
-              gyms.map((g) => {
-                const sub = g.subscription;
-                const activeCount = g.members.length;
-                const maxQuota = sub?.maxMembersOverride ?? sub?.plan.maxMembers ?? null;
-                const pct = maxQuota ? Math.round((activeCount / maxQuota) * 100) : 0;
-                const isNearLimit = maxQuota ? pct >= 90 : false;
-                const isOverLimit = maxQuota ? activeCount > maxQuota : false;
+              gyms.map((gym) => {
+                const sub = gym.subscription;
+                const max = sub?.maxMembersOverride ?? sub?.plan?.maxMembers;
+                const isUnlimited = max == null || max === -1;
+                const count = gym.members.length;
+                const pct = isUnlimited ? 0 : Math.round((count / (max || 1)) * 100);
+                const isOver = !isUnlimited && count > max;
 
                 return (
-                  <TableRow key={g.id} className="border-slate-800/60 hover:bg-slate-900/40">
-                    <TableCell className="font-medium text-xs text-white">
-                      <div className="font-bold">{g.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">/{g.slug}</div>
+                  <TableRow key={gym.id} className="border-line/60 hover:bg-canvas/50">
+                    <TableCell className="font-medium text-xs text-ink">
+                      <div className="font-bold">{gym.name}</div>
+                      <div className="text-[10px] text-muted font-mono">/{gym.slug}</div>
                     </TableCell>
+
                     <TableCell>
                       {sub?.plan ? (
-                        <Badge variant="outline" className="bg-indigo-950 text-indigo-300 border-indigo-800 text-[10px]">
+                        <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30 text-[10px] font-semibold">
                           {sub.plan.name}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-slate-500">None</span>
+                        <Badge variant="outline" className="text-[10px] text-muted border-dashed">
+                          No Plan
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">{activeCount}</span>
-                        <span className="text-slate-500">/</span>
-                        <span className="text-slate-400">{maxQuota ? maxQuota : "Unlimited"}</span>
-                        {maxQuota && (
-                          <span className="text-[10px] text-slate-500 font-mono">({pct}%)</span>
+
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-ink">
+                            {count} <span className="text-muted font-normal">/ {isUnlimited ? "∞" : max}</span>
+                          </span>
+                          <span
+                            className={`text-[11px] font-semibold ${
+                              isOver
+                                ? "text-rose-600 font-bold"
+                                : pct >= 80
+                                ? "text-amber-700"
+                                : "text-pine"
+                            }`}
+                          >
+                            {isUnlimited ? "Unlimited" : `${pct}%`}
+                          </span>
+                        </div>
+
+                        {!isUnlimited && (
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                isOver
+                                  ? "bg-rose-600"
+                                  : pct >= 80
+                                  ? "bg-amber-500"
+                                  : "bg-pine"
+                              }`}
+                              style={{ width: `${Math.min(pct, 100)}%` }}
+                            />
+                          </div>
                         )}
                       </div>
-                      {maxQuota && (
-                        <div className="w-28 bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              isOverLimit
-                                ? "bg-rose-500"
-                                : isNearLimit
-                                ? "bg-amber-400"
-                                : "bg-emerald-500"
-                            }`}
-                            style={{ width: `${Math.min(pct, 100)}%` }}
-                          />
-                        </div>
-                      )}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-300 font-bold">
-                      {g.classes.length}
+
+                    <TableCell className="text-xs text-ink font-semibold">
+                      {gym.classes.length}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-300 font-bold">
-                      {g.whatsAppNotifications.length}
+
+                    <TableCell className="text-xs text-ink font-semibold">
+                      {gym.whatsAppNotifications.length}
                     </TableCell>
-                    <TableCell>
-                      {isOverLimit ? (
-                        <Badge variant="outline" className="bg-rose-950 text-rose-300 border-rose-800 text-[10px] gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          <span>EXCEEDED QUOTA</span>
-                        </Badge>
-                      ) : isNearLimit ? (
-                        <Badge variant="outline" className="bg-amber-950 text-amber-300 border-amber-800 text-[10px]">
-                          NEAR LIMIT ({pct}%)
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-emerald-950 text-emerald-300 border-emerald-800 text-[10px]">
-                          HEALTHY
-                        </Badge>
-                      )}
-                    </TableCell>
+
                     <TableCell className="text-right">
                       <Link
-                        href={`/platform-admin/gyms/${g.id}`}
-                        className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+                        href={`/platform-admin/gyms/${gym.id}`}
+                        className="inline-flex items-center gap-1 text-xs text-pine font-semibold hover:underline"
                       >
-                        <span>Inspect</span>
+                        <span>Workspace</span>
                         <ExternalLink className="h-3 w-3" />
                       </Link>
                     </TableCell>

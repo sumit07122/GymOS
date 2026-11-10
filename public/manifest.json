@@ -5,8 +5,8 @@
   "description": "Commercial Fitness Business Operating System & Member Portal",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0B6B4F",
   "orientation": "portrait-primary",
   "icons": [
     {

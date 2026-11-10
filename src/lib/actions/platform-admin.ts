@@ -55,7 +55,11 @@ export async function updateGymAccountStatusAction(
       reason: parsed.reason,
     });
 
+    revalidatePath("/platform-admin");
+    revalidatePath(`/platform-admin/gyms/${gymId}`);
+    revalidatePath("/platform-admin/gyms");
     revalidatePath("/admin");
+    revalidatePath(`/platform-admin/gyms/${gymId}`);
     revalidatePath(`/admin/gyms/${gymId}`);
     revalidatePath("/admin/gyms");
 
@@ -83,6 +87,7 @@ export async function updateGymSupportNotesAction(
 
     await updateGymSupportNotes(session.user.id, gymId, parsed.notes);
 
+    revalidatePath(`/platform-admin/gyms/${gymId}`);
     revalidatePath(`/admin/gyms/${gymId}`);
 
     return { success: true };
@@ -102,6 +107,8 @@ export async function createSaasPlanAction(input: SaasPlanInput) {
 
     const result = await createSaasPlan(session.user.id, parsed);
 
+    revalidatePath("/platform-admin/plans");
+    revalidatePath("/platform-admin");
     revalidatePath("/admin/plans");
     revalidatePath("/admin");
 
@@ -153,6 +160,10 @@ export async function assignGymSubscriptionAction(
 
     const result = await assignGymSubscription(session.user.id, gymId, parsed);
 
+    revalidatePath(`/platform-admin/gyms/${gymId}`);
+    revalidatePath("/platform-admin/subscriptions");
+    revalidatePath("/platform-admin/gyms");
+    revalidatePath("/platform-admin");
     revalidatePath(`/admin/gyms/${gymId}`);
     revalidatePath("/admin/gyms");
     revalidatePath("/admin");

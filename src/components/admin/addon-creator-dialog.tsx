@@ -61,112 +61,112 @@ export function AddonCreatorDialog() {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs gap-1.5 shadow-md shadow-indigo-600/30"
+        className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 rounded-lg gap-1.5 shadow-xs transition"
       >
-        <PlusCircle className="h-4 w-4" />
+        <PlusCircle className="h-3.5 w-3.5" />
         <span>Create Add-on</span>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-md">
+        <DialogContent className="bg-white border-line text-ink sm:max-w-md rounded-xl shadow-xl">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle className="text-white text-base">New SaaS Add-on</DialogTitle>
-              <DialogDescription className="text-slate-400 text-xs">
+              <DialogTitle className="text-ink text-base font-bold">New SaaS Add-on</DialogTitle>
+              <DialogDescription className="text-muted text-xs">
                 Define a reusable tier add-on that gym subscriptions can purchase.
               </DialogDescription>
             </DialogHeader>
 
             {error && (
-              <div className="mt-3 rounded-lg bg-rose-950/50 border border-rose-800 p-2.5 text-xs text-rose-300">
+              <div className="mt-3 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700">
                 {error}
               </div>
             )}
 
             <div className="space-y-3 py-4 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Add-on Name *</label>
+                <label className="text-ink font-semibold">Add-on Name *</label>
                 <Input
                   required
                   placeholder="e.g. 5,000 WhatsApp Notification Pack"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Unique Code *</label>
+                <label className="text-ink font-semibold">Unique Code *</label>
                 <Input
                   required
                   placeholder="ADDON_WA_5K"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9 font-mono"
+                  className="bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Monthly Price (₹) *</label>
+                  <label className="text-ink font-semibold">Monthly Price (₹) *</label>
                   <Input
                     required
                     type="number"
                     value={formData.monthlyPrice}
                     onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })}
-                    className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                    className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Annual Price (₹) *</label>
+                  <label className="text-ink font-semibold">Annual Price (₹) *</label>
                   <Input
                     required
                     type="number"
                     value={formData.yearlyPrice}
                     onChange={(e) => setFormData({ ...formData, yearlyPrice: e.target.value })}
-                    className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                    className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Feature Entitlement Key *</label>
+                <label className="text-ink font-semibold">Feature Entitlement Key *</label>
                 <Input
                   required
                   placeholder="WHATSAPP_NOTIFICATIONS or CUSTOM_DOMAIN"
                   value={formData.featureKey}
                   onChange={(e) => setFormData({ ...formData, featureKey: e.target.value })}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9 font-mono"
+                  className="bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Description</label>
+                <label className="text-ink font-semibold">Description</label>
                 <Input
                   placeholder="Includes 5,000 automated transaction alerts per month"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
+                  className="bg-white border-line text-ink text-xs h-9 focus:ring-pine/30 focus:border-pine"
                 />
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-2 border-t border-line">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-muted hover:text-ink text-xs h-9 border-line"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                className="bg-pine hover:bg-pine/90 text-white text-xs font-semibold h-9"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Add-on"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : "Save Add-on"}
               </Button>
             </DialogFooter>
           </form>

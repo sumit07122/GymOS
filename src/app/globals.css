@@ -9,8 +9,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Geist Variable', var(--font-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Geist Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-heading: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
   --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
 
@@ -21,6 +21,8 @@
   --color-ink: #111613;
   --color-faint: #94A099;
   --color-line: #E3E7E4;
+  --color-muted: #5F6B65;
+  --color-muted-foreground: #5F6B65;
 
   --color-midnight: #0F172A;
   --color-midnight-navy: #1E293B;
@@ -51,8 +53,6 @@
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -86,8 +86,8 @@
   /* Secondary & Neutral Muted */
   --secondary: oklch(0.95 0.01 240);
   --secondary-foreground: oklch(0.25 0.03 260);
-  --muted: oklch(0.96 0.008 240);
-  --muted-foreground: oklch(0.48 0.02 250);
+  --muted: #E8EAE6;
+  --muted-foreground: #5F6B65;
 
   --accent: oklch(0.94 0.02 155);
   --accent-foreground: oklch(0.25 0.08 155);
@@ -147,14 +147,20 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *, *::before, *::after {
+    border-color: var(--color-line, #E3E7E4);
+    outline-color: var(--color-pine, #0B6B4F);
   }
-  body {
-    @apply bg-background text-foreground;
+  html, body {
+    font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: var(--color-canvas, #F5F6F4);
+    color: var(--color-ink, #111613);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  html {
-    @apply font-sans;
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -165,6 +171,10 @@
 
 .num {
   font-variant-numeric: tabular-nums;
+}
+
+.text-muted {
+  color: #5F6B65 !important;
 }
 
 .rise {

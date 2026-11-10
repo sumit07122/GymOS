@@ -14,8 +14,7 @@ export default async function MemberProgressPage() {
   return (
     <PortalHub
       initialData={{ ...initialData, userEmail: session.user.email }}
-      initialTab="workouts"
+      initialTab="progress"
     />
   );
 }
-

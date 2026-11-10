@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { scanQrCodeAction } from "@/lib/actions/attendance";
 import { ScanResult } from "@/lib/services/attendance.service";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -170,24 +169,24 @@ export function QrScannerCard({
   }, []);
 
   return (
-    <Card className="border-slate-200 shadow-xs overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-3 bg-slate-50/70 border-b border-slate-100">
+    <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
+      <div className="flex flex-row items-center justify-between p-4 bg-canvas border-b border-line">
         <div className="flex items-center gap-2">
-          <Camera className="h-5 w-5 text-emerald-600" />
-          <CardTitle className="text-sm font-bold text-slate-900">
+          <Camera className="h-4 w-4 text-pine" />
+          <h3 className="text-xs font-bold text-ink uppercase tracking-wider">
             Secure QR Camera Scanner
-          </CardTitle>
+          </h3>
         </div>
 
         {/* Mode Switcher */}
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-line shadow-xs">
           <button
             type="button"
             onClick={() => setMode("CHECK_IN")}
             className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
               mode === "CHECK_IN"
-                ? "bg-emerald-600 text-white"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-pine text-white"
+                : "text-muted hover:text-ink"
             }`}
           >
             Check-In
@@ -197,21 +196,21 @@ export function QrScannerCard({
             onClick={() => setMode("CHECK_OUT")}
             className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
               mode === "CHECK_OUT"
-                ? "bg-emerald-600 text-white"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-pine text-white"
+                : "text-muted hover:text-ink"
             }`}
           >
             Check-Out
           </button>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
         {/* Scanner Viewport */}
         <div className="relative mx-auto flex flex-col items-center justify-center max-w-md">
           <div
             id={elementId}
-            className="w-full h-[280px] bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center relative border-2 border-slate-800"
+            className="w-full h-[280px] bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center relative border border-line"
           >
             {!isScanning && (
               <div className="text-center p-6 text-slate-400 space-y-3">
@@ -221,7 +220,7 @@ export function QrScannerCard({
                   type="button"
                   size="sm"
                   onClick={startScanner}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 gap-1.5"
+                  className="bg-pine hover:bg-pine/90 text-white text-xs h-9 gap-1.5 rounded-lg shadow-xs transition"
                 >
                   <Camera className="h-4 w-4" />
                   <span>Start Camera Scanner</span>
@@ -233,7 +232,7 @@ export function QrScannerCard({
           {/* Scanner Controls Bar */}
           {isScanning && (
             <div className="flex items-center justify-between w-full mt-3 px-1 text-xs">
-              <span className="flex items-center gap-1.5 text-emerald-700 font-medium">
+              <span className="flex items-center gap-1.5 text-pine font-medium">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -246,7 +245,7 @@ export function QrScannerCard({
                 variant="outline"
                 size="sm"
                 onClick={stopScanner}
-                className="h-8 text-xs text-rose-600 border-rose-200 hover:bg-rose-50"
+                className="h-8 text-xs text-rose-600 border-rose-200 hover:bg-rose-50 rounded-lg"
               >
                 Stop Camera
               </Button>
@@ -255,7 +254,7 @@ export function QrScannerCard({
 
           {/* Camera Access Limitation Notice */}
           {cameraError && (
-            <div className="mt-3 w-full rounded-xl bg-amber-50 p-3 border border-amber-200 text-xs text-amber-900 space-y-1">
+            <div className="mt-3 w-full rounded-xl bg-amber-50 p-3.5 border border-amber-200 text-xs text-amber-900 space-y-1">
               <div className="flex items-center gap-1.5 font-semibold">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 <span>Camera Device Limitation</span>
@@ -269,8 +268,8 @@ export function QrScannerCard({
 
         {/* Processing Indicator */}
         {isProcessing && (
-          <div className="rounded-xl bg-slate-50 p-3 text-center flex items-center justify-center gap-2 text-xs text-slate-600 border border-slate-200 animate-pulse">
-            <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+          <div className="rounded-xl bg-canvas p-3 text-center flex items-center justify-center gap-2 text-xs text-muted border border-line animate-pulse">
+            <Loader2 className="h-4 w-4 animate-spin text-pine" />
             <span>Verifying cryptographic signature and membership status...</span>
           </div>
         )}
@@ -278,16 +277,16 @@ export function QrScannerCard({
         {/* Feedback Scan Result Banner */}
         {lastScanResult && !isProcessing && (
           <div
-            className={`rounded-2xl p-4 border transition-all ${
+            className={`rounded-xl p-4 border transition-all ${
               lastScanResult.success
-                ? "bg-emerald-50/80 border-emerald-200 text-emerald-950"
+                ? "bg-pine-soft/60 border-pine/30 text-ink"
                 : "bg-rose-50/80 border-rose-200 text-rose-950"
             }`}
           >
             <div className="flex items-start gap-3">
               <div className="mt-0.5">
                 {lastScanResult.success ? (
-                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                  <CheckCircle2 className="h-6 w-6 text-pine" />
                 ) : (
                   <XCircle className="h-6 w-6 text-rose-600" />
                 )}
@@ -295,14 +294,14 @@ export function QrScannerCard({
 
               <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm">
+                  <span className="font-bold text-sm text-ink">
                     {lastScanResult.success ? "Verified Attendance Granted" : "Entry Access Rejected"}
                   </span>
                   <Badge
                     variant="outline"
                     className={`text-[10px] font-bold ${
                       lastScanResult.success
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                        ? "bg-pine-soft text-pine border-pine/30"
                         : "bg-rose-100 text-rose-800 border-rose-300"
                     }`}
                   >
@@ -315,25 +314,25 @@ export function QrScannerCard({
                 </p>
 
                 {lastScanResult.member && (
-                  <div className="mt-2 pt-2 border-t border-slate-200/60 flex flex-wrap items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 font-semibold text-slate-800">
-                      <User className="h-3.5 w-3.5 text-slate-500" />
+                  <div className="mt-2 pt-2 border-t border-line/60 flex flex-wrap items-center gap-4 text-xs">
+                    <span className="flex items-center gap-1 font-semibold text-ink">
+                      <User className="h-3.5 w-3.5 text-muted" />
                       <span>{lastScanResult.member.fullName}</span>
-                      <span className="font-mono text-slate-500 font-normal">
+                      <span className="font-mono text-muted font-normal">
                         ({lastScanResult.member.memberCode})
                       </span>
                     </span>
 
                     {lastScanResult.member.activePlan && (
-                      <span className="flex items-center gap-1 text-slate-600">
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      <span className="flex items-center gap-1 text-ink">
+                        <ShieldCheck className="h-3.5 w-3.5 text-pine" />
                         <span>{lastScanResult.member.activePlan}</span>
                       </span>
                     )}
 
                     {lastScanResult.member.validUntil && (
-                      <span className="flex items-center gap-1 text-slate-500">
-                        <Clock className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="flex items-center gap-1 text-muted">
+                        <Clock className="h-3.5 w-3.5 text-muted" />
                         <span>Valid to: {new Date(lastScanResult.member.validUntil).toLocaleDateString()}</span>
                       </span>
                     )}
@@ -343,7 +342,7 @@ export function QrScannerCard({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

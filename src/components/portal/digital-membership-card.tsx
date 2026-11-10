@@ -116,7 +116,7 @@ export function DigitalMembershipCard({
       );
     }
     return (
-      <Badge className="bg-emerald-500 text-white border-none text-xs gap-1">
+      <Badge className="bg-[#0B6B4F] text-white border-none text-xs gap-1">
         <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
         Active
       </Badge>
@@ -126,10 +126,10 @@ export function DigitalMembershipCard({
   return (
     <div className="w-full max-w-sm mx-auto">
       {/* Wallet-Style Digital Membership Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 text-white shadow-2xl border border-slate-800">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B1528] via-[#0F1E36] to-[#0A261E] p-6 text-white shadow-2xl border border-slate-800">
         {/* Holographic glowing background effect */}
-        <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute -left-20 -bottom-20 h-52 w-52 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-[#0B6B4F]/25 blur-3xl" />
+        <div className="absolute -left-20 -bottom-20 h-52 w-52 rounded-full bg-emerald-500/15 blur-3xl" />
 
         {/* Card Header: Gym Logo & Status */}
         <div className="relative z-10 flex items-start justify-between">
@@ -142,14 +142,14 @@ export function DigitalMembershipCard({
                   className="h-7 w-7 object-contain rounded"
                 />
               ) : (
-                <Dumbbell className="h-5 w-5 text-indigo-300" />
+                <Dumbbell className="h-5 w-5 text-[#A7F3D0]" />
               )}
             </div>
             <div>
               <h2 className="text-sm font-semibold tracking-wide text-white uppercase">
                 {gym.name}
               </h2>
-              <span className="text-[10px] uppercase tracking-wider text-indigo-300 font-medium flex items-center gap-1">
+              <span className="text-[10px] uppercase tracking-wider text-[#A7F3D0] font-medium flex items-center gap-1">
                 <Sparkles className="h-2.5 w-2.5" /> Digital Pass
               </span>
             </div>
@@ -166,10 +166,10 @@ export function DigitalMembershipCard({
             {member.fullName}
           </h3>
           <div className="mt-1 flex items-center gap-2">
-            <span className="font-mono text-xs font-semibold text-indigo-300 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
+            <span className="font-mono text-xs font-semibold text-[#A7F3D0] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
               ID: {member.memberCode}
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 truncate max-w-[160px]">
               {membership?.planName || "General Membership"}
             </span>
           </div>
@@ -185,12 +185,12 @@ export function DigitalMembershipCard({
                 className="h-48 w-48 object-contain rounded-lg"
               />
               {/* Scan overlay guide border */}
-              <div className="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-indigo-200/50" />
+              <div className="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-[#0B6B4F]/30" />
             </div>
           ) : (
             <div className="flex h-48 w-48 flex-col items-center justify-center gap-2 text-slate-400">
-              <QrCode className="h-10 w-10" />
-              <span className="text-xs font-medium">Generating QR...</span>
+              <QrCode className="h-10 w-10 text-[#0B6B4F]" />
+              <span className="text-xs font-medium">Generating Pass...</span>
             </div>
           )}
 
@@ -200,7 +200,7 @@ export function DigitalMembershipCard({
               <span
                 className={`inline-block h-2 w-2 rounded-full ${
                   secondsRemaining > 15
-                    ? "bg-emerald-500 animate-pulse"
+                    ? "bg-[#0B6B4F] animate-pulse"
                     : "bg-amber-500 animate-ping"
                 }`}
               />
@@ -212,7 +212,7 @@ export function DigitalMembershipCard({
               size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="h-6 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 p-1 gap-1"
+              className="h-6 text-[11px] font-semibold text-[#0B6B4F] hover:text-[#047857] hover:bg-[#E4F2EB] p-1 gap-1"
             >
               <RotateCw
                 className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
@@ -236,15 +236,15 @@ export function DigitalMembershipCard({
             <span className="font-semibold text-slate-200">{formattedExpiry}</span>
           </div>
           <div className="flex items-center gap-1 text-[10px] text-slate-400">
-            <ShieldCheck className="h-3 w-3 text-emerald-400" />
+            <ShieldCheck className="h-3 w-3 text-[#10B981]" />
             <span>HMAC-SHA256</span>
           </div>
         </div>
       </div>
 
       {/* Helpful Kiosk Instructions Card */}
-      <div className="mt-3 flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-xs text-slate-600 border border-slate-200/80">
-        <Info className="h-4 w-4 shrink-0 text-indigo-500 mt-0.5" />
+      <div className="mt-3 flex items-start gap-2 rounded-xl bg-white p-3 text-xs text-[#64748B] border border-[#E2E8F0] shadow-xs">
+        <Info className="h-4 w-4 shrink-0 text-[#0B6B4F] mt-0.5" />
         <p>
           Hold this QR code directly against the gym turnstile or front desk
           scanner to check in. For security, the QR regenerates every 60 seconds

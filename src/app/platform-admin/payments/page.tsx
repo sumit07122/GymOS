@@ -1,8 +1,8 @@
 import * as React from "react";
+import Link from "next/link";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { listSubscriptionInvoices } from "@/lib/services/platform-admin.service";
-import { Receipt } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Receipt, DollarSign, AlertCircle, ExternalLink } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,13 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RecordSubscriptionPaymentDialog } from "@/components/admin/record-subscription-payment-dialog";
-
-const invoiceStatusBadge: Record<string, string> = {
-  PAID: "bg-emerald-950 text-emerald-300 border-emerald-800",
-  ISSUED: "bg-amber-950 text-amber-300 border-amber-800",
-  OVERDUE: "bg-rose-950 text-rose-300 border-rose-800",
-  VOID: "bg-slate-800 text-slate-400 border-slate-700",
-};
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
+import { StatusBadge } from "@/components/design-system/status-badge";
 
 export default async function PlatformAdminPaymentsPage() {
   const session = await requireSuperAdmin("/platform-admin/payments");
@@ -29,89 +25,115 @@ export default async function PlatformAdminPaymentsPage() {
     return acc + paid;
   }, 0);
 
+  const totalInvoiced = invoices.reduce((acc, inv) => acc + Number(inv.totalAmount), 0);
+  const pendingCount = invoices.filter((i) => i.status !== "PAID" && i.status !== "VOID").length;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-            <Receipt className="h-6 w-6 text-indigo-400" />
-            <span>SaaS Payments & Billing Ledger</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Track subscription invoices issued to gym owners and log verified payments.
-          </p>
-        </div>
+      {/* Header */}
+      <PageHeader
+        title="SaaS Payments & Platform Ledger"
+        description="Track subscription invoices issued to gym owners, reconcile multi-tenant fee settlements, and record direct wire payments."
+        breadcrumbs={[
+          { label: "Overview", href: "/platform-admin" },
+          { label: "Payments" },
+        ]}
+        actions={<RecordSubscriptionPaymentDialog invoices={invoices} />}
+      />
 
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-right">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Total Collected</span>
-            <div className="text-base font-extrabold text-emerald-400">
-              ₹{totalCollected.toLocaleString("en-IN")}
-            </div>
-          </div>
-          <RecordSubscriptionPaymentDialog invoices={invoices} />
-        </div>
+      {/* KPI Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard
+          label="Total Collected Revenue"
+          value={`₹${totalCollected.toLocaleString("en-IN")}`}
+          icon={DollarSign}
+          trend={{ value: `${Math.round((totalCollected / (totalInvoiced || 1)) * 100)}% collected`, isPositive: true }}
+          subtext="Reconciled SaaS income"
+        />
+        <StatCard
+          label="Total Invoiced"
+          value={`₹${totalInvoiced.toLocaleString("en-IN")}`}
+          icon={Receipt}
+          subtext={`${invoices.length} billing cycles`}
+        />
+        <StatCard
+          label="Pending Collections"
+          value={pendingCount}
+          icon={AlertCircle}
+          trend={pendingCount > 0 ? { value: "Action required", isPositive: false } : undefined}
+          subtext="Awaiting verification"
+        />
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 shadow-lg overflow-hidden">
+      {/* Invoice Ledger Table */}
+      <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-slate-800">
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 text-xs font-semibold">Invoice No</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Gym Client</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Billing Cycle</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Amount</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Due Date</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Paid History</TableHead>
+          <TableHeader className="bg-canvas border-b border-line">
+            <TableRow className="border-line hover:bg-transparent">
+              <TableHead className="text-muted text-xs font-semibold">Invoice #</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Gym Workspace</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Amount</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Due Date</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Payment Status</TableHead>
+              <TableHead className="text-muted text-xs font-semibold">Settled Date</TableHead>
+              <TableHead className="text-muted text-xs font-semibold text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {invoices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-xs text-slate-500">
-                  No subscription invoices issued yet.
+                <TableCell colSpan={7} className="h-32 text-center text-xs text-muted">
+                  No subscription invoices generated yet.
                 </TableCell>
               </TableRow>
             ) : (
-              invoices.map((inv) => (
-                <TableRow key={inv.id} className="border-slate-800/60 hover:bg-slate-900/40">
-                  <TableCell className="font-mono text-xs font-bold text-white">
-                    {inv.invoiceNumber}
-                  </TableCell>
-                  <TableCell className="text-xs text-slate-200">
-                    <div className="font-semibold">{inv.gym.name}</div>
-                    <div className="text-[10px] text-slate-400 font-mono">/{inv.gym.slug}</div>
-                  </TableCell>
-                  <TableCell className="text-xs text-slate-400">
-                    {inv.billingPeriod}
-                  </TableCell>
-                  <TableCell className="text-xs font-bold text-white">
-                    ₹{Number(inv.totalAmount).toLocaleString("en-IN")}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`${invoiceStatusBadge[inv.status] || "bg-slate-800"} text-[10px]`}>
-                      {inv.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-slate-400">
-                    {new Date(inv.dueDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-xs text-slate-300">
-                    {inv.payments.length === 0 ? (
-                      <span className="text-slate-500 italic">None</span>
-                    ) : (
-                      <div className="space-y-0.5">
-                        {inv.payments.map((p) => (
-                          <div key={p.id} className="text-[11px] font-mono text-emerald-400">
-                            ₹{Number(p.amount).toLocaleString()} via {p.method}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+              invoices.map((inv) => {
+                const totalPaid = inv.payments.reduce((acc, p) => acc + Number(p.amount), 0);
+
+                return (
+                  <TableRow key={inv.id} className="border-line/60 hover:bg-canvas/50">
+                    <TableCell className="font-mono text-xs font-bold text-ink">
+                      {inv.invoiceNumber}
+                    </TableCell>
+                    <TableCell className="font-medium text-xs text-ink">
+                      <div className="font-bold text-ink">{inv.gym.name}</div>
+                      <div className="text-[10px] text-muted font-mono">/{inv.gym.slug}</div>
+                    </TableCell>
+                    <TableCell className="text-xs text-ink font-bold">
+                      ₹{Number(inv.totalAmount).toLocaleString("en-IN")}
+                      {totalPaid > 0 && totalPaid < Number(inv.totalAmount) && (
+                        <div className="text-[10px] text-pine font-normal">
+                          Paid: ₹{totalPaid.toLocaleString("en-IN")}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted">
+                      {new Date(inv.dueDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={inv.status} />
+                    </TableCell>
+                    <TableCell className="text-xs text-muted">
+                      {inv.paidAt ? (
+                        <span className="text-pine font-medium">
+                          {new Date(inv.paidAt).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link
+                        href={`/platform-admin/gyms/${inv.gymId}`}
+                        className="inline-flex items-center gap-1 text-xs text-pine font-semibold hover:underline"
+                      >
+                        <span>Workspace</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

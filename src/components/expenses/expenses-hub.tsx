@@ -2,7 +2,6 @@
 
 import { useState, useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,7 @@ import { AddCategoryModal, CategoryManagementPanel } from "./expense-category-mo
 import { ExpenseWithDetails, ExpenseOverview } from "@/lib/services/expense.service";
 import { deleteExpenseAction, seedDefaultCategoriesAction, ExpenseActionState } from "@/lib/actions/expense";
 import { ExpenseCategory } from "@prisma/client";
+import { PageHeader } from "@/components/design-system/page-header";
 
 interface ExpensesHubProps {
   expenses: ExpenseWithDetails[];
@@ -56,11 +56,11 @@ function DeleteExpenseDialog({ expense, gymId, gymSlug, onClose }: DeleteDialogP
 
   return (
     <Dialog open={!!expense} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm bg-white border border-line shadow-2xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-base">Remove Expense?</DialogTitle>
-          <DialogDescription className="text-xs">
-            The expense record will be soft-deleted and preserved in the audit history. This action cannot remove the financial record.
+          <DialogTitle className="text-base font-bold text-ink">Remove Expense?</DialogTitle>
+          <DialogDescription className="text-xs text-muted">
+            The expense record will be soft-deleted and preserved in the audit history.
           </DialogDescription>
         </DialogHeader>
         <form action={formAction} className="space-y-3">
@@ -68,20 +68,20 @@ function DeleteExpenseDialog({ expense, gymId, gymSlug, onClose }: DeleteDialogP
           <input type="hidden" name="gymSlug" value={gymSlug} />
           <input type="hidden" name="expenseId" value={expense?.id ?? ""} />
           {state?.error && (
-            <div className="flex items-center gap-2 rounded-md bg-red-50 p-2 text-xs text-red-600">
+            <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{state.error}</span>
             </div>
           )}
           <div className="space-y-1">
-            <Label htmlFor="del-reason" className="text-xs">Reason for removal</Label>
-            <Input id="del-reason" name="reason" placeholder="e.g. Entered in error" className="text-sm" />
+            <Label htmlFor="del-reason" className="text-xs font-semibold text-ink">Reason for removal</Label>
+            <Input id="del-reason" name="reason" placeholder="e.g. Entered in error" className="text-xs bg-canvas border-line rounded-lg" />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} className="text-xs h-8">
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button type="button" variant="outline" onClick={onClose} className="text-xs h-8 border-line">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} variant="destructive" className="text-xs h-8">
+            <Button type="submit" disabled={isPending} variant="destructive" className="text-xs h-8 bg-rose-600 hover:bg-rose-700">
               {isPending && <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />}
               Remove Expense
             </Button>
@@ -105,18 +105,27 @@ function SeedCategoriesButton({ gymId, gymSlug }: { gymId: string; gymSlug: stri
     <form action={formAction}>
       <input type="hidden" name="gymId" value={gymId} />
       <input type="hidden" name="gymSlug" value={gymSlug} />
-      {state?.error && <p className="text-xs text-red-500 mt-1">{state.error}</p>}
-      <Button type="submit" size="sm" variant="outline" className="text-xs h-7" disabled={isPending}>
-        {isPending && <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />}
-        Restore Default Categories
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        disabled={isPending}
+        className="text-xs h-8 text-pine border-pine/30 hover:bg-pine-soft rounded-lg"
+      >
+        {isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+        ) : (
+          <Settings className="h-3.5 w-3.5 mr-1.5" />
+        )}
+        Seed Standard Categories
       </Button>
+      {state?.error && (
+        <span className="text-xs text-rose-600 ml-2">{state.error}</span>
+      )}
     </form>
   );
 }
 
-// ==============================================================================
-// Main Hub
-// ==============================================================================
 export function ExpensesHub({
   expenses,
   categories,
@@ -145,127 +154,126 @@ export function ExpensesHub({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Expenses</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Track and manage your gym&apos;s operating expenses.
-          </p>
-        </div>
-        <Button
-          className="text-xs h-8 bg-indigo-600 hover:bg-indigo-700 w-fit"
-          onClick={() => { setEditExpense(null); setFormOpen(true); }}
-        >
-          <Plus className="h-3.5 w-3.5 mr-1.5" />
-          Add Expense
-        </Button>
-      </div>
+      <PageHeader
+        title="Operating Expenses"
+        description="Track overhead, rent, equipment maintenance, and facility operating costs."
+        actions={
+          <Button
+            className="text-xs h-9 bg-pine hover:bg-pine/90 text-white rounded-lg shadow-xs transition"
+            onClick={() => { setEditExpense(null); setFormOpen(true); }}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
+            <span>Add Expense</span>
+          </Button>
+        }
+      />
 
       {/* Overview cards */}
       <ExpenseOverviewCards overview={overview} currency={currency} />
 
       {/* Tabs navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <Button
-          variant={activeTab === "expenses" ? "default" : "ghost"}
-          size="sm"
+      <div className="flex border-b border-line text-xs font-semibold">
+        <button
+          type="button"
           onClick={() => setActiveTab("expenses")}
-          className={`text-xs gap-1.5 ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "expenses"
-              ? "bg-slate-900 text-white"
-              : "text-slate-600"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <Receipt className="h-3.5 w-3.5" />
-          All Expenses
-        </Button>
+          <Receipt className="h-4 w-4" />
+          <span>All Expenses ({expenses.length})</span>
+        </button>
 
-        <Button
-          variant={activeTab === "reports" ? "default" : "ghost"}
-          size="sm"
+        <button
+          type="button"
           onClick={() => setActiveTab("reports")}
-          className={`text-xs gap-1.5 ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "reports"
-              ? "bg-slate-900 text-white"
-              : "text-slate-600"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <BarChart3 className="h-3.5 w-3.5" />
-          Expense Reports
-        </Button>
+          <BarChart3 className="h-4 w-4" />
+          <span>Category Breakdown</span>
+        </button>
 
         {isOwner && (
-          <Button
-            variant={activeTab === "categories" ? "default" : "ghost"}
-            size="sm"
+          <button
+            type="button"
             onClick={() => setActiveTab("categories")}
-            className={`text-xs gap-1.5 ${
+            className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
               activeTab === "categories"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600"
+                ? "border-pine text-pine font-bold"
+                : "border-transparent text-muted hover:text-ink"
             }`}
           >
-            <Settings className="h-3.5 w-3.5" />
-            Categories
-          </Button>
+            <Settings className="h-4 w-4" />
+            <span>Cost Centers ({categories.length})</span>
+          </button>
         )}
       </div>
 
       {activeTab === "expenses" && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-slate-700">All Expenses</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
+        <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-line">
+            <h3 className="text-xs font-bold text-ink uppercase tracking-wider">Expense Records</h3>
+          </div>
+          <div className="p-0">
             <ExpenseListTable
               expenses={expenses}
               categories={categories}
-              onEdit={handleEdit}
-              onDelete={(e) => setDeleteTarget(e)}
               currency={currency}
+              onEdit={handleEdit}
+              onDelete={(exp) => setDeleteTarget(exp)}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {activeTab === "reports" && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-slate-700">Expense Analysis</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <ExpenseCategoryBreakdown overview={overview} currency={currency} />
-          </CardContent>
-        </Card>
+        <ExpenseCategoryBreakdown
+          overview={overview}
+          currency={currency}
+        />
       )}
 
-      {isOwner && activeTab === "categories" && (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-slate-700">Expense Categories</CardTitle>
-            <SeedCategoriesButton gymId={gymId} gymSlug={gymSlug} />
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <CategoryManagementPanel
-              categories={categories}
-              gymId={gymId}
-              gymSlug={gymSlug}
-              onAddClick={() => setAddCategoryOpen(true)}
-            />
-          </CardContent>
-        </Card>
+      {activeTab === "categories" && isOwner && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button
+              size="sm"
+              onClick={() => setAddCategoryOpen(true)}
+              className="text-xs h-9 bg-pine hover:bg-pine/90 text-white rounded-lg shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Add Category
+            </Button>
+            {categories.length === 0 && (
+              <SeedCategoriesButton gymId={gymId} gymSlug={gymSlug} />
+            )}
+          </div>
+          <CategoryManagementPanel
+            categories={categories}
+            gymId={gymId}
+            gymSlug={gymSlug}
+            onAddClick={() => setAddCategoryOpen(true)}
+          />
+        </div>
       )}
 
-      {/* Modals */}
+      {/* Expense Form Modal (Add / Edit) */}
       <ExpenseFormModal
         open={formOpen}
-        expense={editExpense}
+        onClose={handleCloseForm}
         categories={categories}
+        expense={editExpense}
         gymId={gymId}
         gymSlug={gymSlug}
-        onClose={handleCloseForm}
       />
 
+      {/* Delete confirmation dialog */}
       <DeleteExpenseDialog
         expense={deleteTarget}
         gymId={gymId}
@@ -273,13 +281,13 @@ export function ExpensesHub({
         onClose={() => setDeleteTarget(null)}
       />
 
+      {/* Add category modal */}
       <AddCategoryModal
         open={addCategoryOpen}
+        onClose={() => setAddCategoryOpen(false)}
         gymId={gymId}
         gymSlug={gymSlug}
-        onClose={() => setAddCategoryOpen(false)}
       />
     </div>
   );
 }
-

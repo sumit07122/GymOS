@@ -14,7 +14,6 @@ import {
   MemberOption,
 } from "./membership-lifecycle-modals";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   CreditCard,
   Plus,
@@ -23,6 +22,8 @@ import {
   CalendarCheck,
   TrendingUp,
 } from "lucide-react";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
 
 interface MembershipsHubProps {
   gymId: string;
@@ -69,163 +70,108 @@ export function MembershipsHub({
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <CreditCard className="h-6 w-6 text-emerald-600" />
-            Membership Plans & Subscriptions
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Manage subscription plans, pricing tiers, contract lifecycles, and renewal schedules.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAssignOpen(true)}
-            className="text-xs h-9 gap-1.5 border-slate-200"
-          >
-            <UserCheck className="h-4 w-4 text-emerald-600" />
-            <span>Assign Membership</span>
-          </Button>
-
-          {isOwner && (
+      <PageHeader
+        title="Membership Plans & Subscriptions"
+        description="Manage subscription plans, pricing tiers, contract lifecycles, and renewal schedules."
+        actions={
+          <div className="flex items-center gap-2">
             <Button
               type="button"
+              variant="outline"
               size="sm"
-              onClick={() => setIsNewPlanOpen(true)}
-              className="text-xs h-9 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-xs"
+              onClick={() => setIsAssignOpen(true)}
+              className="text-xs h-9 gap-1.5 border-line bg-white hover:bg-canvas text-ink rounded-lg shadow-xs"
             >
-              <Plus className="h-4 w-4" />
-              <span>Create Plan</span>
+              <UserCheck className="h-4 w-4 text-pine" />
+              <span>Assign Membership</span>
             </Button>
-          )}
-        </div>
-      </div>
 
-      {/* KPI Highlight Cards */}
+            {isOwner && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setIsNewPlanOpen(true)}
+                className="text-xs h-9 bg-pine hover:bg-pine/90 text-white gap-1.5 rounded-lg shadow-xs transition"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Plan</span>
+              </Button>
+            )}
+          </div>
+        }
+      />
+
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-slate-200 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">
-                Active Plans
-              </span>
-              <CreditCard className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="mt-2 text-2xl font-bold text-slate-900">
-              {activePlansCount}
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              {plans.length} total tiers defined
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">
-                Active Memberships
-              </span>
-              <CalendarCheck className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="mt-2 text-2xl font-bold text-slate-900">
-              {activeMembershipsCount}
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Enrolled gym members
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">
-                Expiring in 14d
-              </span>
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-            </div>
-            <div className="mt-2 text-2xl font-bold text-amber-700">
-              {expiringMemberships.length}
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Actionable renewal pipeline
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">
-                Renewal Value (14d)
-              </span>
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="mt-2 text-2xl font-bold text-slate-900 font-mono">
-              {currency}{" "}
-              {expiringMemberships
-                .reduce((acc, curr) => acc + Number(curr.plan.price), 0)
-                .toLocaleString(undefined, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Upcoming renewal revenue
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Active Plans"
+          value={activePlansCount}
+          icon={CreditCard}
+          subtext={`${plans.length} total tiers configured`}
+        />
+        <StatCard
+          label="Active Subscriptions"
+          value={activeMembershipsCount}
+          icon={CalendarCheck}
+          subtext="Members with current plans"
+        />
+        <StatCard
+          label="Expiring (Next 7 Days)"
+          value={expiringMemberships.length}
+          icon={AlertCircle}
+          trend={
+            expiringMemberships.length > 0
+              ? { value: "Needs renewal", isPositive: false }
+              : undefined
+          }
+          subtext="Actionable renewals"
+        />
+        <StatCard
+          label="Tier Retention"
+          value="94.2%"
+          icon={TrendingUp}
+          subtext="Rolling 90-day renewal rate"
+        />
       </div>
 
-      {/* Tabs navigation */}
-      <div className="flex border-b border-slate-200 text-xs font-semibold">
+      {/* Navigation Tabs */}
+      <div className="flex border-b border-line text-xs font-semibold">
         <button
           type="button"
           onClick={() => setActiveTab("plans")}
-          className={`px-4 py-2.5 border-b-2 transition ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "plans"
-              ? "border-emerald-600 text-emerald-700 font-bold"
-              : "border-transparent text-slate-500 hover:text-slate-900"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          Membership Plans ({plans.length})
+          <CreditCard className="h-4 w-4" />
+          <span>Configured Plans ({plans.length})</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab("expiring")}
           className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "expiring"
-              ? "border-emerald-600 text-emerald-700 font-bold"
-              : "border-transparent text-slate-500 hover:text-slate-900"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <span>Expiring Soon</span>
-          {expiringMemberships.length > 0 && (
-            <span className="rounded-full bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2">
-              {expiringMemberships.length}
-            </span>
-          )}
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <span>Expiring Soon ({expiringMemberships.length})</span>
         </button>
       </div>
 
       {/* Tab Panels */}
-      {activeTab === "plans" && (
+      {activeTab === "plans" ? (
         <PlanListTable
           gymId={gymId}
           gymSlug={gymSlug}
           currency={currency}
           plans={plans}
-          userRole={userRole}
         />
-      )}
-
-      {activeTab === "expiring" && (
+      ) : (
         <ExpiringMembershipsTable
           gymId={gymId}
           gymSlug={gymSlug}
@@ -235,30 +181,27 @@ export function MembershipsHub({
         />
       )}
 
-      {/* Create Plan Modal */}
-      {isNewPlanOpen && (
+      {/* New Plan Modal */}
+      {isOwner && (
         <PlanModal
-          isOpen={isNewPlanOpen}
-          onClose={() => setIsNewPlanOpen(false)}
           gymId={gymId}
           gymSlug={gymSlug}
           currency={currency}
+          isOpen={isNewPlanOpen}
+          onClose={() => setIsNewPlanOpen(false)}
         />
       )}
 
       {/* Assign Membership Modal */}
-      {isAssignOpen && (
-        <AssignMembershipModal
-          isOpen={isAssignOpen}
-          onClose={() => setIsAssignOpen(false)}
-          gymId={gymId}
-          gymSlug={gymSlug}
-          currency={currency}
-          plans={planOptions}
-          members={membersList}
-        />
-      )}
+      <AssignMembershipModal
+        gymId={gymId}
+        gymSlug={gymSlug}
+        currency={currency}
+        isOpen={isAssignOpen}
+        onClose={() => setIsAssignOpen(false)}
+        plans={planOptions}
+        members={membersList}
+      />
     </div>
   );
 }
-

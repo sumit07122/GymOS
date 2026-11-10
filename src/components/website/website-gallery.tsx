@@ -21,11 +21,11 @@ export function WebsiteGallery({
     <section id="gallery" className="py-20 sm:py-28 bg-slate-900 text-white border-t border-slate-800">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest font-bold mb-2" style={{ color: primaryColor }}>
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold mb-2" style={{ color: primaryColor }}>
             <Camera className="h-4 w-4" />
             <span>Tour the Floor</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
             Photo Gallery
           </h2>
           <p className="mt-3 text-sm sm:text-base text-slate-400">
@@ -33,19 +33,24 @@ export function WebsiteGallery({
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {galleryUrls.map((url, idx) => (
             <div
               key={idx}
               onClick={() => setSelectedImage(url)}
-              className="group relative h-64 overflow-hidden rounded-2xl bg-slate-800 cursor-pointer shadow-md"
+              className="group relative overflow-hidden rounded-[16px] bg-white/[0.03] border border-white/10 p-2 shadow-sm ring-1 ring-white/5 cursor-pointer hover:border-white/20 transition-all hover:-translate-y-0.5"
             >
-              <img
-                src={url}
-                alt={`Gym facility photo ${idx + 1}`}
-                className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition-colors" />
+              <div className="relative h-60 w-full overflow-hidden rounded-[12px] bg-slate-800">
+                <img
+                  src={url}
+                  alt={`Gym facility photo ${idx + 1}`}
+                  className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition-colors" />
+                <div className="absolute bottom-2.5 right-2.5 rounded-[8px] bg-slate-950/70 backdrop-blur-md px-2 py-1 text-[10px] font-semibold text-slate-300 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  View Full
+                </div>
+              </div>
             </div>
           ))}
         </div>

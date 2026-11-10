@@ -42,10 +42,10 @@ export function SettingsForm({ gym }: SettingsFormProps) {
 
       {/* Success Notification */}
       {state?.success && (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-900 shadow-xs">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-pine/30 bg-pine-soft p-4 text-xs text-ink shadow-xs">
+          <CheckCircle2 className="h-5 w-5 text-pine shrink-0" />
           <div>
-            <div className="font-semibold">Settings Saved</div>
+            <div className="font-semibold text-pine">Settings Saved</div>
             <div>{state.message || "Gym business profile updated successfully."}</div>
           </div>
         </div>
@@ -63,22 +63,22 @@ export function SettingsForm({ gym }: SettingsFormProps) {
       )}
 
       {/* Basic Identity & Workspace */}
-      <Card className="border-slate-200 shadow-xs">
+      <Card className="border-line shadow-xs rounded-xl bg-white">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-emerald-600" />
-            <CardTitle className="text-sm font-semibold text-slate-900">
+            <Building2 className="h-4 w-4 text-pine" />
+            <CardTitle className="text-sm font-bold text-ink">
               Gym Identity & Branding
             </CardTitle>
           </div>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted">
             Public business name, URL slug and branding elements.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="name" className="text-xs font-medium text-slate-700">
+              <label htmlFor="name" className="text-xs font-semibold text-ink">
                 Gym Name <span className="text-rose-500">*</span>
               </label>
               <Input
@@ -86,7 +86,7 @@ export function SettingsForm({ gym }: SettingsFormProps) {
                 name="name"
                 defaultValue={gym.name}
                 required
-                className="text-xs h-9"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
               {state?.fieldErrors?.name && (
                 <p className="text-[11px] text-rose-600">{state.fieldErrors.name}</p>
@@ -94,25 +94,25 @@ export function SettingsForm({ gym }: SettingsFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="slug" className="text-xs font-medium text-slate-700">
-                Workspace Slug (Read-only)
+              <label htmlFor="slug" className="text-xs font-semibold text-ink">
+                Workspace Slug (Managed by FIXIA)
               </label>
               <Input
                 id="slug"
                 name="slug"
                 defaultValue={gym.slug}
                 disabled
-                className="text-xs h-9 bg-slate-100 text-slate-500 cursor-not-allowed font-mono"
+                className="text-xs h-9 bg-canvas/60 text-muted cursor-not-allowed font-mono border-line rounded-lg"
               />
-              <p className="text-[10px] text-slate-400">
-                Workspace URL: fixia.app/{gym.slug}
+              <p className="text-[10px] text-muted">
+                Public website URL: gms.fixia.in/g/{gym.slug}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-xs font-medium text-slate-700">
+              <label htmlFor="email" className="text-xs font-semibold text-ink">
                 Business Contact Email
               </label>
               <Input
@@ -121,7 +121,7 @@ export function SettingsForm({ gym }: SettingsFormProps) {
                 type="email"
                 defaultValue={gym.email || ""}
                 placeholder="contact@yourgym.com"
-                className="text-xs h-9"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
               {state?.fieldErrors?.email && (
                 <p className="text-[11px] text-rose-600">{state.fieldErrors.email}</p>
@@ -129,124 +129,130 @@ export function SettingsForm({ gym }: SettingsFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="phone" className="text-xs font-medium text-slate-700">
+              <label htmlFor="phone" className="text-xs font-semibold text-ink">
                 Business Phone
               </label>
               <Input
                 id="phone"
                 name="phone"
                 defaultValue={gym.phone || ""}
-                placeholder="+1 (555) 000-0000"
-                className="text-xs h-9"
+                placeholder="+91 98765 43210"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
+              {state?.fieldErrors?.phone && (
+                <p className="text-[11px] text-rose-600">{state.fieldErrors.phone}</p>
+              )}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="logoUrl" className="text-xs font-medium text-slate-700">
-              Logo URL
+            <label htmlFor="logoUrl" className="text-xs font-semibold text-ink">
+              Gym Brand Logo URL
             </label>
             <Input
               id="logoUrl"
               name="logoUrl"
               defaultValue={gym.logoUrl || ""}
-              placeholder="https://example.com/logo.png"
-              className="text-xs h-9"
+              placeholder="https://yourdomain.com/brand-logo.png"
+              className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
             />
+            <p className="text-[10px] text-muted">
+              Appears on digital membership passes, invoices, receipts, and public website.
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Address & Physical Location */}
-      <Card className="border-slate-200 shadow-xs">
+      {/* Location & Physical Facility */}
+      <Card className="border-line shadow-xs rounded-xl bg-white">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-emerald-600" />
-            <CardTitle className="text-sm font-semibold text-slate-900">
-              Location & Address
+            <MapPin className="h-4 w-4 text-pine" />
+            <CardTitle className="text-sm font-bold text-ink">
+              Facility Location & Address
             </CardTitle>
           </div>
-          <CardDescription className="text-xs text-slate-500">
-            Physical street address displayed on invoices and member receipts.
+          <CardDescription className="text-xs text-muted">
+            Physical gym premise address displayed on invoices and receipts.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="addressLine1" className="text-xs font-medium text-slate-700">
-              Address Line 1
+            <label htmlFor="addressLine1" className="text-xs font-semibold text-ink">
+              Street Address Line 1
             </label>
             <Input
               id="addressLine1"
               name="addressLine1"
               defaultValue={gym.addressLine1 || ""}
-              placeholder="123 Fitness Blvd, Suite 100"
-              className="text-xs h-9"
+              placeholder="123 Fitness Boulevard"
+              className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="addressLine2" className="text-xs font-medium text-slate-700">
-              Address Line 2 (Optional)
+            <label htmlFor="addressLine2" className="text-xs font-semibold text-ink">
+              Suite / Floor / Landmark
             </label>
             <Input
               id="addressLine2"
               name="addressLine2"
               defaultValue={gym.addressLine2 || ""}
-              placeholder="Floor 2, Building B"
-              className="text-xs h-9"
+              placeholder="Level 2, Premium Sports Complex"
+              className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
             />
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="city" className="text-xs font-medium text-slate-700">
+              <label htmlFor="city" className="text-xs font-semibold text-ink">
                 City
               </label>
               <Input
                 id="city"
                 name="city"
                 defaultValue={gym.city || ""}
-                placeholder="New York"
-                className="text-xs h-9"
+                placeholder="Mumbai"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="state" className="text-xs font-medium text-slate-700">
+              <label htmlFor="state" className="text-xs font-semibold text-ink">
                 State / Province
               </label>
               <Input
                 id="state"
                 name="state"
                 defaultValue={gym.state || ""}
-                placeholder="NY"
-                className="text-xs h-9"
+                placeholder="Maharashtra"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="postalCode" className="text-xs font-medium text-slate-700">
+              <label htmlFor="postalCode" className="text-xs font-semibold text-ink">
                 Postal Code
               </label>
               <Input
                 id="postalCode"
                 name="postalCode"
                 defaultValue={gym.postalCode || ""}
-                placeholder="10001"
-                className="text-xs h-9"
+                placeholder="400001"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="country" className="text-xs font-medium text-slate-700">
+              <label htmlFor="country" className="text-xs font-semibold text-ink">
                 Country
               </label>
               <Input
                 id="country"
                 name="country"
-                defaultValue={gym.country || "US"}
-                placeholder="US"
-                className="text-xs h-9 uppercase"
+                defaultValue={gym.country || "IN"}
+                placeholder="IN"
+                className="text-xs h-9 uppercase bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
             </div>
           </div>
@@ -254,21 +260,21 @@ export function SettingsForm({ gym }: SettingsFormProps) {
       </Card>
 
       {/* Operating Schedule & Regional Billing */}
-      <Card className="border-slate-200 shadow-xs">
+      <Card className="border-line shadow-xs rounded-xl bg-white">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-emerald-600" />
-            <CardTitle className="text-sm font-semibold text-slate-900">
+            <Clock className="h-4 w-4 text-pine" />
+            <CardTitle className="text-sm font-bold text-ink">
               Operating Schedule & Financial Localization
             </CardTitle>
           </div>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted">
             Business hours, base currency, timezone, and tax rules.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="openingHours" className="text-xs font-medium text-slate-700">
+            <label htmlFor="openingHours" className="text-xs font-semibold text-ink">
               Opening Hours Schedule
             </label>
             <textarea
@@ -277,54 +283,54 @@ export function SettingsForm({ gym }: SettingsFormProps) {
               rows={3}
               defaultValue={gym.openingHours || ""}
               placeholder={"Mon - Fri: 06:00 - 22:00\nSat - Sun: 08:00 - 20:00"}
-              className="w-full rounded-md border border-slate-200 bg-white p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full rounded-lg border border-line bg-canvas p-2.5 text-xs text-ink placeholder:text-muted focus:border-pine focus:outline-hidden focus:ring-1 focus:ring-pine/30"
             />
-            <p className="text-[10px] text-slate-400">
-              Displayed on gym public portal and front desk check-in kiosk.
+            <p className="text-[10px] text-muted">
+              Displayed on gym public website and front desk check-in kiosk.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="currency" className="text-xs font-medium text-slate-700">
+              <label htmlFor="currency" className="text-xs font-semibold text-ink">
                 Primary Currency
               </label>
               <select
                 id="currency"
                 name="currency"
                 defaultValue={gym.currency}
-                className="w-full rounded-md border border-slate-200 bg-white h-9 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-line bg-canvas h-9 px-2.5 text-xs text-ink focus:border-pine focus:outline-hidden focus:ring-1 focus:ring-pine"
               >
+                <option value="INR">INR (₹) - Indian Rupee</option>
                 <option value="USD">USD ($) - US Dollar</option>
                 <option value="EUR">EUR (€) - Euro</option>
                 <option value="GBP">GBP (£) - British Pound</option>
-                <option value="CAD">CAD ($) - Canadian Dollar</option>
-                <option value="AUD">AUD ($) - Australian Dollar</option>
-                <option value="INR">INR (₹) - Indian Rupee</option>
                 <option value="AED">AED (د.إ) - UAE Dirham</option>
                 <option value="SGD">SGD ($) - Singapore Dollar</option>
+                <option value="CAD">CAD ($) - Canadian Dollar</option>
+                <option value="AUD">AUD ($) - Australian Dollar</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="timezone" className="text-xs font-medium text-slate-700">
+              <label htmlFor="timezone" className="text-xs font-semibold text-ink">
                 Operating Timezone
               </label>
               <select
                 id="timezone"
                 name="timezone"
                 defaultValue={gym.timezone}
-                className="w-full rounded-md border border-slate-200 bg-white h-9 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-line bg-canvas h-9 px-2.5 text-xs text-ink focus:border-pine focus:outline-hidden focus:ring-1 focus:ring-pine"
               >
+                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
                 <option value="America/New_York">America/New_York (Eastern)</option>
                 <option value="America/Chicago">America/Chicago (Central)</option>
                 <option value="America/Denver">America/Denver (Mountain)</option>
                 <option value="America/Los_Angeles">America/Los_Angeles (Pacific)</option>
                 <option value="Europe/London">Europe/London (GMT/BST)</option>
                 <option value="Europe/Paris">Europe/Paris (CET)</option>
-                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-                <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
                 <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
               </select>
             </div>
@@ -332,8 +338,8 @@ export function SettingsForm({ gym }: SettingsFormProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="taxRate" className="text-xs font-medium text-slate-700">
-                Standard Tax / VAT Rate (%)
+              <label htmlFor="taxRate" className="text-xs font-semibold text-ink">
+                Standard GST / Tax Rate (%)
               </label>
               <Input
                 id="taxRate"
@@ -343,23 +349,23 @@ export function SettingsForm({ gym }: SettingsFormProps) {
                 min="0"
                 max="100"
                 defaultValue={gym.taxRate.toString()}
-                className="text-xs h-9"
+                className="text-xs h-9 bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[10px] text-muted">
                 Default rate automatically applied to membership invoices.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="taxNumber" className="text-xs font-medium text-slate-700">
-                Tax ID / VAT Registration #
+              <label htmlFor="taxNumber" className="text-xs font-semibold text-ink">
+                GSTIN / Tax ID Registration #
               </label>
               <Input
                 id="taxNumber"
                 name="taxNumber"
                 defaultValue={gym.taxNumber || ""}
-                placeholder="e.g. US-XX-XXXXXXX or VAT-12345678"
-                className="text-xs h-9 font-mono"
+                placeholder="e.g. 27AAAAA0000A1Z5"
+                className="text-xs h-9 font-mono bg-canvas border-line text-ink rounded-lg focus-visible:ring-pine/30"
               />
             </div>
           </div>
@@ -371,7 +377,7 @@ export function SettingsForm({ gym }: SettingsFormProps) {
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-5 h-9"
+          className="bg-pine hover:bg-pine/90 text-white text-xs px-5 h-9 rounded-lg shadow-xs transition"
         >
           <Save className="h-4 w-4 mr-1.5" />
           {isPending ? "Saving..." : "Save Settings"}
@@ -380,4 +386,3 @@ export function SettingsForm({ gym }: SettingsFormProps) {
     </form>
   );
 }
-

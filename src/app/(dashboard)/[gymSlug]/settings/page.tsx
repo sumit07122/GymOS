@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { GymRole, SystemRole } from "@prisma/client";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/design-system/page-header";
 
 interface SettingsPageProps {
   params: Promise<{ gymSlug: string }>;
@@ -14,9 +15,9 @@ interface SettingsPageProps {
 function SettingsSkeleton() {
   return (
     <div className="flex h-96 w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-slate-500 text-xs">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
-        <span>Loading settings...</span>
+      <div className="flex flex-col items-center gap-3 text-muted text-xs">
+        <Loader2 className="h-6 w-6 animate-spin text-pine" />
+        <span>Loading gym business settings...</span>
       </div>
     </div>
   );
@@ -44,14 +45,10 @@ async function SettingsContent({ params }: SettingsPageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Gym Business Settings
-        </h1>
-        <p className="text-xs text-slate-500">
-          Manage your gym profile, contact details, operating schedule, and billing rules.
-        </p>
-      </div>
+      <PageHeader
+        title="Gym Business Settings"
+        description="Manage your business operating profile, operating schedule, contact details, tax compliance rules, and currency."
+      />
 
       <SettingsForm
         gym={{

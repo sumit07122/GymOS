@@ -14,7 +14,13 @@ import {
   ExternalLink,
   ShieldAlert,
   Loader2,
+  PlusCircle,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
+import { StatusBadge } from "@/components/design-system/status-badge";
 
 interface GymItem {
   id: string;
@@ -52,7 +58,7 @@ interface GymsManagementProps {
   totalCount: number;
 }
 
-export function GymsManagement({ initialGyms }: GymsManagementProps) {
+export function GymsManagement({ initialGyms, totalCount }: GymsManagementProps) {
   const [gyms, setGyms] = React.useState<GymItem[]>(initialGyms);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL");
@@ -64,12 +70,9 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [modalError, setModalError] = React.useState<string | null>(null);
 
-  const statusBadgeStyle: Record<string, string> = {
-    ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    TRIAL: "bg-blue-50 text-blue-700 border-blue-200",
-    SUSPENDED: "bg-rose-50 text-rose-700 border-rose-200",
-    INACTIVE: "bg-slate-100 text-slate-700 border-slate-200",
-  };
+  const activeCount = gyms.filter((g) => g.status === "ACTIVE").length;
+  const trialCount = gyms.filter((g) => g.status === "TRIAL").length;
+  const suspendedCount = gyms.filter((g) => g.status === "SUSPENDED").length;
 
   const filteredGyms = gyms.filter((g) => {
     const matchesStatus = statusFilter === "ALL" || g.status === statusFilter;
@@ -127,40 +130,72 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-slate-800" />
-            <span>Registered Gym Workspaces</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage multi-tenant gym accounts, SaaS subscriptions, and account security.
-          </p>
-        </div>
+      <PageHeader
+        title="Registered Gym Workspaces"
+        description="Oversee multi-tenant gym instances, subscription lifecycle, owner assignments, and access enforcement."
+        actions={
+          <Link href="/platform-admin/gyms/new">
+            <Button className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 rounded-lg shadow-xs transition">
+              <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
+              <span>Onboard Gym Workspace</span>
+            </Button>
+          </Link>
+        }
+      />
+
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Workspaces"
+          value={totalCount}
+          icon={Building2}
+          subtext="Configured tenants"
+        />
+        <StatCard
+          label="Active Tenants"
+          value={activeCount}
+          icon={CheckCircle2}
+          trend={{ value: `${Math.round((activeCount / (totalCount || 1)) * 100)}% active`, isPositive: true }}
+          subtext="Operational"
+        />
+        <StatCard
+          label="In Evaluation Trial"
+          value={trialCount}
+          icon={Clock}
+          subtext="Evaluation window"
+        />
+        <StatCard
+          label="Suspended Workspaces"
+          value={suspendedCount}
+          icon={AlertTriangle}
+          trend={suspendedCount > 0 ? { value: "Action required", isPositive: false } : undefined}
+          subtext="Restricted access"
+        />
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-line shadow-xs">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by gym name, slug, or owner email..."
-            className="pl-9 text-xs h-9"
+            className="pl-9 text-xs h-9 border-line focus:ring-pine/30 focus:border-pine"
           />
         </div>
 
-        {/* Status Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto">
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-canvas border border-line self-start sm:self-auto text-xs">
           {["ALL", "ACTIVE", "TRIAL", "SUSPENDED", "INACTIVE"].map((st) => (
             <button
+              type="button"
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
                 statusFilter === st
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white text-pine shadow-xs border border-line/60"
+                  : "text-muted hover:text-ink"
               }`}
             >
               {st}
@@ -170,122 +205,115 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
       </div>
 
       {/* Gyms Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+            <thead className="bg-canvas border-b border-line text-muted uppercase tracking-wider text-[10px] font-semibold">
               <tr>
                 <th className="px-5 py-3">Gym Workspace</th>
                 <th className="px-5 py-3">Owner / Contact</th>
-                <th className="px-5 py-3">SaaS Tier & Status</th>
-                <th className="px-5 py-3">Members</th>
+                <th className="px-5 py-3">SaaS Tier & Billing</th>
+                <th className="px-5 py-3">Capacity</th>
                 <th className="px-5 py-3">Account Status</th>
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-line/60 text-ink">
               {filteredGyms.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-slate-400">
+                  <td colSpan={6} className="px-5 py-12 text-center text-muted">
                     No gyms match the selected search or status criteria.
                   </td>
                 </tr>
               ) : (
-                filteredGyms.map((gym) => {
-                  const badgeClass =
-                    statusBadgeStyle[gym.status] || "bg-slate-100 text-slate-700 border-slate-200";
+                filteredGyms.map((gym) => (
+                  <tr key={gym.id} className="hover:bg-canvas/60 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <Link
+                        href={`/platform-admin/gyms/${gym.id}`}
+                        className="font-bold text-ink hover:text-pine transition-colors block"
+                      >
+                        {gym.name}
+                      </Link>
+                      <span className="text-[11px] text-muted font-mono">
+                        /{gym.slug} • {gym.currency}
+                      </span>
+                    </td>
 
-                  return (
-                    <tr key={gym.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <Link
-                          href={`/platform-admin/gyms/${gym.id}`}
-                          className="font-bold text-slate-900 hover:text-indigo-600 transition-colors block"
-                        >
-                          {gym.name}
-                        </Link>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          /{gym.slug} • {gym.currency}
-                        </span>
-                      </td>
+                    <td className="px-5 py-3.5">
+                      {gym.owner ? (
+                        <div>
+                          <span className="font-semibold text-ink block">
+                            {gym.owner.name || "Owner"}
+                          </span>
+                          <span className="text-[11px] text-muted">
+                            {gym.owner.email}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted text-[11px]">Unassigned</span>
+                      )}
+                    </td>
 
-                      <td className="px-5 py-3.5">
-                        {gym.owner ? (
-                          <div>
-                            <span className="font-semibold text-slate-800 block">
-                              {gym.owner.name || "Owner"}
-                            </span>
-                            <span className="text-[11px] text-slate-400">
-                              {gym.owner.email}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 text-[11px]">Unassigned</span>
-                        )}
-                      </td>
-
-                      <td className="px-5 py-3.5">
-                        {gym.subscription ? (
-                          <div>
-                            <span className="font-bold text-slate-900 block">
-                              {gym.subscription.planName}
-                            </span>
-                            <span className="text-[10px] uppercase font-semibold text-slate-500">
-                              {gym.subscription.billingPeriod} • {gym.subscription.status}
-                            </span>
-                          </div>
-                        ) : (
-                          <Badge variant="outline" className="text-[10px] text-slate-400 border-dashed">
-                            No SaaS Plan
-                          </Badge>
-                        )}
-                      </td>
-
-                      <td className="px-5 py-3.5">
-                        <span className="font-bold text-slate-900">{gym.memberCount}</span>
-                        <span className="text-slate-400 text-[11px] block">
-                          {gym.staffCount} staff
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-3.5">
-                        <Badge variant="outline" className={`${badgeClass} text-[10px] font-bold`}>
-                          {gym.status}
+                    <td className="px-5 py-3.5">
+                      {gym.subscription ? (
+                        <div>
+                          <span className="font-bold text-ink block">
+                            {gym.subscription.planName}
+                          </span>
+                          <span className="text-[10px] uppercase font-semibold text-muted">
+                            {gym.subscription.billingPeriod} • {gym.subscription.status}
+                          </span>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-muted border-dashed">
+                          No SaaS Plan
                         </Badge>
-                      </td>
+                      )}
+                    </td>
 
-                      <td className="px-5 py-3.5 text-right space-x-2">
-                        <Link
-                          href={`/platform-admin/gyms/${gym.id}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                    <td className="px-5 py-3.5">
+                      <span className="font-bold text-ink">{gym.memberCount}</span>
+                      <span className="text-muted text-[11px] block">
+                        {gym.staffCount} staff • {gym.classesCount} classes
+                      </span>
+                    </td>
+
+                    <td className="px-5 py-3.5">
+                      <StatusBadge status={gym.status} />
+                    </td>
+
+                    <td className="px-5 py-3.5 text-right space-x-2">
+                      <Link
+                        href={`/platform-admin/gyms/${gym.id}`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-ink bg-canvas border border-line hover:bg-white hover:text-pine transition-colors"
+                      >
+                        <span>Workspace</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+
+                      {gym.status === GymStatus.SUSPENDED ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenStatusModal(gym, GymStatus.ACTIVE)}
+                          className="h-7 text-xs border-pine/30 text-pine hover:bg-pine-soft"
                         >
-                          <span>Manage</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-
-                        {gym.status === GymStatus.SUSPENDED ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenStatusModal(gym, GymStatus.ACTIVE)}
-                            className="h-7 text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                          >
-                            Reactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenStatusModal(gym, GymStatus.SUSPENDED)}
-                            className="h-7 text-xs border-rose-200 text-rose-700 hover:bg-rose-50"
-                          >
-                            Suspend
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
+                          Reactivate
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenStatusModal(gym, GymStatus.SUSPENDED)}
+                          className="h-7 text-xs border-rose-200 text-rose-700 hover:bg-rose-50"
+                        >
+                          Suspend
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -294,14 +322,14 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
 
       {/* Suspend / Reactivate Audit Modal */}
       {selectedGym && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-line space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3">
               <div
                 className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
                   newStatus === GymStatus.SUSPENDED
                     ? "bg-rose-100 text-rose-700"
-                    : "bg-emerald-100 text-emerald-700"
+                    : "bg-pine-soft text-pine"
                 }`}
               >
                 {newStatus === GymStatus.SUSPENDED ? (
@@ -311,38 +339,38 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
                 )}
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-sm font-bold text-ink">
                   {newStatus === GymStatus.SUSPENDED ? "Suspend Gym Workspace" : "Reactivate Gym Workspace"}
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted">
                   Target: <strong>{selectedGym.name}</strong> (/{selectedGym.slug})
                 </p>
               </div>
             </div>
 
             {newStatus === GymStatus.SUSPENDED && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs leading-relaxed">
                 Suspending this gym will immediately block owner, staff, and member login. All SaaS feature entitlements and public website pages will be deactivated.
               </div>
             )}
 
             {modalError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handleConfirmStatusChange} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
-                  Mandatory Audit Reason
+                <label className="text-xs font-semibold text-ink block mb-1">
+                  Mandatory Audit Reason *
                 </label>
                 <textarea
                   rows={3}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Terms of Service violation, non-payment, owner requested reactivation..."
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full text-xs p-2.5 rounded-lg border border-line focus:outline-hidden focus:ring-2 focus:ring-pine/30 focus:border-pine transition"
                   required
                 />
               </div>
@@ -352,17 +380,17 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setSelectedGym(null)}
-                  className="text-xs"
+                  className="text-xs h-9 border-line hover:bg-canvas"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`text-xs ${
+                  className={`text-xs h-9 font-semibold ${
                     newStatus === GymStatus.SUSPENDED
                       ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      : "bg-pine hover:bg-pine/90 text-white"
                   }`}
                 >
                   {isSubmitting ? (

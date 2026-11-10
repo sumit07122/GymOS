@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/auth/guards";
-import { Sliders, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
+import { Sliders, CheckCircle2, Lock, ExternalLink, ShieldCheck, Layers } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -13,6 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SaasFeature, isFeatureIncludedInPlan } from "@/lib/saas/entitlements";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
 
 const trackedFeatures = [
   { key: SaasFeature.ATTENDANCE_QR, label: "Attendance QR" },
@@ -45,103 +47,153 @@ export default async function PlatformAdminEntitlementsPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const fullSuiteCount = gyms.filter((g) => {
+    if (!g.subscription?.plan) return false;
+    return trackedFeatures.every((f) =>
+      isFeatureIncludedInPlan(g.subscription!.plan, f.key)
+    );
+  }).length;
+
+  const overridesCount = gyms.filter((g) => {
+    return Boolean(g.subscription?.customFeatureOverrides);
+  }).length;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-            <Sliders className="h-6 w-6 text-amber-400" />
-            <span>Tenant Entitlement Matrix</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Global view of enabled and restricted platform modules across all active tenant workspaces.
-          </p>
-        </div>
+      {/* Header */}
+      <PageHeader
+        title="Tenant Entitlement Matrix"
+        description="Comprehensive audit of enabled platform capabilities, base plan entitlements, add-on licenses, and administrative overrides across all gym workspaces."
+        breadcrumbs={[
+          { label: "Overview", href: "/platform-admin" },
+          { label: "Entitlements" },
+        ]}
+      />
+
+      {/* KPI Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard
+          label="Tracked Modules"
+          value={trackedFeatures.length}
+          icon={Layers}
+          subtext="Modular feature gates"
+        />
+        <StatCard
+          label="Full-Suite Workspaces"
+          value={fullSuiteCount}
+          icon={ShieldCheck}
+          trend={{ value: `${gyms.length} total`, isPositive: true }}
+          subtext="All 9 modules active"
+        />
+        <StatCard
+          label="Custom Overrides"
+          value={overridesCount}
+          icon={Sliders}
+          subtext="Admin tailored access"
+        />
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 shadow-lg overflow-x-auto">
-        <Table>
-          <TableHeader className="bg-slate-900/80 border-b border-slate-800">
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 text-xs font-semibold min-w-[160px]">Gym Tenant</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold">Tier Plan</TableHead>
-              {trackedFeatures.map((f) => (
-                <TableHead key={f.key} className="text-slate-400 text-[11px] font-semibold text-center whitespace-nowrap">
-                  {f.label}
+      {/* Matrix Table */}
+      <div className="rounded-2xl border border-line bg-white shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-canvas border-b border-line">
+              <TableRow className="border-line hover:bg-transparent">
+                <TableHead className="text-slate-700 text-xs font-bold uppercase tracking-wider min-w-[200px]">
+                  Gym Workspace
                 </TableHead>
-              ))}
-              <TableHead className="text-slate-400 text-xs font-semibold text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {gyms.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={trackedFeatures.length + 3} className="h-32 text-center text-xs text-slate-500">
-                  No gyms registered yet.
-                </TableCell>
+                <TableHead className="text-slate-700 text-xs font-bold uppercase tracking-wider">Tier Plan</TableHead>
+                {trackedFeatures.map((f) => (
+                  <TableHead key={f.key} className="text-slate-600 text-[11px] font-bold text-center whitespace-nowrap px-2">
+                    {f.label}
+                  </TableHead>
+                ))}
+                <TableHead className="text-slate-700 text-xs font-bold uppercase tracking-wider text-right">Action</TableHead>
               </TableRow>
-            ) : (
-              gyms.map((g) => {
-                const sub = g.subscription;
-                let overrides: Record<string, boolean> = {};
-                try {
-                  overrides = sub?.customFeatureOverrides ? JSON.parse(sub.customFeatureOverrides) : {};
-                } catch {
-                  overrides = {};
-                }
+            </TableHeader>
+            <TableBody>
+              {gyms.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={trackedFeatures.length + 3} className="h-32 text-center text-xs text-slate-500">
+                    No gym workspaces provisioned on the platform yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                gyms.map((gym) => {
+                  const sub = gym.subscription;
 
-                return (
-                  <TableRow key={g.id} className="border-slate-800/60 hover:bg-slate-900/40">
-                    <TableCell className="font-medium text-xs text-white">
-                      <div className="font-bold">{g.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">/{g.slug}</div>
-                    </TableCell>
-                    <TableCell>
-                      {sub?.plan ? (
-                        <Badge variant="outline" className="bg-indigo-950 text-indigo-300 border-indigo-800 text-[10px]">
-                          {sub.plan.name}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-slate-500">No Plan</span>
-                      )}
-                    </TableCell>
+                  let customOverrides: Record<string, boolean> = {};
+                  try {
+                    if (sub?.customFeatureOverrides) {
+                      customOverrides = JSON.parse(sub.customFeatureOverrides);
+                    }
+                  } catch {
+                    // fallback
+                  }
 
-                    {trackedFeatures.map((f) => {
-                      // Check if enabled by plan, override, or addon
-                      const planHasFeature = sub?.plan ? isFeatureIncludedInPlan(sub.plan, f.key) : false;
-                      const hasOverride = typeof overrides[f.key] === "boolean";
-                      const isEnabled = hasOverride ? overrides[f.key] : planHasFeature;
+                  return (
+                    <TableRow key={gym.id} className="border-line/60 hover:bg-canvas/50">
+                      <TableCell className="font-medium text-xs">
+                        <div className="font-bold text-[#0F172A]">{gym.name}</div>
+                        <div className="text-[11px] text-slate-500 font-mono">/{gym.slug}</div>
+                      </TableCell>
 
-                      return (
-                        <TableCell key={f.key} className="text-center">
-                          {isEnabled ? (
-                            <span className="inline-flex items-center justify-center text-emerald-400">
-                              <CheckCircle2 className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center justify-center text-slate-600">
-                              <XCircle className="h-4 w-4" />
-                            </span>
-                          )}
-                        </TableCell>
-                      );
-                    })}
+                      <TableCell>
+                        {sub?.plan ? (
+                          <Badge variant="outline" className="bg-[#E4F2EB] text-[#0B6B4F] border-[#A7F3D0] text-[11px] font-bold px-2.5 py-0.5">
+                            {sub.plan.name}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[11px] text-slate-500 border-dashed">
+                            No Plan
+                          </Badge>
+                        )}
+                      </TableCell>
 
-                    <TableCell className="text-right">
-                      <Link
-                        href={`/platform-admin/gyms/${g.id}`}
-                        className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-                      >
-                        <span>Configure</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                      {trackedFeatures.map((feat) => {
+                        let isEnabled = sub?.plan ? isFeatureIncludedInPlan(sub.plan, feat.key) : false;
+
+                        // Check add-ons
+                        if (sub?.addons?.some((a) => a.addon.featureKey === feat.key)) {
+                          isEnabled = true;
+                        }
+
+                        // Check explicit overrides
+                        if (customOverrides[feat.key] !== undefined) {
+                          isEnabled = customOverrides[feat.key];
+                        }
+
+                        return (
+                          <TableCell key={feat.key} className="text-center py-3">
+                            {isEnabled ? (
+                              <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-[#E4F2EB] text-[#0B6B4F] border border-[#A7F3D0]/60 shadow-2xs">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-slate-100 text-slate-400 border border-slate-200/60">
+                                <Lock className="h-3 w-3" />
+                              </div>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+
+                      <TableCell className="text-right">
+                        <Link
+                          href={`/platform-admin/gyms/${gym.id}`}
+                          className="inline-flex items-center gap-1 text-xs text-[#0B6B4F] hover:text-[#062E23] font-bold hover:underline"
+                        >
+                          <span>Overrides</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

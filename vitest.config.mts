@@ -7,6 +7,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    include: ["tests/**/*.test.{ts,tsx}"],
+    exclude: ["FIXIA-GymOS-Premium-Frontend/**", "node_modules/**"],
   },
   resolve: {
     alias: {

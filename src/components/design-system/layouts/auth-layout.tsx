@@ -44,13 +44,13 @@ export function AuthLayout({
         </Link>
 
         {/* Card Surface */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white p-6 sm:p-8 shadow-2xl backdrop-blur-xs">
+        <div className="w-full rounded-3xl border border-white/20 bg-white p-6 sm:p-8 shadow-2xl ring-1 ring-black/5">
           <div className="mb-6 text-center">
-            <h1 className="font-heading text-xl font-bold text-[#0F172A] sm:text-2xl tracking-tight">
+            <h1 className="font-heading text-xl font-extrabold text-[#0F172A] sm:text-2xl tracking-tight">
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1.5 text-xs text-[#5F6B65]">{subtitle}</p>
+              <p className="mt-1.5 text-xs text-slate-600 font-normal leading-relaxed">{subtitle}</p>
             )}
           </div>
 

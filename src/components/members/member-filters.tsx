@@ -6,6 +6,7 @@ import { Search, Filter, RotateCcw, Download, Upload, Plus } from "lucide-react"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { PageHeader } from "@/components/design-system/page-header";
 
 interface MemberFiltersProps {
   gymSlug: string;
@@ -57,73 +58,68 @@ export function MemberFilters({
   const exportUrl = `/api/gym/${gymSlug}/members/export?${searchParams.toString()}`;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Top action row */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Member Management
-          </h1>
-          <p className="text-xs text-slate-500">
-            Manage your gym roster, membership assignments, profiles, and attendance passes.
-          </p>
-        </div>
+      <PageHeader
+        title="Member Management"
+        description="Manage your gym roster, membership assignments, KYC profiles, and attendance passes."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {/* CSV Export */}
+            <a
+              href={exportUrl}
+              download
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-ink shadow-xs hover:bg-canvas transition"
+            >
+              <Download className="h-3.5 w-3.5 text-muted" />
+              <span>Export CSV</span>
+            </a>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* CSV Export */}
-          <a
-            href={exportUrl}
-            download
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 transition"
-          >
-            <Download className="h-3.5 w-3.5 text-slate-500" />
-            <span>Export CSV</span>
-          </a>
+            {/* CSV Import */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onOpenImportModal}
+              className="text-xs h-9 gap-1.5 border-line bg-white hover:bg-canvas text-ink rounded-lg shadow-xs"
+            >
+              <Upload className="h-3.5 w-3.5 text-muted" />
+              <span>Import CSV</span>
+            </Button>
 
-          {/* CSV Import */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onOpenImportModal}
-            className="text-xs h-9 gap-1.5"
-          >
-            <Upload className="h-3.5 w-3.5 text-slate-500" />
-            <span>Import CSV</span>
-          </Button>
-
-          {/* Add Member button */}
-          <Link
-            href={`/${gymSlug}/members/new`}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Add Member</span>
-          </Link>
-        </div>
-      </div>
+            {/* Add Member button */}
+            <Link
+              href={`/${gymSlug}/members/new`}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-pine px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-pine/90 transition"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Member</span>
+            </Link>
+          </div>
+        }
+      />
 
       {/* Filter bar */}
-      <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xs md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2.5 rounded-xl border border-line bg-white p-3.5 shadow-xs md:flex-row md:items-center md:justify-between">
         <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[240px]">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name, phone, email, or member code..."
-              className="pl-9 text-xs h-9 bg-slate-50 border-slate-200"
+              className="pl-9 text-xs h-9 bg-canvas border-line text-ink placeholder:text-muted rounded-lg focus-visible:ring-pine/30"
             />
           </div>
         </form>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Filter className="h-3.5 w-3.5 text-slate-400" />
+          <div className="flex items-center gap-1.5 text-xs text-muted">
+            <Filter className="h-3.5 w-3.5 text-muted" />
             <select
               value={currentStatus}
               onChange={(e) => applyFilters({ status: e.target.value })}
-              className="rounded-md border border-slate-200 bg-slate-50 h-9 px-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="rounded-lg border border-line bg-canvas h-9 px-2 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-pine"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -140,7 +136,7 @@ export function MemberFilters({
             <select
               value={currentPlan}
               onChange={(e) => applyFilters({ planId: e.target.value })}
-              className="rounded-md border border-slate-200 bg-slate-50 h-9 px-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 max-w-[160px] truncate"
+              className="rounded-lg border border-line bg-canvas h-9 px-2 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-pine max-w-[160px] truncate"
             >
               <option value="ALL">All Plans</option>
               {plans.map((p) => (
@@ -155,7 +151,7 @@ export function MemberFilters({
           <select
             value={currentSort}
             onChange={(e) => applyFilters({ sortBy: e.target.value })}
-            className="rounded-md border border-slate-200 bg-slate-50 h-9 px-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="rounded-lg border border-line bg-canvas h-9 px-2 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-pine"
           >
             <option value="joiningDate">Sort: Joining Date</option>
             <option value="name">Sort: Name (A-Z)</option>
@@ -169,7 +165,7 @@ export function MemberFilters({
               type="button"
               variant="ghost"
               onClick={handleReset}
-              className="text-xs h-9 px-2 text-slate-500 hover:text-slate-900"
+              className="text-xs h-9 px-2.5 text-muted hover:text-ink hover:bg-canvas rounded-lg"
             >
               <RotateCcw className="h-3.5 w-3.5 mr-1" />
               Reset
@@ -180,4 +176,3 @@ export function MemberFilters({
     </div>
   );
 }
-

@@ -60,17 +60,17 @@ export default function GymBrandedLoginPage() {
         </Link>
 
         {/* Card Surface */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white p-6 sm:p-8 text-[#0F172A] shadow-2xl backdrop-blur-xs">
+        <div className="w-full rounded-3xl border border-white/20 bg-white p-6 sm:p-8 text-[#0F172A] shadow-2xl ring-1 ring-black/5">
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E4F2EB] text-[#0B6B4F] mx-auto mb-3 font-bold text-lg">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E4F2EB] text-[#0B6B4F] mx-auto mb-3 font-bold text-lg border border-[#A7F3D0]/60 shadow-2xs">
               <Building2 className="h-6 w-6" />
             </div>
 
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+            <h1 className="font-heading text-xl sm:text-2xl font-extrabold tracking-tight text-[#0F172A]">
               {gymDisplayName}
             </h1>
-            <p className="mt-1 text-xs text-[#5F6B65]">
+            <p className="mt-1 text-xs text-slate-600 font-normal leading-relaxed">
               Member Portal & Digital Pass Sign In
             </p>
           </div>

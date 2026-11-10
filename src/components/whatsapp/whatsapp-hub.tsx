@@ -103,10 +103,10 @@ interface WhatsAppHubProps {
     pagination: {
       page: number;
       limit: number;
-      totalPages: number;
       totalCount: number;
-      consentedCount: number;
+      totalPages: number;
       optInRate: number;
+      consentedCount: number;
     };
   };
   historyData: {
@@ -114,8 +114,8 @@ interface WhatsAppHubProps {
     pagination: {
       page: number;
       limit: number;
-      totalPages: number;
       totalCount: number;
+      totalPages: number;
     };
   };
 }
@@ -148,13 +148,13 @@ export function WhatsAppHub({
       />
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-slate-200 overflow-x-auto space-x-1 sm:space-x-2">
+      <div className="flex border-b border-line overflow-x-auto space-x-1 sm:space-x-2 text-xs font-semibold">
         <button
           onClick={() => setActiveTab("preferences")}
-          className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 whitespace-nowrap transition-colors ${
             activeTab === "preferences"
-              ? "border-emerald-600 text-emerald-700 bg-emerald-50/40 rounded-t-lg"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
           <BellRing className="h-3.5 w-3.5" />
@@ -163,10 +163,10 @@ export function WhatsAppHub({
 
         <button
           onClick={() => setActiveTab("provider")}
-          className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 whitespace-nowrap transition-colors ${
             activeTab === "provider"
-              ? "border-emerald-600 text-emerald-700 bg-emerald-50/40 rounded-t-lg"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
           <Settings className="h-3.5 w-3.5" />
@@ -175,22 +175,22 @@ export function WhatsAppHub({
 
         <button
           onClick={() => setActiveTab("templates")}
-          className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 whitespace-nowrap transition-colors ${
             activeTab === "templates"
-              ? "border-emerald-600 text-emerald-700 bg-emerald-50/40 rounded-t-lg"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
           <FileCheck2 className="h-3.5 w-3.5" />
-          <span>Approved Templates (7)</span>
+          <span>Approved Templates ({templates.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab("consent")}
-          className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 whitespace-nowrap transition-colors ${
             activeTab === "consent"
-              ? "border-emerald-600 text-emerald-700 bg-emerald-50/40 rounded-t-lg"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
           <Users className="h-3.5 w-3.5" />
@@ -199,10 +199,10 @@ export function WhatsAppHub({
 
         <button
           onClick={() => setActiveTab("history")}
-          className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 whitespace-nowrap transition-colors ${
             activeTab === "history"
-              ? "border-emerald-600 text-emerald-700 bg-emerald-50/40 rounded-t-lg"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
           <History className="h-3.5 w-3.5" />
@@ -239,7 +239,7 @@ export function WhatsAppHub({
         />
       )}
 
-      {/* Modals */}
+      {/* Test Message Modal */}
       <WhatsAppTestModal
         open={testModalOpen}
         onClose={() => setTestModalOpen(false)}
@@ -247,6 +247,7 @@ export function WhatsAppHub({
         defaultPhone={gym.phone}
       />
 
+      {/* Announcement Broadcast Modal */}
       <WhatsAppAnnouncementModal
         open={announcementModalOpen}
         onClose={() => setAnnouncementModalOpen(false)}
@@ -256,4 +257,3 @@ export function WhatsAppHub({
     </div>
   );
 }
-

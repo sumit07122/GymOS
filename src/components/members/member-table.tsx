@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,6 +32,12 @@ import {
   RotateCcw,
   Users,
   Plus,
+  Phone,
+  Mail,
+  Calendar,
+  CreditCard,
+  ShieldCheck,
+  ArrowRight,
 } from "lucide-react";
 import {
   archiveMemberAction,
@@ -40,6 +45,8 @@ import {
   deleteMemberAction,
 } from "@/lib/actions/member";
 import { MemberStatus } from "@prisma/client";
+import { StatusBadge } from "@/components/design-system/status-badge";
+import { Drawer } from "@/components/design-system/drawer";
 
 export interface MemberListItem {
   id: string;
@@ -83,7 +90,8 @@ export function MemberTable({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Dialog states
+  // Drawer & Dialog states
+  const [drawerMember, setDrawerMember] = React.useState<MemberListItem | null>(null);
   const [memberToArchive, setMemberToArchive] = React.useState<MemberListItem | null>(null);
   const [archiveReason, setArchiveReason] = React.useState("Member request / seasonal pause");
   const [memberToDelete, setMemberToDelete] = React.useState<MemberListItem | null>(null);
@@ -159,7 +167,7 @@ export function MemberTable({
   };
 
   const formatMoney = (val: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency,
       minimumFractionDigits: 0,
@@ -167,67 +175,26 @@ export function MemberTable({
     }).format(val);
   };
 
-  const getStatusBadge = (status: MemberStatus) => {
-    switch (status) {
-      case "ACTIVE":
-        return (
-          <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px]">
-            Active
-          </Badge>
-        );
-      case "INACTIVE":
-        return (
-          <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px]">
-            Inactive
-          </Badge>
-        );
-      case "EXPIRED":
-        return (
-          <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px]">
-            Expired
-          </Badge>
-        );
-      case "FROZEN":
-        return (
-          <Badge className="bg-blue-50 text-blue-800 border-blue-200 text-[10px]">
-            Frozen
-          </Badge>
-        );
-      case "ARCHIVED":
-        return (
-          <Badge className="bg-rose-50 text-rose-800 border-rose-200 text-[10px]">
-            Archived
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-slate-100 text-slate-700 text-[10px]">
-            {status}
-          </Badge>
-        );
-    }
-  };
-
   return (
     <>
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-line bg-white shadow-xs overflow-hidden">
         {members.length === 0 ? (
           <div className="py-16 text-center space-y-4 px-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-muted">
               <Users className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-ink">
                 No Members Found
               </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+              <p className="text-xs text-muted max-w-sm mx-auto mt-1">
                 No members match the current search or filter criteria. Add a member or import your roster from CSV.
               </p>
             </div>
             <div className="flex justify-center gap-2 pt-2">
               <Link
                 href={`/${gymSlug}/members/new`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-pine px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-pine/90 transition"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add First Member</span>
@@ -238,23 +205,23 @@ export function MemberTable({
           <>
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/80">
-                  <TableHead className="text-xs font-semibold text-slate-700">Member</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700">Contact</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700">Membership</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700">Status</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700">Dues</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700">Joined</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-700 text-right">Actions</TableHead>
+                <TableRow className="bg-canvas border-b border-line hover:bg-transparent">
+                  <TableHead className="text-xs font-semibold text-muted">Member</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted">Contact</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted">Membership</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted">Status</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted">Dues</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted">Joined</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {members.map((m) => (
-                  <TableRow key={m.id} className="hover:bg-slate-50/60 transition">
+                  <TableRow key={m.id} className="border-line/60 hover:bg-canvas/50 transition">
                     {/* Member Info */}
                     <TableCell className="py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 font-bold text-xs text-white">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pine-soft font-bold text-xs text-pine">
                           {m.photoUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -270,13 +237,15 @@ export function MemberTable({
                           )}
                         </div>
                         <div>
-                          <Link
-                            href={`/${gymSlug}/members/${m.id}`}
-                            className="font-semibold text-xs text-slate-900 hover:text-emerald-700 hover:underline transition"
+                          <button
+                            type="button"
+                            onClick={() => setDrawerMember(m)}
+                            className="font-semibold text-xs text-ink hover:text-pine hover:underline text-left transition flex items-center gap-1.5"
                           >
-                            {m.firstName} {m.lastName}
-                          </Link>
-                          <div className="text-[10px] font-mono text-slate-400">
+                            <span>{m.firstName} {m.lastName}</span>
+                            <Eye className="h-3 w-3 text-muted hover:text-pine" />
+                          </button>
+                          <div className="text-[10px] font-mono text-muted">
                             {m.memberCode}
                           </div>
                         </div>
@@ -285,28 +254,30 @@ export function MemberTable({
 
                     {/* Contact */}
                     <TableCell className="py-3 text-xs">
-                      <div className="text-slate-800">{m.phone || "—"}</div>
-                      <div className="text-[10px] text-slate-400">{m.email || "—"}</div>
+                      <div className="text-ink font-medium">{m.phone || "—"}</div>
+                      <div className="text-[10px] text-muted">{m.email || "—"}</div>
                     </TableCell>
 
                     {/* Membership */}
                     <TableCell className="py-3 text-xs">
                       {m.activeMembership ? (
                         <div>
-                          <span className="font-medium text-slate-900">
+                          <span className="font-semibold text-ink">
                             {m.activeMembership.planName}
                           </span>
-                          <div className="text-[10px] text-slate-400">
+                          <div className="text-[10px] text-muted">
                             Expires {new Date(m.activeMembership.endDate).toLocaleDateString()}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">No active plan</span>
+                        <span className="text-muted italic">No active plan</span>
                       )}
                     </TableCell>
 
                     {/* Status */}
-                    <TableCell className="py-3">{getStatusBadge(m.status)}</TableCell>
+                    <TableCell className="py-3">
+                      <StatusBadge status={m.status} />
+                    </TableCell>
 
                     {/* Dues */}
                     <TableCell className="py-3 text-xs">
@@ -315,48 +286,70 @@ export function MemberTable({
                           {formatMoney(m.outstandingDues)}
                         </span>
                       ) : (
-                        <span className="text-emerald-700 font-medium">Paid</span>
+                        <span className="text-pine font-medium">Cleared</span>
                       )}
                     </TableCell>
 
                     {/* Joined */}
-                    <TableCell className="py-3 text-xs text-slate-500">
+                    <TableCell className="py-3 text-xs text-muted">
                       {new Date(m.joiningDate).toLocaleDateString()}
                     </TableCell>
 
                     {/* Actions Menu */}
                     <TableCell className="py-3 text-right">
-                      <div className="relative inline-block text-left">
+                      <div className="relative inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setDrawerMember(m)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-white text-muted hover:text-pine hover:bg-canvas transition"
+                          title="Quick Member Drawer"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+
                         <button
                           type="button"
                           onClick={() =>
                             setActiveMenuMemberId(activeMenuMemberId === m.id ? null : m.id)
                           }
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-white text-muted hover:bg-canvas hover:text-ink transition"
+                          title="More Actions"
                         >
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
 
                         {activeMenuMemberId === m.id && (
                           <div
-                            className="absolute right-0 top-8 z-50 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl animate-in fade-in-50 zoom-in-95"
+                            className="absolute right-0 top-8 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl animate-in fade-in-50 zoom-in-95 text-left"
                             onMouseLeave={() => setActiveMenuMemberId(null)}
                           >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuMemberId(null);
+                                setDrawerMember(m);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-ink hover:bg-canvas transition"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-muted" />
+                              <span>Preview Profile Drawer</span>
+                            </button>
+
                             <Link
                               href={`/${gymSlug}/members/${m.id}`}
-                              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-ink hover:bg-canvas transition"
                               onClick={() => setActiveMenuMemberId(null)}
                             >
-                              <Eye className="h-3.5 w-3.5 text-slate-400" />
-                              <span>View Profile</span>
+                              <ShieldCheck className="h-3.5 w-3.5 text-muted" />
+                              <span>Full Ledger & History</span>
                             </Link>
 
                             <Link
                               href={`/${gymSlug}/members/${m.id}/edit`}
-                              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-ink hover:bg-canvas transition"
                               onClick={() => setActiveMenuMemberId(null)}
                             >
-                              <Edit className="h-3.5 w-3.5 text-slate-400" />
+                              <Edit className="h-3.5 w-3.5 text-muted" />
                               <span>Edit Details</span>
                             </Link>
 
@@ -367,9 +360,9 @@ export function MemberTable({
                                   setActiveMenuMemberId(null);
                                   handleUnarchive(m);
                                 }}
-                                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50"
+                                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-pine hover:bg-pine-soft transition"
                               >
-                                <RotateCcw className="h-3.5 w-3.5 text-emerald-600" />
+                                <RotateCcw className="h-3.5 w-3.5 text-pine" />
                                 <span>Restore to Active</span>
                               </button>
                             ) : (
@@ -379,14 +372,14 @@ export function MemberTable({
                                   setActiveMenuMemberId(null);
                                   setMemberToArchive(m);
                                 }}
-                                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-amber-700 hover:bg-amber-50"
+                                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-amber-700 hover:bg-amber-50 transition"
                               >
                                 <Archive className="h-3.5 w-3.5 text-amber-600" />
                                 <span>Archive Member</span>
                               </button>
                             )}
 
-                            <div className="my-1 border-t border-slate-100" />
+                            <div className="my-1 border-t border-line" />
 
                             <button
                               type="button"
@@ -394,7 +387,7 @@ export function MemberTable({
                                 setActiveMenuMemberId(null);
                                 setMemberToDelete(m);
                               }}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 transition"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                               <span>Delete Record</span>
@@ -409,10 +402,10 @@ export function MemberTable({
             </Table>
 
             {/* Pagination footer */}
-            <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500 gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between border-t border-line px-4 py-3 text-xs text-muted gap-3">
               <div>
-                Showing <span className="font-semibold text-slate-900">{members.length}</span> of{" "}
-                <span className="font-semibold text-slate-900">{total}</span> total members
+                Showing <span className="font-semibold text-ink">{members.length}</span> of{" "}
+                <span className="font-semibold text-ink">{total}</span> total members
               </div>
 
               <div className="flex items-center gap-2">
@@ -422,13 +415,13 @@ export function MemberTable({
                   size="sm"
                   disabled={page <= 1}
                   onClick={() => navigateToPage(page - 1)}
-                  className="h-8 gap-1 text-xs"
+                  className="h-8 gap-1 text-xs border-line hover:bg-canvas"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                   <span>Previous</span>
                 </Button>
 
-                <span className="px-2 font-medium">
+                <span className="px-2 font-medium text-ink">
                   Page {page} of {totalPages}
                 </span>
 
@@ -438,7 +431,7 @@ export function MemberTable({
                   size="sm"
                   disabled={page >= totalPages}
                   onClick={() => navigateToPage(page + 1)}
-                  className="h-8 gap-1 text-xs"
+                  className="h-8 gap-1 text-xs border-line hover:bg-canvas"
                 >
                   <span>Next</span>
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -448,6 +441,156 @@ export function MemberTable({
           </>
         )}
       </div>
+
+      {/* Member Profile Slide-Over Drawer */}
+      <Drawer
+        isOpen={!!drawerMember}
+        onClose={() => setDrawerMember(null)}
+        title={drawerMember ? `${drawerMember.firstName} ${drawerMember.lastName}` : "Member Profile"}
+        description={drawerMember ? `Member Identifier: ${drawerMember.memberCode}` : undefined}
+        size="md"
+        footer={
+          drawerMember && (
+            <div className="flex items-center justify-between w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  const m = drawerMember;
+                  setDrawerMember(null);
+                  setMemberToArchive(m);
+                }}
+                className="text-xs font-semibold text-amber-700 hover:underline"
+              >
+                Archive Member
+              </button>
+
+              <Link
+                href={`/${gymSlug}/members/${drawerMember.id}`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-pine px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-pine/90 transition"
+              >
+                <span>Full Ledger & History</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          )
+        }
+      >
+        {drawerMember && (
+          <div className="space-y-6">
+            {/* Header Identity Card */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-canvas border border-line">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-pine-soft font-bold text-lg text-pine">
+                {drawerMember.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={drawerMember.photoUrl}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span>
+                    {drawerMember.firstName.charAt(0)}
+                    {drawerMember.lastName.charAt(0)}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h3 className="font-bold text-ink text-base">
+                  {drawerMember.firstName} {drawerMember.lastName}
+                </h3>
+                <p className="font-mono text-xs text-muted">{drawerMember.memberCode}</p>
+                <div className="mt-1">
+                  <StatusBadge status={drawerMember.status} />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Details */}
+            <div className="rounded-xl border border-line p-4 space-y-3">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                Contact Information
+              </h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center gap-2 text-ink">
+                  <Phone className="h-3.5 w-3.5 text-pine" />
+                  <span>{drawerMember.phone || "No phone registered"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-ink">
+                  <Mail className="h-3.5 w-3.5 text-pine" />
+                  <span>{drawerMember.email || "No email registered"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted">
+                  <Calendar className="h-3.5 w-3.5 text-muted" />
+                  <span>Joined on {new Date(drawerMember.joiningDate).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Membership Status */}
+            <div className="rounded-xl border border-line p-4 space-y-3">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                Membership Plan
+              </h4>
+              {drawerMember.activeMembership ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-ink text-sm">
+                      {drawerMember.activeMembership.planName}
+                    </span>
+                    <span className="text-[11px] font-semibold text-pine bg-pine-soft px-2 py-0.5 rounded">
+                      ACTIVE TIER
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted">
+                    Valid until {new Date(drawerMember.activeMembership.endDate).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-xs text-muted italic">
+                  No active membership plan currently assigned.
+                </div>
+              )}
+            </div>
+
+            {/* Financial Dues & Balances */}
+            <div className="rounded-xl border border-line p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                  Outstanding Dues
+                </h4>
+                <CreditCard className="h-4 w-4 text-muted" />
+              </div>
+              <div className="text-lg font-bold text-ink">
+                {drawerMember.outstandingDues > 0 ? (
+                  <span className="text-rose-600">{formatMoney(drawerMember.outstandingDues)}</span>
+                ) : (
+                  <span className="text-pine">All Invoices Settled (₹0.00)</span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <Link
+                href={`/${gymSlug}/members/${drawerMember.id}/edit`}
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-line bg-canvas p-2.5 text-xs font-semibold text-ink hover:bg-line/40 transition"
+              >
+                <Edit className="h-3.5 w-3.5 text-muted" />
+                <span>Edit Profile</span>
+              </Link>
+
+              <Link
+                href={`/${gymSlug}/attendance`}
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-line bg-canvas p-2.5 text-xs font-semibold text-ink hover:bg-line/40 transition"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-muted" />
+                <span>Verify Access</span>
+              </Link>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       {/* Archive Member Confirmation Dialog */}
       <Dialog
@@ -459,17 +602,17 @@ export function MemberTable({
           }
         }}
       >
-        <DialogContent className="max-w-md bg-white border border-slate-200 shadow-2xl p-6">
+        <DialogContent className="max-w-md bg-white border border-line shadow-2xl p-6">
           <DialogHeader className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
                 <Archive className="h-4 w-4" />
               </div>
-              <DialogTitle className="text-base font-bold text-slate-900">
+              <DialogTitle className="text-base font-bold text-ink">
                 Archive Member
               </DialogTitle>
             </div>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-muted">
               Archiving deactivates membership without destroying historical attendance or payment ledgers.
             </DialogDescription>
           </DialogHeader>
@@ -481,16 +624,16 @@ export function MemberTable({
           )}
 
           <div className="space-y-3 py-2 text-xs">
-            <div className="rounded-lg bg-slate-50 p-3 text-slate-700">
-              <span className="text-slate-500">Member: </span>
-              <span className="font-semibold text-slate-900">
+            <div className="rounded-lg bg-canvas p-3 text-ink">
+              <span className="text-muted">Member: </span>
+              <span className="font-semibold text-ink">
                 {memberToArchive?.firstName} {memberToArchive?.lastName}
               </span>{" "}
-              <span className="font-mono text-slate-500">({memberToArchive?.memberCode})</span>
+              <span className="font-mono text-muted">({memberToArchive?.memberCode})</span>
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="archive-reason" className="font-medium text-slate-700">
+              <label htmlFor="archive-reason" className="font-medium text-ink">
                 Archive Reason
               </label>
               <input
@@ -498,7 +641,7 @@ export function MemberTable({
                 value={archiveReason}
                 onChange={(e) => setArchiveReason(e.target.value)}
                 placeholder="Reason for archiving..."
-                className="w-full rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full rounded-lg border border-line bg-white p-2.5 text-xs text-ink focus:border-amber-500 focus:outline-hidden focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
@@ -508,7 +651,7 @@ export function MemberTable({
               type="button"
               variant="outline"
               onClick={() => setMemberToArchive(null)}
-              className="text-xs"
+              className="text-xs border-line"
             >
               Cancel
             </Button>
@@ -534,17 +677,17 @@ export function MemberTable({
           }
         }}
       >
-        <DialogContent className="max-w-md bg-white border border-slate-200 shadow-2xl p-6">
+        <DialogContent className="max-w-md bg-white border border-line shadow-2xl p-6">
           <DialogHeader className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
                 <Trash2 className="h-4 w-4" />
               </div>
-              <DialogTitle className="text-base font-bold text-slate-900">
+              <DialogTitle className="text-base font-bold text-ink">
                 Delete Member Record
               </DialogTitle>
             </div>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-muted">
               Permanent deletion check.
             </DialogDescription>
           </DialogHeader>
@@ -558,10 +701,10 @@ export function MemberTable({
               <p className="leading-relaxed">{actionError}</p>
             </div>
           ) : (
-            <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+            <div className="space-y-3 py-2 text-xs text-muted leading-relaxed">
               <p>
                 Are you sure you want to permanently delete{" "}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-ink">
                   {memberToDelete?.firstName} {memberToDelete?.lastName}
                 </span>{" "}
                 ({memberToDelete?.memberCode})?
@@ -582,7 +725,7 @@ export function MemberTable({
                 setMemberToDelete(null);
                 setActionError(null);
               }}
-              className="text-xs"
+              className="text-xs border-line"
             >
               Close
             </Button>

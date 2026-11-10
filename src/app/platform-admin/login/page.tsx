@@ -43,7 +43,7 @@ function SuperAdminLoginFormContent() {
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#0B6B4F]/30 blur-3xl breathe pointer-events-none" />
 
       {/* Main Container */}
-      <div className="relative z-10 w-full max-w-md my-auto flex flex-col items-center animate-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-md min-w-0 my-auto flex flex-col items-center animate-in zoom-in-95 duration-200">
         <Link
           href="/login"
           className="inline-flex items-center gap-1.5 text-xs text-[#E4F2EB]/70 hover:text-white mb-6 transition"
@@ -53,34 +53,34 @@ function SuperAdminLoginFormContent() {
         </Link>
 
         {/* Card Surface */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white p-6 sm:p-8 text-[#0F172A] shadow-2xl backdrop-blur-xs">
+        <div className="w-full rounded-[16px] border border-white/20 bg-white p-5 sm:p-8 text-[#111613] shadow-xl">
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-3 py-1 text-xs font-semibold text-[#065F46] border border-[#A7F3D0]/60 mb-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-3 py-1 text-xs font-semibold text-[#065F46] border border-[#A7F3D0] mb-3 shadow-2xs">
               <ShieldAlert className="h-3.5 w-3.5 text-[#059669]" />
               <span>FIXIA PLATFORM ADMINISTRATION</span>
             </div>
 
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#111613]">
               Super Admin Authentication
             </h1>
-            <p className="mt-1 text-xs text-[#5F6B65]">
+            <p className="mt-1 text-xs text-[#5F6B65] font-normal leading-relaxed">
               Strictly restricted to authorized FIXIA cloud platform architects
             </p>
           </div>
 
           <form action={formAction} className="space-y-4">
             {state?.error && (
-              <div className="rounded-xl bg-[#FEF2F2] border border-[#FECACA] p-3 text-xs text-[#991B1B] flex items-start gap-2.5 animate-in fade-in">
+              <div className="rounded-[10px] bg-[#FEF2F2] border border-[#FECACA] p-3 text-xs text-[#991B1B] flex items-start gap-2.5 animate-in fade-in">
                 <AlertCircle className="h-4 w-4 shrink-0 text-[#DC2626] mt-0.5" />
                 <span>{state.error}</span>
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#0F172A] flex justify-between" htmlFor="admin-email">
+              <label className="text-xs font-semibold text-[#111613] flex justify-between" htmlFor="admin-email">
                 <span>Super Admin Root Email</span>
-                <span className="text-[10px] text-[#0B6B4F] font-mono font-medium">Root Access</span>
+                <span className="text-[10px] text-[#0B6B4F] font-mono font-medium">Root access</span>
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A099] pointer-events-none" />
@@ -92,13 +92,13 @@ function SuperAdminLoginFormContent() {
                   required
                   placeholder="admin@fixia.in"
                   disabled={isPending}
-                  className="w-full rounded-lg border border-[#E3E7E4] bg-white py-2 pl-9 pr-3 text-xs text-[#0F172A] placeholder:text-[#94A099] focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F] disabled:bg-[#F8FAFC]"
+                  className="w-full rounded-[10px] border border-[#E3E7E4] bg-white py-2 pl-9 pr-3 text-xs text-[#111613] placeholder:text-[#94A099] focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F] disabled:bg-[#F8FAFC]"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#0F172A]" htmlFor="admin-password">
+              <label className="text-xs font-semibold text-[#111613]" htmlFor="admin-password">
                 Root Password
               </label>
               <div className="relative">
@@ -111,12 +111,12 @@ function SuperAdminLoginFormContent() {
                   required
                   placeholder="••••••••••••"
                   disabled={isPending}
-                  className="w-full rounded-lg border border-[#E3E7E4] bg-white py-2 pl-9 pr-9 text-xs text-[#0F172A] placeholder:text-[#94A099] font-mono focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F] disabled:bg-[#F8FAFC]"
+                  className="w-full rounded-[10px] border border-[#E3E7E4] bg-white py-2 pl-9 pr-9 text-xs text-[#111613] placeholder:text-[#94A099] font-mono focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F] disabled:bg-[#F8FAFC]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A099] hover:text-[#0F172A]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A099] hover:text-[#111613]"
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -128,12 +128,12 @@ function SuperAdminLoginFormContent() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B6B4F] py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-[#09543E] transition-colors disabled:opacity-60 cursor-pointer"
+              className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#0B6B4F] py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-[#09543E] transition-colors disabled:opacity-60 cursor-pointer"
             >
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Verifying Root Credentials...</span>
+                  <span>Verifying root credentials...</span>
                 </>
               ) : (
                 <>
@@ -145,7 +145,7 @@ function SuperAdminLoginFormContent() {
           </form>
 
           {/* Audit Notice */}
-          <div className="mt-5 rounded-xl border border-[#E3E7E4] bg-[#F8FAFC] p-3 text-[11px] text-[#5F6B65] flex items-start gap-2">
+          <div className="mt-5 rounded-[10px] border border-[#E3E7E4] bg-[#F8FAFC] p-3 text-[11px] text-[#5F6B65] flex items-start gap-2">
             <FileText className="h-3.5 w-3.5 text-[#0B6B4F] shrink-0 mt-0.5" />
             <span>
               All authentication attempts, IP origins, and platform administrative actions are written to immutable audit logs.

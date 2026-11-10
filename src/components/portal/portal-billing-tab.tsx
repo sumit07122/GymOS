@@ -81,27 +81,27 @@ export function PortalBillingTab({
     switch (status) {
       case "PAID":
         return (
-          <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-[10px]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#E4F2EB] px-2 py-0.5 text-[10px] font-semibold text-[#0B6B4F] border border-[#A7F3D0]">
             Paid
-          </Badge>
+          </span>
         );
       case "PARTIALLY_PAID":
         return (
-          <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-[10px]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200">
             Partially Paid
-          </Badge>
+          </span>
         );
       case "VOID":
         return (
-          <Badge className="bg-slate-100 text-slate-500 text-[10px]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-semibold text-[#64748B] border border-[#E2E8F0]">
             Void
-          </Badge>
+          </span>
         );
       default:
         return (
-          <Badge className="bg-rose-500/15 text-rose-700 border-rose-500/30 text-[10px]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 border border-rose-200">
             Unpaid
-          </Badge>
+          </span>
         );
     }
   };
@@ -113,45 +113,45 @@ export function PortalBillingTab({
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-6">
       {/* 1. Financial Overview Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
             Total Invoiced
           </span>
-          <div className="mt-1 text-2xl font-bold text-slate-900">
+          <div className="mt-1 text-2xl font-bold text-[#0F172A]">
             {gym.currency} {billing.totalInvoiced.toFixed(2)}
           </div>
-          <span className="text-[11px] text-slate-500">
+          <span className="text-[11px] text-[#64748B]">
             {billing.invoices.length} invoices issued
           </span>
         </div>
 
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 shadow-sm">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+        <div className="rounded-xl border border-[#A7F3D0] bg-[#E4F2EB]/50 p-4 shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#0B6B4F]">
             Total Paid
           </span>
-          <div className="mt-1 text-2xl font-bold text-emerald-900">
+          <div className="mt-1 text-2xl font-bold text-[#0B6B4F]">
             {gym.currency} {billing.totalPaid.toFixed(2)}
           </div>
-          <span className="text-[11px] text-emerald-600">
+          <span className="text-[11px] text-[#064E3B]">
             {billing.payments.length} transactions completed
           </span>
         </div>
 
         <div
-          className={`rounded-2xl p-4 shadow-sm border ${
+          className={`rounded-xl p-4 shadow-xs border ${
             billing.outstandingBalance > 0
-              ? "border-amber-200 bg-amber-50/60"
-              : "border-slate-200 bg-white"
+              ? "border-amber-200 bg-amber-50/70"
+              : "border-[#E2E8F0] bg-white"
           }`}
         >
           <span
             className={`text-[11px] font-semibold uppercase tracking-wider ${
               billing.outstandingBalance > 0
                 ? "text-amber-800"
-                : "text-slate-400"
+                : "text-[#64748B]"
             }`}
           >
             Outstanding Dues
@@ -160,7 +160,7 @@ export function PortalBillingTab({
             className={`mt-1 text-2xl font-bold ${
               billing.outstandingBalance > 0
                 ? "text-amber-900"
-                : "text-slate-900"
+                : "text-[#0F172A]"
             }`}
           >
             {gym.currency} {billing.outstandingBalance.toFixed(2)}
@@ -169,7 +169,7 @@ export function PortalBillingTab({
             className={`text-[11px] ${
               billing.outstandingBalance > 0
                 ? "text-amber-700 font-medium"
-                : "text-slate-500"
+                : "text-[#64748B]"
             }`}
           >
             {billing.outstandingBalance > 0
@@ -180,21 +180,21 @@ export function PortalBillingTab({
       </div>
 
       {/* 2. Invoices & Receipts List */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-xs">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
           <div className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900">
+            <Receipt className="h-4 w-4 text-[#0B6B4F]" />
+            <h2 className="text-sm font-bold text-[#0F172A]">
               Invoices & Official Receipts
             </h2>
           </div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[#64748B]">
             {billing.invoices.length} invoices
           </span>
         </div>
 
         {billing.invoices.length > 0 ? (
-          <div className="mt-3 divide-y divide-slate-100">
+          <div className="mt-3 divide-y divide-[#F1F5F9]">
             {billing.invoices.map((inv) => (
               <div
                 key={inv.id}
@@ -202,14 +202,14 @@ export function PortalBillingTab({
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900">
+                    <span className="font-mono text-xs font-bold text-[#0F172A]">
                       {inv.invoiceNumber}
                     </span>
                     {getStatusBadge(inv.status)}
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1">
+                  <div className="flex items-center gap-3 text-[11px] text-[#64748B] mt-1">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
+                      <Calendar className="h-3 w-3 text-[#0B6B4F]" />
                       Issued: {new Date(inv.issueDate).toLocaleDateString()}
                     </span>
                     <span>•</span>
@@ -221,7 +221,7 @@ export function PortalBillingTab({
 
                 <div className="flex items-center gap-4 justify-between sm:justify-end">
                   <div className="text-right">
-                    <div className="text-xs font-bold text-slate-900">
+                    <div className="text-xs font-bold text-[#0F172A]">
                       {gym.currency} {inv.totalAmount.toFixed(2)}
                     </div>
                     {inv.dueAmount > 0 ? (
@@ -229,7 +229,7 @@ export function PortalBillingTab({
                         Due: {gym.currency} {inv.dueAmount.toFixed(2)}
                       </span>
                     ) : (
-                      <span className="text-[10px] text-emerald-600 font-medium">
+                      <span className="text-[10px] text-[#0B6B4F] font-medium">
                         Settled
                       </span>
                     )}
@@ -239,9 +239,9 @@ export function PortalBillingTab({
                     size="sm"
                     variant="outline"
                     onClick={() => setSelectedInvoice(inv)}
-                    className="h-8 text-xs gap-1 border-slate-200"
+                    className="h-7 text-xs gap-1 border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC]"
                   >
-                    <FileText className="h-3.5 w-3.5" />
+                    <FileText className="h-3.5 w-3.5 text-[#0B6B4F]" />
                     <span>View Receipt</span>
                   </Button>
                 </div>
@@ -249,28 +249,28 @@ export function PortalBillingTab({
             ))}
           </div>
         ) : (
-          <div className="py-8 text-center text-xs text-slate-500">
+          <div className="py-8 text-center text-xs text-[#64748B]">
             No invoices have been issued to your account yet.
           </div>
         )}
       </div>
 
       {/* 3. Payment History Ledger */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-xs">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
           <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900">
+            <CreditCard className="h-4 w-4 text-[#0B6B4F]" />
+            <h2 className="text-sm font-bold text-[#0F172A]">
               Payment History
             </h2>
           </div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[#64748B]">
             {billing.payments.length} transactions
           </span>
         </div>
 
         {billing.payments.length > 0 ? (
-          <div className="mt-3 divide-y divide-slate-100">
+          <div className="mt-3 divide-y divide-[#F1F5F9]">
             {billing.payments.map((p) => (
               <div
                 key={p.id}
@@ -278,14 +278,14 @@ export function PortalBillingTab({
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900">
+                    <span className="font-mono text-xs font-bold text-[#0F172A]">
                       {p.paymentNumber}
                     </span>
-                    <Badge variant="outline" className="text-[10px] uppercase font-mono">
+                    <Badge variant="outline" className="text-[10px] uppercase font-mono border-[#E2E8F0] text-[#64748B]">
                       {p.method}
                     </Badge>
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  <span className="text-[11px] text-[#64748B] mt-0.5 block">
                     {new Date(p.receivedAt).toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "short",
@@ -297,10 +297,10 @@ export function PortalBillingTab({
                 </div>
 
                 <div className="text-right">
-                  <span className="text-sm font-bold text-emerald-700">
+                  <span className="text-sm font-bold text-[#0B6B4F]">
                     +{gym.currency} {p.amount.toFixed(2)}
                   </span>
-                  <div className="flex items-center justify-end gap-1 text-[10px] text-emerald-600">
+                  <div className="flex items-center justify-end gap-1 text-[10px] text-[#0B6B4F]">
                     <CheckCircle2 className="h-3 w-3" />
                     <span>Completed</span>
                   </div>
@@ -309,7 +309,7 @@ export function PortalBillingTab({
             ))}
           </div>
         ) : (
-          <div className="py-8 text-center text-xs text-slate-500">
+          <div className="py-8 text-center text-xs text-[#64748B]">
             No payments recorded yet.
           </div>
         )}
@@ -324,12 +324,12 @@ export function PortalBillingTab({
           <DialogContent className="max-w-md p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-between">
-                <span>Payment Receipt</span>
+                <span className="text-sm font-bold text-[#0F172A]">Payment Receipt</span>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={handlePrint}
-                  className="h-8 gap-1 text-xs"
+                  className="h-7 gap-1 text-xs text-[#0B6B4F]"
                 >
                   <Printer className="h-3.5 w-3.5" />
                   Print
@@ -337,26 +337,26 @@ export function PortalBillingTab({
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 text-xs text-slate-700 mt-2">
+            <div className="space-y-4 text-xs text-[#334155] mt-2">
               {/* Gym Header */}
-              <div className="text-center border-b border-slate-200 pb-3">
-                <h3 className="font-bold text-base text-slate-900 uppercase">
+              <div className="text-center border-b border-[#E2E8F0] pb-3">
+                <h3 className="font-bold text-base text-[#0F172A] uppercase">
                   {gym.name}
                 </h3>
-                {gym.address && <p className="text-slate-500">{gym.address}</p>}
-                {gym.phone && <p className="text-slate-500">Tel: {gym.phone}</p>}
+                {gym.address && <p className="text-[#64748B]">{gym.address}</p>}
+                {gym.phone && <p className="text-[#64748B]">Tel: {gym.phone}</p>}
               </div>
 
               {/* Receipt Details */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg font-mono">
+              <div className="grid grid-cols-2 gap-2 bg-[#F8FAFC] p-3 rounded-lg font-mono border border-[#E2E8F0]">
                 <div>
-                  <span className="text-slate-400 block text-[10px]">
+                  <span className="text-[#64748B] block text-[10px]">
                     INVOICE NO
                   </span>
-                  <span className="font-bold">{selectedInvoice.invoiceNumber}</span>
+                  <span className="font-bold text-[#0F172A]">{selectedInvoice.invoiceNumber}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">
+                  <span className="text-[#64748B] block text-[10px]">
                     DATE ISSUED
                   </span>
                   <span>
@@ -364,17 +364,17 @@ export function PortalBillingTab({
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">MEMBER</span>
-                  <span className="font-semibold">{member.fullName}</span>
+                  <span className="text-[#64748B] block text-[10px]">MEMBER</span>
+                  <span className="font-semibold text-[#0F172A]">{member.fullName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">MEMBER ID</span>
+                  <span className="text-[#64748B] block text-[10px]">MEMBER ID</span>
                   <span>{member.memberCode}</span>
                 </div>
               </div>
 
               {/* Line Totals */}
-              <div className="space-y-1.5 border-t border-b border-slate-200 py-3">
+              <div className="space-y-1.5 border-t border-b border-[#E2E8F0] py-3">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>
@@ -387,19 +387,19 @@ export function PortalBillingTab({
                     {gym.currency} {selectedInvoice.taxAmount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between font-bold text-sm text-slate-900 pt-1 border-t border-slate-100">
+                <div className="flex justify-between font-bold text-sm text-[#0F172A] pt-1 border-t border-[#F1F5F9]">
                   <span>Total Amount:</span>
                   <span>
                     {gym.currency} {selectedInvoice.totalAmount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-emerald-700">
+                <div className="flex justify-between text-[#0B6B4F] font-semibold">
                   <span>Amount Paid:</span>
                   <span>
                     {gym.currency} {selectedInvoice.paidAmount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between font-bold text-rose-700">
+                <div className="flex justify-between font-bold text-rose-600">
                   <span>Balance Due:</span>
                   <span>
                     {gym.currency} {selectedInvoice.dueAmount.toFixed(2)}
@@ -410,10 +410,10 @@ export function PortalBillingTab({
               {/* Allocations Breakdown */}
               {selectedInvoice.allocations.length > 0 && (
                 <div>
-                  <span className="font-bold uppercase tracking-wider text-[10px] text-slate-400 block mb-1">
+                  <span className="font-bold uppercase tracking-wider text-[10px] text-[#64748B] block mb-1">
                     Payments Applied
                   </span>
-                  <div className="space-y-1 bg-slate-50 p-2 rounded">
+                  <div className="space-y-1 bg-[#F8FAFC] p-2 rounded border border-[#E2E8F0]">
                     {selectedInvoice.allocations.map((a) => (
                       <div
                         key={a.id}
@@ -422,7 +422,7 @@ export function PortalBillingTab({
                         <span>
                           {a.paymentNumber} ({a.paymentMethod})
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-semibold text-[#0B6B4F]">
                           {gym.currency} {a.amount.toFixed(2)}
                         </span>
                       </div>
@@ -431,8 +431,8 @@ export function PortalBillingTab({
                 </div>
               )}
 
-              <div className="text-center text-[10px] text-slate-400 pt-2 flex items-center justify-center gap-1">
-                <ShieldCheck className="h-3 w-3 text-emerald-600" />
+              <div className="text-center text-[10px] text-[#64748B] pt-2 flex items-center justify-center gap-1">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#0B6B4F]" />
                 <span>Verified System Record • FIXIA GymOS</span>
               </div>
             </div>

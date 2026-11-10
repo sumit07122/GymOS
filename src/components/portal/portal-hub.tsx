@@ -16,6 +16,8 @@ import { PortalMembershipTab } from "./portal-membership-tab";
 import { PortalBillingTab } from "./portal-billing-tab";
 import { PortalAttendanceTab } from "./portal-attendance-tab";
 import { PortalWorkoutsTab } from "./portal-workouts-tab";
+import { PortalProgressTab } from "./portal-progress-tab";
+import { PortalChallengesTab } from "./portal-challenges-tab";
 import { PortalScheduleTab } from "./portal-schedule-tab";
 import { PortalProfileTab } from "./portal-profile-tab";
 
@@ -31,20 +33,20 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
   // Fallback state if user does not have an active Member profile linked to this gym
   if (!initialData.hasLinkedProfile || !initialData.member) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-between">
         <PortalHeader
           gym={initialData.gym}
           member={null}
           isStaffOrAdmin={isStaffOrAdmin}
         />
         <main className="mx-auto max-w-md px-4 py-16 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 shadow-sm mb-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 shadow-xs mb-4">
             <UserCheck className="h-7 w-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className="text-xl font-bold text-[#0F172A]">
             No Member Profile Linked
           </h1>
-          <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+          <p className="mt-2 text-xs text-[#64748B] leading-relaxed">
             Your login account is active, but you do not currently have an active
             member record associated with <strong>{initialData.gym.name}</strong>.
           </p>
@@ -52,15 +54,15 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
           <div className="mt-6 flex flex-col gap-2.5">
             {isStaffOrAdmin ? (
               <Link href={`/${initialData.gym.slug}/dashboard`}>
-                <Button className="w-full text-xs h-9 gap-2 bg-indigo-600 hover:bg-indigo-700">
+                <Button className="w-full text-xs h-9 gap-2 bg-[#0B6B4F] hover:bg-[#047857] text-white">
                   <LayoutDashboard className="h-4 w-4" />
                   <span>Go to Staff / Admin Dashboard</span>
                 </Button>
               </Link>
             ) : (
-              <div className="rounded-xl bg-slate-100 p-3 text-xs text-slate-600">
+              <div className="rounded-xl bg-white border border-[#E2E8F0] p-4 text-xs text-[#64748B] shadow-xs">
                 Please ask your gym front desk staff to link your membership profile with email:{" "}
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-[#0F172A]">
                   {initialData.userEmail || "your account email"}
                 </span>
                 .
@@ -68,14 +70,14 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
             )}
           </div>
         </main>
-        <footer className="py-4 text-center text-xs text-slate-400">
-          FIXIA GymOS • Member Portal
+        <footer className="py-4 text-center text-xs text-[#94A3B8]">
+          FIXIA GymOS • Member Companion
         </footer>
       </div>
     );
   }
 
-  const { gym, member, qrCard, membership, attendance, billing, workouts, classes } =
+  const { gym, member, qrCard, membership, attendance, billing, workouts, classes, challenges } =
     initialData;
 
   // Build unified recent activity feed
@@ -130,7 +132,7 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
     classes.upcoming.find((c: any) => c.isBooked) || null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans antialiased text-[#0F172A]">
       {/* Top Header */}
       <PortalHeader
         gym={gym}
@@ -139,7 +141,7 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
       />
 
       {/* Main Container */}
-      <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 pt-5 pb-20 sm:pb-12">
+      <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 pt-4 pb-20 sm:pb-12">
         {/* Navigation Tabs Bar (Desktop Top Bar) */}
         <PortalBottomNav
           activeTab={activeTab}
@@ -148,7 +150,7 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
         />
 
         {/* Tab Body Router */}
-        <div className="mt-5">
+        <div className="mt-4">
           {activeTab === "home" && (
             <PortalHomeTab
               gym={gym}
@@ -182,7 +184,12 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
           )}
 
           {activeTab === "membership" && (
-            <PortalMembershipTab gym={gym} membership={membership} />
+            <PortalMembershipTab
+              gym={gym}
+              member={member}
+              membership={membership}
+              qrCard={qrCard}
+            />
           )}
 
           {activeTab === "attendance" && (
@@ -195,6 +202,21 @@ export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "h
 
           {activeTab === "workouts" && (
             <PortalWorkoutsTab gymSlug={gym.slug} workouts={workouts} />
+          )}
+
+          {activeTab === "progress" && (
+            <PortalProgressTab
+              gymSlug={gym.slug}
+              attendance={attendance}
+              workouts={workouts}
+            />
+          )}
+
+          {activeTab === "challenges" && (
+            <PortalChallengesTab
+              gymName={gym.name}
+              challenges={challenges || []}
+            />
           )}
 
           {activeTab === "billing" && (

@@ -10,117 +10,11 @@ import { MembershipReportSection } from "@/components/reports/membership-report-
 import { AttendanceReportSection } from "@/components/reports/attendance-report-section";
 import { CrmReportSection } from "@/components/reports/crm-report-section";
 import { OperationsReportSection } from "@/components/reports/operations-report-section";
-import { BarChart3, RefreshCw, AlertCircle } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
+import { PageHeader } from "@/components/design-system/page-header";
+import type { getComprehensiveBusinessReport } from "@/lib/services/report.service";
 
-interface MasterReportData {
-  gym: {
-    name: string;
-    currency: string;
-    timezone: string;
-  };
-  filter: {
-    preset: ReportPreset;
-    label: string;
-    startDate: string;
-    endDate: string;
-  };
-  membership: {
-    totalMembers: number;
-    activeMembers: number;
-    inactiveMembers: number;
-    expiredMemberships: number;
-    newMemberships: number;
-    renewals: number;
-    totalJoinedInRange: number;
-    planDistribution: Array<{
-      planId: string;
-      planName: string;
-      activeCount: number;
-    }>;
-  };
-  attendance: {
-    totalCheckIns: number;
-    uniqueAttendees: number;
-    averageDailyAttendance: number;
-    attendanceTrends: Array<{
-      date: string;
-      checkIns: number;
-      uniqueMembers: number;
-    }>;
-    hourlyDistribution: Array<{
-      hour: number;
-      label: string;
-      checkIns: number;
-    }>;
-    peakHours: Array<{
-      hour: number;
-      count: number;
-      label: string;
-    }>;
-    frequencyBreakdown: {
-      visits1to2: number;
-      visits3to5: number;
-      visits6Plus: number;
-    };
-  };
-  financial: {
-    invoicedAmount: number;
-    paymentsCollected: number;
-    totalRefunds: number;
-    totalAdjustments: number;
-    netRevenue: number;
-    totalExpenses: number;
-    netOperatingIncome: number;
-    totalOutstandingDues: number;
-    paymentMethodBreakdown: Array<{
-      method: string;
-      total: number;
-      count: number;
-    }>;
-    expenseCategoryBreakdown: Array<{
-      category: string;
-      amount: number;
-    }>;
-  };
-  crm: {
-    totalEnquiries: number;
-    convertedLeads: number;
-    lostLeads: number;
-    activeLeads: number;
-    conversionRate: number;
-    enquirySources: Array<{
-      source: string;
-      count: number;
-      converted: number;
-      conversionRate: number;
-    }>;
-    stageDistribution: Array<{
-      stage: string;
-      count: number;
-    }>;
-  };
-  operations: {
-    totalBookings: number;
-    attendedBookings: number;
-    cancelledBookings: number;
-    totalClassCapacity: number;
-    totalClassBooked: number;
-    bookingUtilization: number;
-    stockMovements: Array<{
-      type: string;
-      quantity: number;
-      transactions: number;
-    }>;
-    lowStockCount: number;
-    lowStockItems: Array<{
-      id: string;
-      name: string;
-      sku: string;
-      currentStock: number;
-      reorderPoint: number | null;
-    }>;
-  };
-}
+export type MasterReportData = Awaited<ReturnType<typeof getComprehensiveBusinessReport>>;
 
 interface ReportsHubProps {
   gymSlug: string;
@@ -209,35 +103,31 @@ export function ReportsHub({ gymSlug, initialData }: ReportsHubProps) {
   return (
     <div className="space-y-6">
       {/* Print-Only Header */}
-      <div className="hidden print:block pb-4 mb-4 border-b border-slate-300">
-        <h1 className="text-xl font-black text-slate-900 tracking-tight">
+      <div className="hidden print:block pb-4 mb-4 border-b border-line">
+        <h1 className="text-xl font-black text-ink tracking-tight">
           {data.gym.name} — Business & Operational Report
         </h1>
-        <p className="text-xs text-slate-600 mt-1">
+        <p className="text-xs text-muted mt-1">
           Period: <strong>{data.filter.label}</strong> ({data.filter.startDate.split("T")[0]} to{" "}
-          {data.filter.endDate.split("T")[0]}) • Currency: {data.gym.currency} • Generated:{" "}
+          {data.filter.endDate.split("T")[0]}) &bull; Currency: {data.gym.currency} &bull; Generated:{" "}
           {new Date().toLocaleDateString()}
         </p>
       </div>
 
       {/* Screen Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 print:hidden">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <span className="p-1.5 rounded-xl bg-slate-900 text-white">
-                <BarChart3 className="h-5 w-5" />
-              </span>
-              <span>Reports & Business Analytics</span>
-            </h1>
-            {isPending && (
-              <RefreshCw className="h-4 w-4 text-slate-400 animate-spin" />
-            )}
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real database analytics for financial performance, membership retention, member attendance, and gym operations.
-          </p>
-        </div>
+      <div className="print:hidden">
+        <PageHeader
+          title="Business Analytics & Reports"
+          description="Verified database analytics for financial performance, membership retention, member attendance, and operations."
+          actions={
+            isPending ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-pine bg-pine-soft px-3 py-1.5 rounded-lg">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                <span>Computing Metrics...</span>
+              </div>
+            ) : undefined
+          }
+        />
       </div>
 
       {/* Error Notice */}
@@ -273,94 +163,39 @@ export function ReportsHub({ gymSlug, initialData }: ReportsHubProps) {
         }}
       />
 
-      {/* Content View Based on Active Tab */}
-      <div className={`space-y-8 ${isPending ? "opacity-60 transition-opacity" : ""}`}>
-        {activeSection === "ALL" && (
-          <div className="space-y-10">
-            {/* Financial P&L Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <h2 className="text-base font-bold text-slate-900">
-                  1. Financial Performance & Operating P&L
-                </h2>
-                <span className="text-xs text-slate-400">Accrual vs Cash Accounting</span>
-              </div>
-              <FinancialReportSection
-                currency={data.gym.currency}
-                data={data.financial}
-              />
-            </div>
-
-            {/* Membership Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <h2 className="text-base font-bold text-slate-900">
-                  2. Membership Growth & Plan Distribution
-                </h2>
-                <span className="text-xs text-slate-400">Member Retention & Acquisition</span>
-              </div>
-              <MembershipReportSection data={data.membership} />
-            </div>
-
-            {/* Attendance Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <h2 className="text-base font-bold text-slate-900">
-                  3. Facility Attendance & Peak Hours
-                </h2>
-                <span className="text-xs text-slate-400">Traffic Patterns & Visit Frequency</span>
-              </div>
-              <AttendanceReportSection data={data.attendance} />
-            </div>
-
-            {/* CRM & Leads Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <h2 className="text-base font-bold text-slate-900">
-                  4. Lead Acquisition & CRM Funnel
-                </h2>
-                <span className="text-xs text-slate-400">Channel Attribution & Conversion</span>
-              </div>
-              <CrmReportSection data={data.crm} />
-            </div>
-
-            {/* Operations Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <h2 className="text-base font-bold text-slate-900">
-                  5. Class Schedules & Inventory Operations
-                </h2>
-                <span className="text-xs text-slate-400">Capacity Utilization & Stock Alert</span>
-              </div>
-              <OperationsReportSection data={data.operations} />
-            </div>
-          </div>
-        )}
-
-        {activeSection === "FINANCIAL" && (
+      {/* Tab Sections */}
+      <div className="space-y-8">
+        {(activeSection === "ALL" || activeSection === "FINANCIAL") && (
           <FinancialReportSection
-            currency={data.gym.currency}
             data={data.financial}
+            currency={data.gym.currency}
           />
         )}
 
-        {activeSection === "MEMBERSHIP" && (
-          <MembershipReportSection data={data.membership} />
+        {(activeSection === "ALL" || activeSection === "MEMBERSHIP") && (
+          <MembershipReportSection
+            data={data.membership}
+          />
         )}
 
-        {activeSection === "ATTENDANCE" && (
-          <AttendanceReportSection data={data.attendance} />
+        {(activeSection === "ALL" || activeSection === "ATTENDANCE") && (
+          <AttendanceReportSection
+            data={data.attendance}
+          />
         )}
 
-        {activeSection === "CRM" && (
-          <CrmReportSection data={data.crm} />
+        {(activeSection === "ALL" || activeSection === "CRM") && (
+          <CrmReportSection
+            data={data.crm}
+          />
         )}
 
-        {activeSection === "OPERATIONS" && (
-          <OperationsReportSection data={data.operations} />
+        {(activeSection === "ALL" || activeSection === "OPERATIONS") && (
+          <OperationsReportSection
+            data={data.operations}
+          />
         )}
       </div>
     </div>
   );
 }
-

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,13 +14,19 @@ import {
   Building2,
   CheckCircle2,
   AlertTriangle,
-  ArrowLeft,
   CreditCard,
   FileText,
   ShieldAlert,
   Loader2,
   Sparkles,
+  Users,
+  Calendar,
+  Package,
+  Receipt,
 } from "lucide-react";
+import { PageHeader } from "@/components/design-system/page-header";
+import { StatCard } from "@/components/design-system/stat-card";
+import { StatusBadge } from "@/components/design-system/status-badge";
 
 interface PlanOption {
   id: string;
@@ -122,49 +127,44 @@ export function GymDetailView({ data }: GymDetailViewProps) {
   const [subscriptionStatus, setSubscriptionStatus] = React.useState<SaasSubscriptionStatus>(
     data.subscription?.status || SaasSubscriptionStatus.ACTIVE
   );
+
+  // Parse existing feature overrides
   const [overrides, setOverrides] = React.useState<Record<string, boolean>>(() => {
     try {
-      return data.subscription?.customFeatureOverrides
-        ? JSON.parse(data.subscription.customFeatureOverrides)
-        : {};
+      if (data.subscription?.customFeatureOverrides) {
+        return JSON.parse(data.subscription.customFeatureOverrides);
+      }
     } catch {
-      return {};
+      // fallback
     }
+    return {};
   });
+
   const [isAssigningSub, setIsAssigningSub] = React.useState(false);
   const [subError, setSubError] = React.useState<string | null>(null);
 
-  // Parse plan features
   let planFeaturesList: string[] = [];
-  try {
-    planFeaturesList = data.subscription?.plan.features
-      ? JSON.parse(data.subscription.plan.features)
-      : [];
-  } catch {
-    planFeaturesList = [];
+  if (data.subscription?.plan?.features) {
+    try {
+      planFeaturesList = JSON.parse(data.subscription.plan.features);
+    } catch {
+      planFeaturesList = [];
+    }
   }
-
-  const statusBadgeStyle: Record<string, string> = {
-    ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    TRIAL: "bg-blue-50 text-blue-700 border-blue-200",
-    SUSPENDED: "bg-rose-50 text-rose-700 border-rose-200",
-    INACTIVE: "bg-slate-100 text-slate-700 border-slate-200",
-  };
 
   const handleSaveNotes = async () => {
     setIsSavingNotes(true);
     setNotesFeedback(null);
     try {
-      const res = await updateGymSupportNotesAction(data.gym.id, {
-        notes: supportNotes,
-      });
+      const res = await updateGymSupportNotesAction(data.gym.id, { notes: supportNotes });
       if (res.success) {
         setNotesFeedback("Support notes saved successfully.");
+        setTimeout(() => setNotesFeedback(null), 3000);
       } else {
         setNotesFeedback(res.error || "Failed to save notes.");
       }
     } catch {
-      setNotesFeedback("Error occurred while saving notes.");
+      setNotesFeedback("Error saving notes.");
     } finally {
       setIsSavingNotes(false);
     }
@@ -172,10 +172,11 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
   const handleStatusSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!statusReason.trim()) {
-      setStatusError("Mandatory audit reason required.");
+    if (!statusReason.trim() || statusReason.trim().length < 3) {
+      setStatusError("Please provide an audit reason of at least 3 characters.");
       return;
     }
+
     setIsUpdatingStatus(true);
     setStatusError(null);
     try {
@@ -183,6 +184,7 @@ export function GymDetailView({ data }: GymDetailViewProps) {
         status: selectedTargetStatus,
         reason: statusReason.trim(),
       });
+
       if (res.success && res.status) {
         setGymStatus(res.status);
         setIsStatusModalOpen(false);
@@ -239,145 +241,144 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Back and Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4">
-        <div>
-          <Link
-            href="/platform-admin/gyms"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold mb-2"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Back to All Gyms</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              {data.gym.name}
-            </h1>
-            <Badge
-              variant="outline"
-              className={`${statusBadgeStyle[gymStatus] || "bg-slate-100"} text-xs font-bold`}
+      {/* Page Header */}
+      <PageHeader
+        title={data.gym.name}
+        description={`Tenant Workspace ID: ${data.gym.id} • Route: /g/${data.gym.slug} • Provisioned: ${new Date(data.gym.createdAt).toLocaleDateString()}`}
+        badge={<StatusBadge status={gymStatus} />}
+        breadcrumbs={[
+          { label: "Overview", href: "/platform-admin" },
+          { label: "Gyms Directory", href: "/platform-admin/gyms" },
+          { label: data.gym.name },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            {gymStatus === GymStatus.SUSPENDED ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedTargetStatus(GymStatus.ACTIVE);
+                  setStatusReason("");
+                  setIsStatusModalOpen(true);
+                }}
+                className="h-9 text-xs border-pine/30 text-pine hover:bg-pine-soft gap-1.5"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Reactivate Workspace</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedTargetStatus(GymStatus.SUSPENDED);
+                  setStatusReason("");
+                  setIsStatusModalOpen(true);
+                }}
+                className="h-9 text-xs border-rose-200 text-rose-700 hover:bg-rose-50 gap-1.5"
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                <span>Suspend Workspace</span>
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              onClick={() => setIsSubModalOpen(true)}
+              className="h-9 text-xs bg-pine hover:bg-pine/90 text-white gap-1.5 font-semibold"
             >
-              {gymStatus}
-            </Badge>
+              <CreditCard className="h-3.5 w-3.5" />
+              <span>Manage Subscription</span>
+            </Button>
           </div>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">
-            ID: {data.gym.id} • Slug: /{data.gym.slug} • Created:{" "}
-            {new Date(data.gym.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-
-        {/* Status Action Buttons */}
-        <div className="flex items-center gap-2">
-          {gymStatus === GymStatus.SUSPENDED ? (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelectedTargetStatus(GymStatus.ACTIVE);
-                setStatusReason("");
-                setIsStatusModalOpen(true);
-              }}
-              className="text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-50 gap-1.5"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Reactivate Gym</span>
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelectedTargetStatus(GymStatus.SUSPENDED);
-                setStatusReason("");
-                setIsStatusModalOpen(true);
-              }}
-              className="text-xs border-rose-300 text-rose-700 hover:bg-rose-50 gap-1.5"
-            >
-              <AlertTriangle className="h-3.5 w-3.5" />
-              <span>Suspend Gym</span>
-            </Button>
-          )}
-
-          <Button
-            onClick={() => setIsSubModalOpen(true)}
-            className="text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1.5"
-          >
-            <CreditCard className="h-3.5 w-3.5" />
-            <span>Manage Subscription</span>
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Overview Cards Row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Members</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.members}</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Staff / Trainers</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.userRoles}</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Classes</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.classes}</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Invoices</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.invoices}</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Payments</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.payments}</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Inventory</span>
-          <span className="text-xl font-black text-slate-900 mt-1 block">{data.counts.inventoryItems}</span>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <StatCard
+          label="Active Members"
+          value={data.counts.members}
+          icon={Users}
+          subtext="Enrolled records"
+        />
+        <StatCard
+          label="Staff & Roles"
+          value={data.counts.userRoles}
+          icon={ShieldAlert}
+          subtext="Assigned users"
+        />
+        <StatCard
+          label="Class Catalog"
+          value={data.counts.classes}
+          icon={Calendar}
+          subtext="Scheduled classes"
+        />
+        <StatCard
+          label="Invoices Generated"
+          value={data.counts.invoices}
+          icon={Receipt}
+          subtext="Member invoices"
+        />
+        <StatCard
+          label="Payments Logged"
+          value={data.counts.payments}
+          icon={CreditCard}
+          subtext="Reconciled payments"
+        />
+        <StatCard
+          label="Inventory Items"
+          value={data.counts.inventoryItems}
+          icon={Package}
+          subtext="Retail products"
+        />
       </div>
 
       {/* Main Grid: Details & Subscription & Support */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Gym Information */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Building2 className="h-4 w-4 text-slate-700" />
+        <div className="rounded-xl border border-line bg-white p-5 shadow-xs space-y-4">
+          <h3 className="text-sm font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+            <Building2 className="h-4 w-4 text-pine" />
             <span>Workspace Profile & Contact</span>
           </h3>
 
           <div className="space-y-2.5 text-xs">
             <div>
-              <span className="text-slate-400 block text-[11px]">Contact Email</span>
-              <span className="font-semibold text-slate-800">{data.gym.email || "Not set"}</span>
+              <span className="text-muted block text-[11px]">Contact Email</span>
+              <span className="font-semibold text-ink">{data.gym.email || "Not configured"}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Phone</span>
-              <span className="font-semibold text-slate-800">{data.gym.phone || "Not set"}</span>
+              <span className="text-muted block text-[11px]">Official Phone</span>
+              <span className="font-semibold text-ink">{data.gym.phone || "Not configured"}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Location</span>
-              <span className="font-semibold text-slate-800">
+              <span className="text-muted block text-[11px]">Location</span>
+              <span className="font-semibold text-ink">
                 {data.gym.city ? `${data.gym.city}, ${data.gym.country}` : data.gym.country}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Currency & Timezone</span>
-              <span className="font-semibold text-slate-800">
+              <span className="text-muted block text-[11px]">Currency & Timezone</span>
+              <span className="font-semibold text-ink">
                 {data.gym.currency} • {data.gym.timezone}
               </span>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100">
-            <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+          <div className="pt-3 border-t border-line">
+            <h4 className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
               Associated Staff & Owners
             </h4>
             <div className="space-y-2 text-xs">
               {data.users.map((u) => (
-                <div key={u.userId} className="flex items-center justify-between bg-slate-50 p-2 rounded-lg">
+                <div key={u.userId} className="flex items-center justify-between bg-canvas p-2.5 rounded-lg border border-line/60">
                   <div>
-                    <span className="font-semibold text-slate-900 block">{u.name || "User"}</span>
-                    <span className="text-[11px] text-slate-400">{u.email}</span>
+                    <span className="font-semibold text-ink block">{u.name || "Owner"}</span>
+                    <span className="text-[11px] text-muted">{u.email}</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] font-bold">
+                  <Badge variant="outline" className="text-[10px] font-bold bg-white text-pine border-pine/30">
                     {u.gymRole}
                   </Badge>
                 </div>
@@ -387,14 +388,14 @@ export function GymDetailView({ data }: GymDetailViewProps) {
         </div>
 
         {/* Center Column: SaaS Subscription Details */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-emerald-600" />
+        <div className="rounded-xl border border-line bg-white p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-pine" />
               <span>FIXIA SaaS Subscription</span>
             </h3>
             {data.subscription && (
-              <Badge variant="outline" className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border-emerald-200">
+              <Badge variant="outline" className="text-[10px] font-bold bg-pine-soft text-pine border-pine/30">
                 {data.subscription.status}
               </Badge>
             )}
@@ -402,36 +403,36 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
           {data.subscription ? (
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="p-3.5 rounded-lg bg-canvas border border-line">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-slate-900">
+                  <span className="text-sm font-bold text-ink">
                     {data.subscription.plan.name}
                   </span>
-                  <span className="text-xs font-bold text-slate-700">
+                  <span className="text-xs font-bold text-pine">
                     {data.subscription.billingPeriod === "YEARLY"
-                      ? `$${data.subscription.plan.yearlyPrice}/yr`
-                      : `$${data.subscription.plan.monthlyPrice}/mo`}
+                      ? `₹${data.subscription.plan.yearlyPrice}/yr`
+                      : `₹${data.subscription.plan.monthlyPrice}/mo`}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-muted mt-0.5">
                   Code: {data.subscription.plan.code} • Max {data.subscription.plan.maxMembers === -1 ? "Unlimited" : data.subscription.plan.maxMembers} members
                 </p>
               </div>
 
-              <div className="space-y-1.5 pt-1">
+              <div className="space-y-2 pt-1">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Billing Cycle:</span>
-                  <span className="font-semibold text-slate-800">{data.subscription.billingPeriod}</span>
+                  <span className="text-muted">Billing Cycle:</span>
+                  <span className="font-semibold text-ink">{data.subscription.billingPeriod}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Current Period End:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="text-muted">Current Period End:</span>
+                  <span className="font-semibold text-ink">
                     {new Date(data.subscription.currentPeriodEnd).toLocaleDateString()}
                   </span>
                 </div>
                 {data.subscription.trialEndsAt && (
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Trial Ends:</span>
+                    <span className="text-muted">Trial Ends:</span>
                     <span className="font-semibold text-blue-700">
                       {new Date(data.subscription.trialEndsAt).toLocaleDateString()}
                     </span>
@@ -439,7 +440,7 @@ export function GymDetailView({ data }: GymDetailViewProps) {
                 )}
                 {data.subscription.gracePeriodEndsAt && (
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Grace Period Cutoff:</span>
+                    <span className="text-muted">Grace Period Cutoff:</span>
                     <span className="font-semibold text-amber-700">
                       {new Date(data.subscription.gracePeriodEndsAt).toLocaleDateString()}
                     </span>
@@ -448,12 +449,12 @@ export function GymDetailView({ data }: GymDetailViewProps) {
               </div>
             </div>
           ) : (
-            <div className="py-8 text-center text-slate-400 text-xs space-y-2">
-              <p>No SaaS subscription plan is currently assigned to this gym.</p>
+            <div className="py-8 text-center text-muted text-xs space-y-3">
+              <p>No commercial subscription plan is currently assigned to this gym.</p>
               <Button
                 size="sm"
                 onClick={() => setIsSubModalOpen(true)}
-                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="text-xs bg-pine hover:bg-pine/90 text-white font-semibold"
               >
                 Assign SaaS Subscription
               </Button>
@@ -462,13 +463,13 @@ export function GymDetailView({ data }: GymDetailViewProps) {
         </div>
 
         {/* Right Column: Support Notes */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-            <FileText className="h-4 w-4 text-indigo-600" />
+        <div className="rounded-xl border border-line bg-white p-5 shadow-xs space-y-4">
+          <h3 className="text-sm font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+            <FileText className="h-4 w-4 text-pine" />
             <span>Support & Internal Notes</span>
           </h3>
 
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-muted">
             Confidential platform administration notes regarding this gym&apos;s support history, payment arrangements, or custom terms.
           </p>
 
@@ -477,11 +478,11 @@ export function GymDetailView({ data }: GymDetailViewProps) {
             value={supportNotes}
             onChange={(e) => setSupportNotes(e.target.value)}
             placeholder="Add internal support notes here..."
-            className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="w-full text-xs p-2.5 rounded-lg border border-line focus:outline-hidden focus:ring-2 focus:ring-pine/30 focus:border-pine transition"
           />
 
           {notesFeedback && (
-            <div className="text-[11px] font-semibold text-emerald-700">
+            <div className="text-[11px] font-semibold text-pine">
               {notesFeedback}
             </div>
           )}
@@ -491,7 +492,7 @@ export function GymDetailView({ data }: GymDetailViewProps) {
               size="sm"
               disabled={isSavingNotes}
               onClick={handleSaveNotes}
-              className="text-xs bg-slate-900 hover:bg-slate-800 text-white"
+              className="text-xs bg-pine hover:bg-pine/90 text-white font-semibold h-8"
             >
               {isSavingNotes ? (
                 <>
@@ -507,14 +508,14 @@ export function GymDetailView({ data }: GymDetailViewProps) {
       </div>
 
       {/* Feature Entitlements Checklist */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="rounded-xl border border-line bg-white p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-indigo-600" />
+            <h3 className="text-sm sm:text-base font-bold text-ink flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-pine" />
               <span>Feature Entitlements Matrix</span>
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted">
               Active capabilities permitted for this gym based on SaaS plan tier and admin overrides.
             </p>
           </div>
@@ -524,21 +525,20 @@ export function GymDetailView({ data }: GymDetailViewProps) {
           {ALL_SAAS_FEATURES.map((feat) => {
             const isPlanIncluded = planFeaturesList.includes(feat.key) || planFeaturesList.includes("*");
             const overrideVal = overrides[feat.key];
-            const isEnabled =
-              overrideVal !== undefined ? overrideVal : isPlanIncluded;
+            const isEnabled = overrideVal !== undefined ? overrideVal : isPlanIncluded;
 
             return (
               <div
                 key={feat.key}
-                className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-colors ${
+                className={`p-3 rounded-lg border flex items-center justify-between text-xs transition-colors ${
                   isEnabled
-                    ? "bg-slate-50 border-slate-200"
-                    : "bg-slate-100/50 border-slate-200/50 opacity-60"
+                    ? "bg-canvas border-line text-ink"
+                    : "bg-canvas/40 border-line/50 text-muted opacity-60"
                 }`}
               >
                 <div>
-                  <span className="font-bold text-slate-900 block">{feat.name}</span>
-                  <span className="text-[10px] text-slate-400 block">{feat.description}</span>
+                  <span className="font-bold text-ink block">{feat.name}</span>
+                  <span className="text-[10px] text-muted block">{feat.description}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -551,8 +551,8 @@ export function GymDetailView({ data }: GymDetailViewProps) {
                     variant="outline"
                     className={`text-[10px] font-bold ${
                       isEnabled
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : "bg-slate-200 text-slate-600 border-slate-300"
+                        ? "bg-pine-soft text-pine border-pine/30"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
                     }`}
                   >
                     {isEnabled ? "Enabled" : "Disabled"}
@@ -565,27 +565,27 @@ export function GymDetailView({ data }: GymDetailViewProps) {
       </div>
 
       {/* Gym Platform Audit Logs */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-          <ShieldAlert className="h-4 w-4 text-slate-700" />
+      <div className="rounded-xl border border-line bg-white p-5 sm:p-6 shadow-xs space-y-4">
+        <h3 className="text-sm sm:text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+          <ShieldAlert className="h-4 w-4 text-pine" />
           <span>Platform Audit Trail for this Workspace</span>
         </h3>
 
         {data.auditHistory.length === 0 ? (
-          <div className="py-8 text-center text-slate-400 text-xs">
+          <div className="py-8 text-center text-muted text-xs">
             No administrative operations recorded for this gym.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-line/60">
             {data.auditHistory.map((item) => (
               <div key={item.id} className="py-2.5 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono text-[10px] font-bold">
+                  <Badge variant="outline" className="font-mono text-[10px] font-bold bg-canvas text-ink border-line">
                     {item.action}
                   </Badge>
-                  <span className="text-slate-600">{item.details}</span>
+                  <span className="text-ink">{item.details}</span>
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-muted">
                   {item.adminEmail} • {new Date(item.createdAt).toLocaleDateString()}
                 </div>
               </div>
@@ -596,27 +596,27 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
       {/* Status Modal */}
       {isStatusModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
-            <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-line space-y-4 animate-in fade-in zoom-in-95">
+            <h3 className="text-sm font-bold text-ink">
               Update Workspace Status: {selectedTargetStatus}
             </h3>
 
             {statusError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                 {statusError}
               </div>
             )}
 
             <form onSubmit={handleStatusSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                <label className="text-xs font-semibold text-ink block mb-1">
                   New Status
                 </label>
                 <select
                   value={selectedTargetStatus}
                   onChange={(e) => setSelectedTargetStatus(e.target.value as GymStatus)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full text-xs p-2.5 rounded-lg border border-line focus:ring-pine/30 focus:border-pine"
                 >
                   <option value={GymStatus.ACTIVE}>ACTIVE</option>
                   <option value={GymStatus.TRIAL}>TRIAL</option>
@@ -626,15 +626,15 @@ export function GymDetailView({ data }: GymDetailViewProps) {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
-                  Mandatory Audit Reason
+                <label className="text-xs font-semibold text-ink block mb-1">
+                  Mandatory Audit Reason *
                 </label>
                 <textarea
                   rows={3}
                   value={statusReason}
                   onChange={(e) => setStatusReason(e.target.value)}
                   placeholder="Reason for changing status..."
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full text-xs p-2.5 rounded-lg border border-line focus:ring-pine/30 focus:border-pine"
                   required
                 />
               </div>
@@ -644,14 +644,14 @@ export function GymDetailView({ data }: GymDetailViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setIsStatusModalOpen(false)}
-                  className="text-xs"
+                  className="text-xs h-9 border-line hover:bg-canvas"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isUpdatingStatus}
-                  className="text-xs bg-slate-900 hover:bg-slate-800 text-white"
+                  className="text-xs h-9 bg-pine hover:bg-pine/90 text-white font-semibold"
                 >
                   {isUpdatingStatus ? "Updating..." : "Confirm Status Change"}
                 </Button>
@@ -663,29 +663,29 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
       {/* Subscription Assignment Modal */}
       {isSubModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-line space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
+            <h3 className="text-sm font-bold text-ink">
               Assign / Update FIXIA SaaS Subscription
             </h3>
 
             {subError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                 {subError}
               </div>
             )}
 
             <form onSubmit={handleAssignSubscription} className="space-y-4 text-xs">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Select SaaS Plan</label>
+                <label className="font-semibold text-ink block mb-1">Select SaaS Plan</label>
                 <select
                   value={selectedPlanId}
                   onChange={(e) => setSelectedPlanId(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full p-2.5 rounded-lg border border-line focus:ring-pine/30 focus:border-pine"
                 >
                   {data.availablePlans.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} (${p.monthlyPrice}/mo, ${p.yearlyPrice}/yr)
+                      {p.name} (₹{p.monthlyPrice}/mo, ₹{p.yearlyPrice}/yr)
                     </option>
                   ))}
                 </select>
@@ -693,11 +693,11 @@ export function GymDetailView({ data }: GymDetailViewProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Billing Period</label>
+                  <label className="font-semibold text-ink block mb-1">Billing Period</label>
                   <select
                     value={billingPeriod}
                     onChange={(e) => setBillingPeriod(e.target.value as SaasBillingPeriod)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full p-2.5 rounded-lg border border-line focus:ring-pine/30 focus:border-pine"
                   >
                     <option value={SaasBillingPeriod.MONTHLY}>MONTHLY</option>
                     <option value={SaasBillingPeriod.YEARLY}>YEARLY</option>
@@ -705,11 +705,11 @@ export function GymDetailView({ data }: GymDetailViewProps) {
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Subscription Status</label>
+                  <label className="font-semibold text-ink block mb-1">Subscription Status</label>
                   <select
                     value={subscriptionStatus}
                     onChange={(e) => setSubscriptionStatus(e.target.value as SaasSubscriptionStatus)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full p-2.5 rounded-lg border border-line focus:ring-pine/30 focus:border-pine"
                   >
                     <option value={SaasSubscriptionStatus.ACTIVE}>ACTIVE</option>
                     <option value={SaasSubscriptionStatus.TRIALING}>TRIALING</option>
@@ -721,28 +721,28 @@ export function GymDetailView({ data }: GymDetailViewProps) {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1.5">
+                <label className="font-semibold text-ink block mb-1.5">
                   Custom Feature Overrides (Optional Super Admin Grant / Deny)
                 </label>
-                <div className="space-y-1.5 border border-slate-200 rounded-xl p-3 bg-slate-50 max-h-48 overflow-y-auto">
+                <div className="space-y-1.5 border border-line rounded-lg p-3 bg-canvas max-h-48 overflow-y-auto">
                   {ALL_SAAS_FEATURES.map((feat) => {
                     const currentOverride = overrides[feat.key];
                     return (
                       <div
                         key={feat.key}
-                        className="flex items-center justify-between text-xs py-1 border-b border-slate-100 last:border-0"
+                        className="flex items-center justify-between text-xs py-1.5 border-b border-line/60 last:border-0"
                       >
-                        <span className="font-medium text-slate-800">{feat.name}</span>
+                        <span className="font-medium text-ink">{feat.name}</span>
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => toggleOverride(feat.key)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                               currentOverride === true
-                                ? "bg-emerald-600 text-white"
+                                ? "bg-pine text-white"
                                 : currentOverride === false
                                 ? "bg-rose-600 text-white"
-                                : "bg-slate-200 text-slate-700"
+                                : "bg-white text-muted border border-line"
                             }`}
                           >
                             {currentOverride === true
@@ -758,19 +758,19 @@ export function GymDetailView({ data }: GymDetailViewProps) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsSubModalOpen(false)}
-                  className="text-xs"
+                  className="text-xs h-9 border-line hover:bg-canvas"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isAssigningSub}
-                  className="text-xs bg-slate-900 hover:bg-slate-800 text-white"
+                  className="text-xs h-9 bg-pine hover:bg-pine/90 text-white font-semibold"
                 >
                   {isAssigningSub ? "Saving..." : "Save Subscription"}
                 </Button>

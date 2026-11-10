@@ -128,7 +128,7 @@ export function DataTable<T extends Record<string, unknown>>({
       {searchable && (
         <div className="flex items-center justify-between gap-3">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94A3B8]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94A099]" />
             <input
               type="text"
               value={searchQuery}
@@ -137,28 +137,28 @@ export function DataTable<T extends Record<string, unknown>>({
                 setCurrentPage(1);
               }}
               placeholder={searchPlaceholder}
-              className="w-full rounded-lg border border-[#E3E7E4] bg-white py-1.5 pl-8 pr-8 text-xs text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F]"
+              className="w-full rounded-[10px] border border-[#E3E7E4] bg-white py-1.5 pl-8 pr-8 text-xs text-[#111613] placeholder:text-[#94A099] focus:border-[#0B6B4F] focus:outline-hidden focus:ring-1 focus:ring-[#0B6B4F]"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={clearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A]"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94A099] hover:text-[#111613]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
-          <div className="text-xs text-[#64748B] num">
-            Showing <span className="font-medium text-[#0F172A]">{sortedData.length}</span> results
+          <div className="text-xs text-[#5F6B65] tabular-nums">
+            Showing <span className="font-medium text-[#111613]">{sortedData.length}</span> results
           </div>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-xl border border-[#E3E7E4] bg-white shadow-xs">
+      <div className="overflow-hidden rounded-[16px] border border-[#E3E7E4] bg-white shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#0F172A]">
+          <table className="w-full text-left text-xs text-[#111613]">
             <thead className="border-b border-[#E3E7E4] bg-[#F8FAFC]">
               <tr>
                 {columns.map((col) => {
@@ -167,7 +167,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     <th
                       key={col.key}
                       style={{ width: col.width }}
-                      className={`px-4 py-3 font-semibold uppercase tracking-wider text-[11px] text-[#64748B] select-none ${
+                      className={`px-4 py-3 font-semibold text-xs text-[#5F6B65] select-none ${
                         col.align === "center"
                           ? "text-center"
                           : col.align === "right"
@@ -179,7 +179,7 @@ export function DataTable<T extends Record<string, unknown>>({
                         <button
                           type="button"
                           onClick={() => handleSort(col.key)}
-                          className="inline-flex items-center gap-1 hover:text-[#0F172A] transition-colors"
+                          className="inline-flex items-center gap-1 hover:text-[#111613] transition-colors"
                         >
                           <span>{col.header}</span>
                           {isSorted ? (
@@ -189,7 +189,7 @@ export function DataTable<T extends Record<string, unknown>>({
                               <ChevronDown className="h-3.5 w-3.5 text-[#0B6B4F]" />
                             )
                           ) : (
-                            <ChevronsUpDown className="h-3 w-3 text-[#94A3B8]" />
+                            <ChevronsUpDown className="h-3 w-3 text-[#94A099]" />
                           )}
                         </button>
                       ) : (
@@ -217,8 +217,8 @@ export function DataTable<T extends Record<string, unknown>>({
                   <td colSpan={columns.length} className="px-4 py-12 text-center">
                     {emptyState || (
                       <div className="flex flex-col items-center justify-center text-center">
-                        <p className="text-sm font-medium text-[#0F172A]">No records found</p>
-                        <p className="mt-1 text-xs text-[#64748B]">
+                        <p className="text-sm font-medium text-[#111613]">No records found</p>
+                        <p className="mt-1 text-xs text-[#5F6B65]">
                           {searchQuery
                             ? "Try adjusting your search criteria"
                             : "There is no data to display yet"}
@@ -261,17 +261,17 @@ export function DataTable<T extends Record<string, unknown>>({
 
         {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-[#E3E7E4] px-4 py-2.5 bg-[#F8FAFC] text-xs text-[#64748B]">
+          <div className="flex items-center justify-between border-t border-[#E3E7E4] px-4 py-2.5 bg-[#F8FAFC] text-xs text-[#5F6B65] tabular-nums">
             <div>
-              Page <span className="font-medium text-[#0F172A]">{currentPage}</span> of{" "}
-              <span className="font-medium text-[#0F172A]">{totalPages}</span>
+              Page <span className="font-medium text-[#111613]">{currentPage}</span> of{" "}
+              <span className="font-medium text-[#111613]">{totalPages}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 disabled={currentPage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E3E7E4] bg-white text-[#64748B] hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#E3E7E4] bg-white text-[#5F6B65] hover:text-[#111613] disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -280,7 +280,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 type="button"
                 disabled={currentPage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E3E7E4] bg-white text-[#64748B] hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#E3E7E4] bg-white text-[#5F6B65] hover:text-[#111613] disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Next page"
               >
                 <ChevronRight className="h-4 w-4" />

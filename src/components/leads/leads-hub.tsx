@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Kanban,
   Table as TableIcon,
@@ -20,6 +19,7 @@ import { LeadStageChangeModal } from "./lead-stage-change-modal";
 import { LeadFollowupModal } from "./lead-followup-modal";
 import { ConvertLeadModal } from "./convert-lead-modal";
 import { LeadCrmMetrics } from "@/lib/services/lead.service";
+import { PageHeader } from "@/components/design-system/page-header";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface LeadsHubProps {
@@ -61,90 +61,72 @@ export function LeadsHub({
   return (
     <div className="space-y-6">
       {/* Header and Add Action */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Leads & CRM Management
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Capture prospective walk-ins, track trials, log touchpoints, and convert enquiries to members.
-          </p>
-        </div>
-
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shrink-0 shadow-xs"
-        >
-          <Plus className="mr-1.5 h-4 w-4" /> Add Enquiry
-        </Button>
-      </div>
+      <PageHeader
+        title="Leads & CRM Pipeline"
+        description="Capture prospective walk-ins, track trials, log touchpoints, and convert enquiries to paid members."
+        actions={
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-pine hover:bg-pine/90 text-white font-semibold text-xs h-9 rounded-lg shadow-xs transition"
+          >
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            <span>Add Enquiry</span>
+          </Button>
+        }
+      />
 
       {/* KPI Overview Cards */}
       <LeadOverviewCards metrics={metrics} />
 
       {/* Tabs Switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-        <Button
-          variant={activeTab === "kanban" ? "default" : "ghost"}
-          size="sm"
+      <div className="flex border-b border-line text-xs font-semibold">
+        <button
+          type="button"
           onClick={() => setActiveTab("kanban")}
-          className={`text-xs gap-1.5 ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "kanban"
-              ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-              : "text-slate-600 dark:text-slate-400"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <Kanban className="h-3.5 w-3.5" />
-          Pipeline Board
-        </Button>
+          <Kanban className="h-4 w-4" />
+          <span>Pipeline Board</span>
+        </button>
 
-        <Button
-          variant={activeTab === "directory" ? "default" : "ghost"}
-          size="sm"
+        <button
+          type="button"
           onClick={() => setActiveTab("directory")}
-          className={`text-xs gap-1.5 ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "directory"
-              ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-              : "text-slate-600 dark:text-slate-400"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <TableIcon className="h-3.5 w-3.5" />
-          Enquiries Directory
-          <Badge
-            variant="outline"
-            className="ml-1 text-[10px] font-mono border-slate-300 dark:border-slate-700"
-          >
-            {leads.length}
-          </Badge>
-        </Button>
+          <TableIcon className="h-4 w-4" />
+          <span>All Leads Table ({leads.length})</span>
+        </button>
 
-        <Button
-          variant={activeTab === "agenda" ? "default" : "ghost"}
-          size="sm"
+        <button
+          type="button"
           onClick={() => setActiveTab("agenda")}
-          className={`text-xs gap-1.5 ${
+          className={`px-4 py-2.5 border-b-2 transition flex items-center gap-1.5 ${
             activeTab === "agenda"
-              ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-              : "text-slate-600 dark:text-slate-400"
+              ? "border-pine text-pine font-bold"
+              : "border-transparent text-muted hover:text-ink"
           }`}
         >
-          <CalendarClock className="h-3.5 w-3.5" />
-          Follow-Up Agenda
-          {metrics.followUps.overdue > 0 && (
-            <Badge className="ml-1 text-[10px] bg-rose-500 text-white font-mono px-1 py-0">
-              {metrics.followUps.overdue}
-            </Badge>
-          )}
-        </Button>
+          <CalendarClock className="h-4 w-4" />
+          <span>Follow-up Agenda</span>
+        </button>
       </div>
 
-      {/* Main Tab Content */}
+      {/* Main Views */}
       {activeTab === "kanban" && (
         <LeadKanbanView
           leads={leads}
           onSelectLead={handleLeadSelect}
-          onOpenConvert={(lead) => setConvertingLead(lead)}
           onOpenStatusChange={(lead) => setStatusChangeLead(lead)}
+          onOpenConvert={(lead) => setConvertingLead(lead)}
         />
       )}
 
@@ -169,10 +151,9 @@ export function LeadsHub({
         />
       )}
 
-      {/* Modals & Dialogs */}
-      {/* 1. Add / Edit Modal */}
+      {/* Add / Edit Lead Modal */}
       <LeadFormModal
-        isOpen={isAddModalOpen || Boolean(editingLead)}
+        isOpen={isAddModalOpen || !!editingLead}
         onClose={() => {
           setIsAddModalOpen(false);
           setEditingLead(null);
@@ -185,51 +166,62 @@ export function LeadsHub({
         onSuccess={refreshData}
       />
 
-      {/* 2. Lead Detail Modal */}
+      {/* Detailed Lead Drawer Modal */}
       <LeadDetailModal
         lead={selectedLead}
-        isOpen={Boolean(selectedLead)}
+        isOpen={!!selectedLead}
         onClose={() => setSelectedLead(null)}
         gymId={gymId}
         gymSlug={gymSlug}
-        onOpenConvert={(lead) => setConvertingLead(lead)}
-        onOpenStatusChange={(lead) => setStatusChangeLead(lead)}
-        onOpenScheduleFollowUp={(lead) => setScheduleFollowUpLead(lead)}
-        onOpenEdit={(lead) => setEditingLead(lead)}
+        onOpenConvert={(lead) => {
+          setSelectedLead(null);
+          setConvertingLead(lead);
+        }}
+        onOpenStatusChange={(lead) => {
+          setSelectedLead(null);
+          setStatusChangeLead(lead);
+        }}
+        onOpenScheduleFollowUp={(lead) => {
+          setSelectedLead(null);
+          setScheduleFollowUpLead(lead);
+        }}
+        onOpenEdit={(lead) => {
+          setSelectedLead(null);
+          setEditingLead(lead);
+        }}
         onSuccess={refreshData}
       />
 
-      {/* 3. Stage Change Modal */}
-      <LeadStageChangeModal
-        lead={statusChangeLead}
-        isOpen={Boolean(statusChangeLead)}
-        onClose={() => setStatusChangeLead(null)}
-        gymId={gymId}
-        gymSlug={gymSlug}
-        onSuccess={refreshData}
-      />
-
-      {/* 4. Follow-Up Reschedule Modal */}
-      <LeadFollowupModal
-        lead={scheduleFollowUpLead}
-        isOpen={Boolean(scheduleFollowUpLead)}
-        onClose={() => setScheduleFollowUpLead(null)}
-        gymId={gymId}
-        gymSlug={gymSlug}
-        onSuccess={refreshData}
-      />
-
-      {/* 5. Convert Lead to Member Modal */}
+      {/* Convert Lead to Member Modal */}
       <ConvertLeadModal
-        lead={convertingLead}
-        isOpen={Boolean(convertingLead)}
+        isOpen={!!convertingLead}
         onClose={() => setConvertingLead(null)}
         gymId={gymId}
         gymSlug={gymSlug}
+        lead={convertingLead}
         plansList={plansList}
+        onSuccess={refreshData}
+      />
+
+      {/* Change Lead Stage Modal */}
+      <LeadStageChangeModal
+        isOpen={!!statusChangeLead}
+        onClose={() => setStatusChangeLead(null)}
+        gymId={gymId}
+        gymSlug={gymSlug}
+        lead={statusChangeLead}
+        onSuccess={refreshData}
+      />
+
+      {/* Follow-up Touchpoint Logger Modal */}
+      <LeadFollowupModal
+        isOpen={!!scheduleFollowUpLead}
+        onClose={() => setScheduleFollowUpLead(null)}
+        gymId={gymId}
+        gymSlug={gymSlug}
+        lead={scheduleFollowUpLead}
         onSuccess={refreshData}
       />
     </div>
   );
 }
-

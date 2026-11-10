@@ -41,12 +41,12 @@ export function ChartCard({
 }: ChartCardProps) {
   return (
     <div
-      className={`rounded-xl border border-[#E3E7E4] bg-white p-4 sm:p-5 shadow-xs ${className}`}
+      className={`rounded-[16px] border border-[#E3E7E4] bg-white p-4 sm:p-5 shadow-xs ${className}`}
     >
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#E3E7E4]/80 pb-4">
         <div>
-          <h3 className="font-heading text-sm sm:text-base font-bold text-[#0F172A]">
+          <h3 className="font-display text-sm sm:text-base font-bold text-[#111613]">
             {title}
           </h3>
           {description && (
@@ -56,7 +56,7 @@ export function ChartCard({
 
         <div className="flex items-center gap-2 flex-wrap">
           {periods && periods.length > 0 && (
-            <div className="inline-flex rounded-lg border border-[#E3E7E4] bg-[#F8FAFC] p-0.5">
+            <div className="inline-flex rounded-[10px] border border-[#E3E7E4] bg-[#F8FAFC] p-0.5">
               {periods.map((p) => {
                 const isActive = p.value === selectedPeriod;
                 return (
@@ -64,10 +64,10 @@ export function ChartCard({
                     key={p.value}
                     type="button"
                     onClick={() => onPeriodChange && onPeriodChange(p.value)}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-all ${
+                    className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-all ${
                       isActive
                         ? "bg-white text-[#0B6B4F] shadow-xs font-semibold"
-                        : "text-[#64748B] hover:text-[#0F172A]"
+                        : "text-[#5F6B65] hover:text-[#111613]"
                     }`}
                   >
                     {p.label}
