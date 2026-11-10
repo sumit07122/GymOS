@@ -71,8 +71,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Expenses",
     href: "/expenses",
     icon: TrendingDown,
-    milestone: "M13",
-    isAvailable: false,
+    milestone: "M11",
+    isAvailable: true,
     description: "Operating expense logging, receipts, category breakdowns, and vendor payments.",
   },
   {

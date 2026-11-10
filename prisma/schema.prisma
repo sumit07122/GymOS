@@ -187,8 +187,10 @@ model User {
   assignedLeads Lead[]       @relation("AssignedStaff")
   leadActivities LeadActivity[] @relation("StaffLeadActivities")
   expenses      Expense[]    @relation("RecordedByExpenseUser")
+  expenseEdits  ExpenseEditLog[]
   instructedClasses ClassSchedule[] @relation("InstructorUser")
   stockMovements StockMovement[] @relation("StaffStockMovement")
+  createdWorkoutPlans WorkoutPlan[] @relation("CreatedWorkoutPlans")
 
   @@index([role])
   @@index([status])
@@ -282,6 +284,7 @@ model Gym {
   leadActivities  LeadActivity[]
   expenseCategories ExpenseCategory[]
   expenses        Expense[]
+  expenseEditLogs ExpenseEditLog[]
   classes         Class[]
   classSchedules  ClassSchedule[]
   classBookings   ClassBooking[]
@@ -290,6 +293,12 @@ model Gym {
   workoutRecords  WorkoutRecord[]
   memberActivities MemberActivity[]
   membershipAuditLogs MembershipAuditLog[]
+  exercises       Exercise[]
+  workoutPlans    WorkoutPlan[]
+  memberFitnessProfiles MemberFitnessProfile[]
+  memberWeightLogs MemberWeightLog[]
+  memberMeasurements MemberMeasurement[]
+  memberWorkoutAssignments MemberWorkoutAssignment[]
 
   @@index([slug])
   @@index([status])
@@ -354,6 +363,10 @@ model Member {
   classBookings         ClassBooking[]
   workoutRecords        WorkoutRecord[]
   activities            MemberActivity[]
+  fitnessProfile        MemberFitnessProfile?
+  weightLogs            MemberWeightLog[]
+  measurements          MemberMeasurement[]
+  workoutAssignments    MemberWorkoutAssignment[]
 
   @@unique([gymId, memberCode])
   @@index([gymId, status])
@@ -688,6 +701,7 @@ model Expense {
   receiptUrl        String?
   vendorName        String?
   notes             String?         @db.Text
+  isDeleted         Boolean         @default(false)   // Soft-delete guard — never hard-delete financial records
 
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
@@ -695,10 +709,32 @@ model Expense {
   gym               Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
   category          ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   recordedByUser    User            @relation("RecordedByExpenseUser", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+  editLogs          ExpenseEditLog[]
 
   @@index([gymId, expenseDate])
   @@index([gymId, categoryId])
+  @@index([gymId, isDeleted])
   @@index([recordedByUserId])
+}
+
+model ExpenseEditLog {
+  id            String   @id @default(uuid())
+  gymId         String
+  expenseId     String
+  editedByUserId String
+  fieldChanged  String   // e.g. "amount", "categoryId", "notes"
+  oldValue      String?  @db.Text
+  newValue      String?  @db.Text
+  reason        String?  @db.Text
+
+  createdAt     DateTime @default(now())
+
+  gym           Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  expense       Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  editedByUser  User     @relation(fields: [editedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([gymId, expenseId])
+  @@index([expenseId, createdAt])
 }
 
 // ------------------------------------------------------------------------------
@@ -815,6 +851,147 @@ model StockMovement {
   @@index([gymId, itemId])
   @@index([gymId, createdAt])
   @@index([recordedByUserId])
+}
+
+// ------------------------------------------------------------------------------
+// 10. FITNESS RECORDS, WORKOUT PLANS & EXERCISE LIBRARY (M14)
+// ------------------------------------------------------------------------------
+
+model Exercise {
+  id          String    @id @default(uuid())
+  gymId       String
+  name        String
+  muscleGroup String?
+  description String?   @db.Text
+  isActive    Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gym         Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  planEntries WorkoutPlanEntry[]
+
+  @@unique([gymId, name])
+  @@index([gymId, isActive])
+}
+
+model WorkoutPlan {
+  id              String    @id @default(uuid())
+  gymId           String
+  name            String
+  description     String?   @db.Text
+  createdByUserId String
+  isActive        Boolean   @default(true)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  gym             Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  createdBy       User      @relation("CreatedWorkoutPlans", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  entries         WorkoutPlanEntry[]
+  assignments     MemberWorkoutAssignment[]
+
+  @@index([gymId, isActive])
+}
+
+model WorkoutPlanEntry {
+  id            String      @id @default(uuid())
+  planId        String
+  exerciseId    String
+  sets          Int?
+  reps          Int?
+  durationSecs  Int?
+  restSecs      Int?
+  sortOrder     Int         @default(0)
+  notes         String?     @db.Text
+
+  plan          WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  exercise      Exercise    @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@index([planId])
+}
+
+model MemberFitnessProfile {
+  id            String    @id @default(uuid())
+  gymId         String
+  memberId      String    @unique
+  heightCm      Decimal?  @db.Decimal(5, 1)
+  fitnessGoals  String?   @db.Text
+  fitnessNotes  String?   @db.Text
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  gym           Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  weightLogs    MemberWeightLog[]
+  measurements  MemberMeasurement[]
+
+  @@index([gymId])
+}
+
+model MemberWeightLog {
+  id          String               @id @default(uuid())
+  gymId       String
+  memberId    String
+  profileId   String
+  weightKg    Decimal              @db.Decimal(5, 1)
+  logDate     DateTime
+  notes       String?              @db.Text
+  recordedBy  String?              // userId of staff or trainer
+
+  createdAt   DateTime             @default(now())
+
+  gym         Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member      Member               @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  profile     MemberFitnessProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, memberId, logDate])
+}
+
+model MemberMeasurement {
+  id          String               @id @default(uuid())
+  gymId       String
+  memberId    String
+  profileId   String
+  measureDate DateTime
+  chestCm     Decimal?             @db.Decimal(5, 1)
+  waistCm     Decimal?             @db.Decimal(5, 1)
+  hipsCm      Decimal?             @db.Decimal(5, 1)
+  armCm       Decimal?             @db.Decimal(5, 1)
+  thighCm     Decimal?             @db.Decimal(5, 1)
+  notes       String?              @db.Text
+  recordedBy  String?
+
+  createdAt   DateTime             @default(now())
+
+  gym         Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member      Member               @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  profile     MemberFitnessProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, memberId, measureDate])
+}
+
+model MemberWorkoutAssignment {
+  id          String      @id @default(uuid())
+  gymId       String
+  memberId    String
+  planId      String
+  assignedBy  String?     // userId of staff/trainer
+  startDate   DateTime    @default(now())
+  endDate     DateTime?
+  isActive    Boolean     @default(true)
+  notes       String?     @db.Text
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  gym         Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member      Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  plan        WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([gymId, memberId, isActive])
+  @@index([planId])
 }
 
 // ------------------------------------------------------------------------------

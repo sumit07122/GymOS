@@ -33,6 +33,8 @@ export type Permission =
   | "LEAD_UPDATE"
   | "LEAD_CONVERT"
   | "LEAD_DELETE"
+  | "WORKOUT_READ"
+  | "WORKOUT_WRITE"
   | "STAFF_MANAGE"
   | "SETTINGS_MANAGE"
   | "SUPER_ADMIN_MANAGE";
@@ -66,6 +68,8 @@ const OWNER_PERMISSIONS: Permission[] = [
   "LEAD_UPDATE",
   "LEAD_CONVERT",
   "LEAD_DELETE",
+  "WORKOUT_READ",
+  "WORKOUT_WRITE",
   "STAFF_MANAGE",
   "SETTINGS_MANAGE",
 ];
@@ -93,6 +97,8 @@ const STAFF_PERMISSIONS: Permission[] = [
   "LEAD_CREATE",
   "LEAD_UPDATE",
   "LEAD_CONVERT",
+  "WORKOUT_READ",
+  "WORKOUT_WRITE",
 ];
 
 const TRAINER_PERMISSIONS: Permission[] = [
@@ -100,6 +106,8 @@ const TRAINER_PERMISSIONS: Permission[] = [
   "ATTENDANCE_READ",
   "CLASS_SCHEDULE",
   "CLASS_BOOK",
+  "WORKOUT_READ",
+  "WORKOUT_WRITE",
 ];
 
 const MEMBER_PERMISSIONS: Permission[] = [
@@ -108,6 +116,7 @@ const MEMBER_PERMISSIONS: Permission[] = [
   "ATTENDANCE_READ",
   "INVOICE_READ",
   "CLASS_BOOK",
+  "WORKOUT_READ",
 ];
 
 export function getRolePermissions(role: GymRole | SystemRole): Set<Permission> {
