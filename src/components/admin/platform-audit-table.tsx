@@ -175,3 +175,4 @@ export function PlatformAuditTable({ initialLogs }: PlatformAuditTableProps) {
     </div>
   );
 }
+

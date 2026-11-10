@@ -63,3 +63,4 @@ export const gymSupportNotesSchema = z.object({
 });
 
 export type GymSupportNotesInput = z.infer<typeof gymSupportNotesSchema>;
+

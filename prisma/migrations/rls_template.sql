@@ -27,6 +27,20 @@ ALTER TABLE "ClassSchedule" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "ClassBooking" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "InventoryItem" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "StockMovement" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "WorkoutRecord" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MemberActivity" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MembershipAuditLog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Exercise" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "WorkoutPlan" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MemberFitnessProfile" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MemberWeightLog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MemberMeasurement" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MemberWorkoutAssignment" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "GymWebsiteConfig" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "GymWhatsAppConfig" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "WhatsAppTemplate" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "WhatsAppNotification" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "GymSubscription" ENABLE ROW LEVEL SECURITY;
 
 -- 2. Create tenant isolation policies
 -- Members
@@ -77,4 +91,33 @@ CREATE POLICY inventory_tenant_isolation ON "InventoryItem"
   AS RESTRICTIVE
   USING ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''))
   WITH CHECK ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''));
+
+-- Classes & Bookings
+DROP POLICY IF EXISTS class_booking_tenant_isolation ON "ClassBooking";
+CREATE POLICY class_booking_tenant_isolation ON "ClassBooking"
+  AS RESTRICTIVE
+  USING ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''))
+  WITH CHECK ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''));
+
+-- Workouts
+DROP POLICY IF EXISTS workout_plan_tenant_isolation ON "WorkoutPlan";
+CREATE POLICY workout_plan_tenant_isolation ON "WorkoutPlan"
+  AS RESTRICTIVE
+  USING ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''))
+  WITH CHECK ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''));
+
+-- WhatsApp Notifications
+DROP POLICY IF EXISTS whatsapp_notif_tenant_isolation ON "WhatsAppNotification";
+CREATE POLICY whatsapp_notif_tenant_isolation ON "WhatsAppNotification"
+  AS RESTRICTIVE
+  USING ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''))
+  WITH CHECK ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''));
+
+-- SaaS Subscription
+DROP POLICY IF EXISTS saas_sub_tenant_isolation ON "GymSubscription";
+CREATE POLICY saas_sub_tenant_isolation ON "GymSubscription"
+  AS RESTRICTIVE
+  USING ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''))
+  WITH CHECK ("gymId" = NULLIF(current_setting('app.current_gym_id', true), ''));
+
 

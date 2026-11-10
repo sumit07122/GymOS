@@ -15,3 +15,4 @@ export default async function PlatformAuditLogsPage() {
 
   return <PlatformAuditTable initialLogs={logs} />;
 }
+
