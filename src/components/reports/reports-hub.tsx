@@ -363,3 +363,4 @@ export function ReportsHub({ gymSlug, initialData }: ReportsHubProps) {
     </div>
   );
 }
+

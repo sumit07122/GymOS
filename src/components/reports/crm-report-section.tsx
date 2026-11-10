@@ -305,3 +305,4 @@ export function CrmReportSection({ data }: CrmReportSectionProps) {
     </div>
   );
 }
+

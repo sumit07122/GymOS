@@ -182,6 +182,19 @@ enum WhatsAppNotificationStatus {
   FAILED
 }
 
+enum SaasSubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELLED
+}
+
+enum SaasBillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
 // ------------------------------------------------------------------------------
 // 1. AUTH.JS V5 MODELS & CORE USER MANAGEMENT
 // ------------------------------------------------------------------------------
@@ -216,6 +229,7 @@ model User {
   instructedClasses ClassSchedule[] @relation("InstructorUser")
   stockMovements StockMovement[] @relation("StaffStockMovement")
   createdWorkoutPlans WorkoutPlan[] @relation("CreatedWorkoutPlans")
+  platformAuditLogs PlatformAuditLog[] @relation("PlatformAuditor")
 
   @@index([role])
   @@index([status])
@@ -328,6 +342,8 @@ model Gym {
   whatsAppConfig  GymWhatsAppConfig?
   whatsAppTemplates WhatsAppTemplate[]
   whatsAppNotifications WhatsAppNotification[]
+  subscription    GymSubscription?
+  platformAuditLogs PlatformAuditLog[]
 
   @@index([slug])
   @@index([status])
@@ -1189,6 +1205,82 @@ model WhatsAppNotification {
   @@index([recipientPhone])
   @@index([createdAt])
 }
+
+// ------------------------------------------------------------------------------
+// 15. FIXIA SAAS PLATFORM ADMINISTRATION & SUBSCRIPTION BILLING (M19)
+// ------------------------------------------------------------------------------
+
+model SaasPlan {
+  id              String             @id @default(uuid())
+  name            String             // e.g. "Starter", "Professional", "Enterprise"
+  code            String             @unique // e.g. "STARTER", "PRO", "ENTERPRISE"
+  description     String?            @db.Text
+  monthlyPrice    Decimal            @db.Decimal(10, 2)
+  yearlyPrice     Decimal            @db.Decimal(10, 2)
+  trialDays       Int                @default(14)
+  gracePeriodDays Int                @default(7)
+  isActive        Boolean            @default(true)
+  maxMembers      Int                @default(100)
+  maxStaff        Int                @default(3)
+  maxClasses      Int                @default(10)
+  features        String             @db.Text // JSON string array of enabled feature entitlement keys
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  subscriptions   GymSubscription[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model GymSubscription {
+  id                     String                 @id @default(uuid())
+  gymId                  String                 @unique
+  planId                 String
+  status                 SaasSubscriptionStatus @default(TRIALING)
+  billingPeriod          SaasBillingPeriod      @default(MONTHLY)
+  currentPeriodStart     DateTime               @default(now())
+  currentPeriodEnd       DateTime
+  trialEndsAt            DateTime?
+  gracePeriodEndsAt      DateTime?
+  cancelledAt            DateTime?
+  customFeatureOverrides String?                @db.Text // JSON object of manual feature overrides: { [featureKey: string]: boolean }
+  notes                  String?                @db.Text // Internal support notes
+
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  gym                    Gym                    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  plan                   SaasPlan               @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([gymId])
+  @@index([status])
+  @@index([planId])
+}
+
+model PlatformAuditLog {
+  id          String   @id @default(uuid())
+  userId      String   // SUPER_ADMIN performing the action
+  gymId       String?  // Optional Gym target
+  action      String   // e.g. "GYM_SUSPENDED", "GYM_REACTIVATED", "PLAN_CREATED", "SUBSCRIPTION_ASSIGNED"
+  targetType  String   // "GYM", "SAAS_PLAN", "SUBSCRIPTION", "SYSTEM"
+  targetId    String?
+  details     String?  @db.Text // JSON string or human-readable description
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation("PlatformAuditor", fields: [userId], references: [id], onDelete: Restrict)
+  gym         Gym?     @relation(fields: [gymId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([gymId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
 
 
 

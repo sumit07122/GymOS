@@ -254,3 +254,4 @@ export function FinancialReportSection({
     </div>
   );
 }
+

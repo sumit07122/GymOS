@@ -330,3 +330,4 @@ export function OperationsReportSection({ data }: OperationsReportSectionProps) 
     </div>
   );
 }
+

@@ -59,3 +59,4 @@ export default async function ReportsPage(props: ReportsPageProps) {
     </Suspense>
   );
 }
+
