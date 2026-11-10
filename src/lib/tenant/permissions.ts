@@ -39,6 +39,8 @@ export type Permission =
   | "SETTINGS_MANAGE"
   | "NOTIFICATION_MANAGE"
   | "NOTIFICATION_SEND"
+  | "REPORT_READ"
+  | "REPORT_EXPORT"
   | "SUPER_ADMIN_MANAGE";
 
 const OWNER_PERMISSIONS: Permission[] = [
@@ -76,6 +78,8 @@ const OWNER_PERMISSIONS: Permission[] = [
   "SETTINGS_MANAGE",
   "NOTIFICATION_MANAGE",
   "NOTIFICATION_SEND",
+  "REPORT_READ",
+  "REPORT_EXPORT",
 ];
 
 const STAFF_PERMISSIONS: Permission[] = [
@@ -105,6 +109,8 @@ const STAFF_PERMISSIONS: Permission[] = [
   "WORKOUT_READ",
   "WORKOUT_WRITE",
   "NOTIFICATION_SEND",
+  "REPORT_READ",
+  "REPORT_EXPORT",
 ];
 
 const TRAINER_PERMISSIONS: Permission[] = [

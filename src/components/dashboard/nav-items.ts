@@ -130,9 +130,9 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Reports & Analytics",
     href: "/reports",
     icon: BarChart3,
-    milestone: "M19",
-    isAvailable: false,
-    description: "Financial performance, retention rates, and multi-gym analytics.",
+    milestone: "M18",
+    isAvailable: true,
+    description: "Business intelligence: memberships, attendance trends, P&L finances, CRM pipeline, and CSV export.",
   },
   {
     title: "Settings",
