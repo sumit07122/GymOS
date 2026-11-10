@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import Link from "next/link";
 import Image from "next/image";
+import { LandingNav } from "@/components/home/landing-nav";
 import {
   Users,
   QrCode,
@@ -11,7 +12,6 @@ import {
   Smartphone,
   ShieldCheck,
   Building2,
-  Lock,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -62,69 +62,7 @@ export default function Home() {
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col font-sans selection:bg-pine-soft selection:text-pine">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <span className="font-display text-xl font-bold tracking-tight text-ink">FIXIA</span>
-              <span className="font-display text-xl font-semibold text-pine">GymOS</span>
-            </div>
-          </Link>
-
-          {/* Nav links with readable contrast (WCAG AA >= 4.5:1) */}
-          <nav className="hidden gap-1 text-sm text-[#475569] sm:flex font-medium items-center">
-            <a
-              href="#features"
-              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#portals"
-              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
-            >
-              Portals
-            </a>
-            <a
-              href="#members"
-              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
-            >
-              Member App
-            </a>
-            <a
-              href="#security"
-              className="px-3 py-1.5 rounded-[10px] hover:text-ink hover:bg-black/[0.04] transition-colors"
-            >
-              Zero-Trust
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/platform-admin/login"
-              className="hidden lg:flex items-center gap-1.5 text-xs text-[#334155] hover:text-ink hover:bg-black/[0.04] font-medium px-3 py-1.5 rounded-[10px] border border-line transition-colors"
-            >
-              <ShieldCheck className="size-3.5 text-pine" />
-              <span>Platform Admin</span>
-            </Link>
-
-            <Link
-              href="/register"
-              className="hidden sm:inline-flex text-xs text-ink hover:bg-black/[0.04] font-semibold px-3.5 py-1.5 rounded-[10px] border border-line bg-white transition-colors"
-            >
-              <span>Register Gym</span>
-            </Link>
-
-            <Link
-              href="/login"
-              className="rounded-[10px] bg-pine hover:bg-pine-deep text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 active:scale-[0.99]"
-            >
-              <Lock className="size-3.5" />
-              <span>Sign In</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingNav />
 
       {/* Hero Section */}
       <main className="flex-1">

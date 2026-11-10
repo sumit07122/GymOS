@@ -53,6 +53,7 @@ export async function resolvePortalMember(
     throw new PortalSecurityError("Active database session required.");
   }
 
+  let dbError = false;
   try {
     // 1. Resolve Gym tenant
     const gym = await db.gym.findFirst({
@@ -102,47 +103,64 @@ export async function resolvePortalMember(
         }
       }
 
-      if (member) {
-        return { gym, member };
-      }
+      return { gym, member: member || null };
     }
-  } catch (err) {
-    console.warn("DB offline in resolvePortalMember:", err);
+
+    if (gymSlugOrId) {
+      throw new PortalSecurityError("Gym workspace not found.");
+    }
+  } catch (err: any) {
+    if (err instanceof PortalSecurityError) {
+      throw err;
+    }
+    dbError = true;
+    console.warn("DB offline in resolvePortalMember:", err?.message || err);
   }
 
-  // Fallback demo member & gym
-  const demoGym = {
-    id: "ironforge-gym-id",
-    name: "IronForge Athletic Club",
-    slug: "ironforge-fitness",
-    logoUrl: null,
-    phone: "+91 98765 43210",
-    email: "owner@ironforge.dev",
-    city: "Bengaluru",
-    addressLine1: "12 Koramangala 4th Block",
-    currency: "INR",
-    qrSigningSecret: "ironforge-secret-dev-hmac-key",
-  };
+  // Fallback demo member & gym for offline preview / demo accounts
+  if (
+    dbError ||
+    !gymSlugOrId ||
+    sessionUserEmail?.includes("connor") ||
+    sessionUserId.includes("demo") ||
+    gymSlugOrId === "spartan-athletics" ||
+    gymSlugOrId === "ironforge-fitness"
+  ) {
+    const demoGym = {
+      id: "ironforge-gym-id",
+      name: "IronForge Athletic Club",
+      slug: "ironforge-fitness",
+      logoUrl: null,
+      phone: "+91 98765 43210",
+      email: "owner@ironforge.dev",
+      city: "Bengaluru",
+      addressLine1: "12 Koramangala 4th Block",
+      currency: "INR",
+      qrSigningSecret: "ironforge-secret-dev-hmac-key",
+    };
 
-  const demoMember: any = {
-    id: "mem-sarah-demo",
-    gymId: demoGym.id,
-    userId: sessionUserId,
-    memberCode: "IF-1001",
-    firstName: "Sarah",
-    lastName: "Connor",
-    photoUrl: null,
-    status: "ACTIVE",
-    joiningDate: new Date("2026-01-01"),
-    email: sessionUserEmail || "sarah.connor@example.com",
-    phone: "+91 98765 00001",
-    address: "14 Olympic Way, Sector 5, Bengaluru",
-    emergencyContactName: "John Connor",
-    emergencyContactPhone: "+91 98765 00002",
-    medicalNotes: "No restrictions. High-intensity conditioning clearance.",
-  };
+    const demoMember: any = {
+      id: "mem-sarah-demo",
+      gymId: demoGym.id,
+      userId: sessionUserId,
+      memberCode: "IF-1001",
+      firstName: "Sarah",
+      lastName: "Connor",
+      photoUrl: null,
+      status: "ACTIVE",
+      joiningDate: new Date("2026-01-01"),
+      email: sessionUserEmail || "sarah.connor@example.com",
+      phone: "+91 98765 00001",
+      address: "14 Olympic Way, Sector 5, Bengaluru",
+      emergencyContactName: "John Connor",
+      emergencyContactPhone: "+91 98765 00002",
+      medicalNotes: "No restrictions. High-intensity conditioning clearance.",
+    };
 
-  return { gym: demoGym, member: demoMember };
+    return { gym: demoGym, member: demoMember };
+  }
+
+  throw new PortalSecurityError("Gym workspace not found.");
 }
 
 const DEMO_PORTAL_DASHBOARD_DATA = {

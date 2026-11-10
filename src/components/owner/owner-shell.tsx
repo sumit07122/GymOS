@@ -18,6 +18,10 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  LayoutDashboard,
+  Users,
+  QrCode,
+  Receipt,
 } from "lucide-react";
 
 interface OwnerShellProps {
@@ -381,9 +385,57 @@ export function OwnerShell({
         )}
 
         {/* Content Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 md:pb-8 max-w-[1400px] w-full mx-auto">
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (md:hidden) */}
+        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-line flex items-center justify-around h-14 px-2 shadow-lg">
+          <Link
+            href="/owner/dashboard"
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium transition ${
+              pathname === "/owner/dashboard" ? "text-pine font-bold" : "text-muted hover:text-ink"
+            }`}
+          >
+            <LayoutDashboard className="h-4 w-4 shrink-0 mb-0.5" />
+            <span>Overview</span>
+          </Link>
+          <Link
+            href="/owner/members"
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium transition ${
+              pathname === "/owner/members" ? "text-pine font-bold" : "text-muted hover:text-ink"
+            }`}
+          >
+            <Users className="h-4 w-4 shrink-0 mb-0.5" />
+            <span>Members</span>
+          </Link>
+          <Link
+            href="/owner/attendance"
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium transition ${
+              pathname === "/owner/attendance" ? "text-pine font-bold" : "text-muted hover:text-ink"
+            }`}
+          >
+            <QrCode className="h-4 w-4 shrink-0 mb-0.5" />
+            <span>Attendance</span>
+          </Link>
+          <Link
+            href="/owner/payments"
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium transition ${
+              pathname === "/owner/payments" ? "text-pine font-bold" : "text-muted hover:text-ink"
+            }`}
+          >
+            <Receipt className="h-4 w-4 shrink-0 mb-0.5" />
+            <span>Billing</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium text-muted hover:text-ink transition"
+          >
+            <Menu className="h-4 w-4 shrink-0 mb-0.5" />
+            <span>More</span>
+          </button>
+        </nav>
       </div>
     </div>
   );
