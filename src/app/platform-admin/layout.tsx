@@ -16,7 +16,7 @@ export default async function PlatformAdminLayout({
   const session = await requireSuperAdmin("/platform-admin");
 
   return (
-    <div className="min-h-screen bg-slate-900 font-sans text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-canvas font-sans text-ink flex flex-col">
       <PlatformAdminNav user={session.user} />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {children}
@@ -24,4 +24,3 @@ export default async function PlatformAdminLayout({
     </div>
   );
 }
-

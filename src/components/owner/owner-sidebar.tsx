@@ -22,9 +22,8 @@ import {
   Globe,
   Smartphone,
   ExternalLink,
-  Building2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/ui";
 
 export interface OwnerSidebarProps {
   currentGym: {
@@ -127,56 +126,40 @@ export function OwnerSidebar({
   return (
     <aside
       className={cn(
-        "flex h-full w-64 flex-col bg-[#0B132B] text-slate-300 border-r border-slate-800 shadow-xl select-none",
+        "flex h-full w-64 flex-col bg-white text-ink border-r border-line select-none",
         className
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-5">
         <Link
           href="/owner/dashboard"
-          className="flex items-center gap-2.5 transition hover:opacity-90"
+          className="flex items-center gap-2"
           onClick={onItemClick}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-900/50">
-            <Building2 className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 font-bold tracking-tight text-white">
-              <span className="text-base tracking-wider font-extrabold">FIXIA</span>
-              <span className="text-sm font-semibold text-indigo-400">GymOS</span>
-            </div>
-            <p className="text-[10px] text-slate-400 font-medium tracking-wide uppercase">
-              Owner Workspace
-            </p>
-          </div>
+          <Logo />
         </Link>
-        <Badge
-          variant="outline"
-          className="border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-[10px] px-1.5 py-0 h-4 font-mono font-medium"
-        >
-          OWNER
-        </Badge>
+        <span className="rounded-md bg-pine-soft px-1.5 py-0.5 text-[11px] font-semibold text-pine">
+          Owner
+        </span>
       </div>
 
-      {/* Gym Identifier Badge */}
-      <div className="p-3 border-b border-slate-800/80 bg-slate-950/40">
-        <div className="text-xs font-bold text-white truncate">{currentGym.name}</div>
-        <div className="flex items-center justify-between mt-0.5">
-          <span className="text-[10px] font-mono text-slate-400 truncate">
+      {/* Gym Identifier Strip */}
+      <div className="p-3.5 border-b border-line bg-canvas/60">
+        <div className="text-xs font-bold text-ink truncate">{currentGym.name}</div>
+        <div className="flex items-center justify-between mt-1 text-[11px]">
+          <span className="font-mono text-muted truncate">
             /g/{currentGym.slug}
           </span>
-          <Badge
-            variant="outline"
-            className="text-[9px] bg-emerald-950 text-emerald-300 border-emerald-800 px-1 py-0"
-          >
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pine bg-pine-soft px-2 py-0.5 rounded-full">
+            <span className="size-1.5 rounded-full bg-pine" />
             {currentGym.status}
-          </Badge>
+          </span>
         </div>
       </div>
 
       {/* Navigation Items List */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
         {OWNER_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -187,16 +170,16 @@ export function OwnerSidebar({
               href={item.href}
               onClick={onItemClick}
               className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all",
+                "group flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-xs font-medium transition-colors",
                 isActive
-                  ? "bg-indigo-600 text-white shadow-sm font-semibold"
-                  : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
+                  ? "bg-pine-soft text-pine font-semibold"
+                  : "text-muted hover:bg-black/[.04] hover:text-ink"
               )}
             >
               <Icon
                 className={cn(
                   "h-4 w-4 shrink-0 transition-colors",
-                  isActive ? "text-white" : "text-slate-400 group-hover:text-indigo-400"
+                  isActive ? "text-pine" : "text-muted group-hover:text-ink"
                 )}
               />
               <span className="truncate">{item.title}</span>
@@ -206,35 +189,35 @@ export function OwnerSidebar({
       </div>
 
       {/* Bottom Actions & User Profile */}
-      <div className="border-t border-slate-800 p-3 bg-slate-950/60 space-y-2">
+      <div className="border-t border-line p-3 bg-canvas/40 space-y-2">
         <div className="grid grid-cols-2 gap-1.5">
           <Link
             href={`/g/${currentGym.slug}`}
             target="_blank"
-            className="flex items-center justify-center gap-1 rounded-md bg-slate-900 border border-slate-800 px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:text-white hover:bg-slate-850 transition"
+            className="flex items-center justify-center gap-1 rounded-lg bg-white border border-line px-2 py-1.5 text-[11px] font-medium text-muted hover:text-ink hover:bg-canvas transition"
           >
-            <Globe className="h-3 w-3 text-indigo-400" />
+            <Globe className="h-3 w-3 text-pine" />
             <span>Public Site</span>
           </Link>
           <Link
             href="/member/home"
-            className="flex items-center justify-center gap-1 rounded-md bg-slate-900 border border-slate-800 px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:text-white hover:bg-slate-850 transition"
+            className="flex items-center justify-center gap-1 rounded-lg bg-white border border-line px-2 py-1.5 text-[11px] font-medium text-muted hover:text-ink hover:bg-canvas transition"
           >
-            <Smartphone className="h-3 w-3 text-emerald-400" />
+            <Smartphone className="h-3 w-3 text-pine" />
             <span>Member App</span>
           </Link>
         </div>
 
-        <div className="pt-2 border-t border-slate-850 flex items-center justify-between">
+        <div className="pt-2 border-t border-line flex items-center justify-between">
           <div className="truncate pr-2">
-            <div className="text-[11px] font-semibold text-slate-200 truncate">
+            <div className="text-[11px] font-semibold text-ink truncate">
               {user.name || user.email}
             </div>
-            <div className="text-[9px] text-slate-500 truncate">{user.email}</div>
+            <div className="text-[10px] text-muted truncate">{user.email}</div>
           </div>
           <Link
             href="/login"
-            className="text-slate-500 hover:text-rose-400 p-1.5 rounded transition"
+            className="text-muted hover:text-rose-600 p-1.5 rounded transition"
             title="Log out"
           >
             <ExternalLink className="h-3.5 w-3.5" />
@@ -244,4 +227,3 @@ export function OwnerSidebar({
     </aside>
   );
 }
-
