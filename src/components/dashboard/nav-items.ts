@@ -9,6 +9,7 @@ import {
   Calendar,
   Package,
   Dumbbell,
+  Smartphone,
   BarChart3,
   Settings,
   type LucideIcon,
@@ -98,6 +99,14 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     milestone: "M14",
     isAvailable: true,
     description: "Workout logs, exercise benchmarks, and client fitness assessments.",
+  },
+  {
+    title: "Member Portal",
+    href: "/portal",
+    icon: Smartphone,
+    milestone: "M15",
+    isAvailable: true,
+    description: "Mobile-first member home, digital membership card, and self-service portal.",
   },
   {
     title: "Reports & Analytics",
