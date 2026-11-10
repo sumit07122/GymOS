@@ -1,25 +1,78 @@
 import Link from "next/link";
-import { WifiOff, RefreshCw } from "lucide-react";
+import { WifiOff, RefreshCw, Dumbbell, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center shadow-2xl">
-        <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <WifiOff className="w-8 h-8" />
-        </div>
-        <h1 className="text-2xl font-bold text-white mb-2">You&apos;re Currently Offline</h1>
-        <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-          FIXIA GymOS requires an active network connection to synchronize member records, verify dynamic attendance QR tokens, and process financial ledgers.
-        </p>
-        <div className="space-y-3">
-          <Link
-            href="/"
-            className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Check Connection & Retry
+    <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-8 sm:p-6 md:p-8 relative overflow-y-auto selection:bg-indigo-500 selection:text-white">
+      {/* Background Decorative Ambient Glows */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-600/20 via-purple-600/10 to-transparent blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-[450px] h-[320px] bg-indigo-900/10 blur-3xl pointer-events-none" />
+
+      {/* Main Centered Container */}
+      <div className="w-full max-w-md relative z-10 flex flex-col items-center my-auto">
+        {/* Brand Header */}
+        <div className="text-center mb-6">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="size-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold shadow-xl shadow-indigo-600/25 ring-1 ring-white/10 group-hover:scale-105 transition-transform duration-200">
+              <Dumbbell className="size-6 text-white" />
+            </div>
+            <div className="text-left">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-2xl tracking-tight text-white">FIXIA</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest bg-indigo-950/90 border border-indigo-700/60 text-indigo-300 px-2.5 py-0.5 rounded-full shadow-inner">
+                  GymOS
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Enterprise Multi-Tenant Cloud Platform
+              </p>
+            </div>
           </Link>
+        </div>
+
+        {/* Centered Offline Card */}
+        <Card className="w-full border-slate-800/80 bg-slate-900/85 shadow-2xl shadow-indigo-950/70 backdrop-blur-2xl text-slate-100 rounded-3xl overflow-hidden relative before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/50 before:to-transparent">
+          <CardHeader className="space-y-3 pb-4 text-center border-b border-slate-800/60 bg-slate-950/50">
+            <div className="size-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-1 shadow-lg shadow-amber-500/10">
+              <WifiOff className="size-7" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-bold text-white tracking-tight">
+                You&apos;re Currently Offline
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-400 mt-1 leading-relaxed">
+                FIXIA GymOS requires an active network connection to verify dynamic attendance QR tokens, synchronize member records, and record financial transactions.
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4 pt-6 px-6">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400 leading-relaxed">
+              Cached shell assets and offline profiles remain available locally. Please reconnect to Wi-Fi or mobile data to resume live synchronization.
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-3 pt-2 pb-6 px-6">
+            <Link href="/" className="w-full">
+              <Button className="w-full h-11 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 rounded-xl transition-all duration-200 active:scale-[0.99]">
+                <RefreshCw className="size-3.5" />
+                <span>Check Connection & Retry</span>
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        {/* Security Subtext */}
+        <div className="mt-6 text-center text-xs text-slate-500 space-y-1">
+          <p className="flex items-center justify-center gap-1.5">
+            <Sparkles className="size-3 text-indigo-400" />
+            <span>Progressive Web App Shell • Stale-While-Revalidate Engine</span>
+          </p>
+          <p className="text-[11px] text-slate-600">
+            Official FIXIA Cloud Platform &bull; <strong className="text-slate-400">https://gms.fixia.in</strong>
+          </p>
         </div>
       </div>
     </div>

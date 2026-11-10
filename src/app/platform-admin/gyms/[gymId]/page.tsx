@@ -21,3 +21,4 @@ export default async function PlatformAdminGymDetailPage(props: PlatformAdminGym
 
   return <GymDetailView data={details} />;
 }
+

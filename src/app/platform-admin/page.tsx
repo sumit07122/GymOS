@@ -9,3 +9,4 @@ export default async function PlatformAdminDashboardPage() {
 
   return <PlatformOverview data={metrics} />;
 }
+

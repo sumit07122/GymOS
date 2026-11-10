@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Dumbbell, ArrowLeft, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { Dumbbell, ArrowLeft, Loader2, AlertCircle, Lock, Sparkles, ArrowRight, Mail, Eye, EyeOff, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -14,6 +14,7 @@ export default function GymBrandedLoginPage() {
   const params = useParams();
   const router = useRouter();
   const gymSlug = (params?.gymSlug as string) || "";
+  const [showPassword, setShowPassword] = useState(false);
 
   const [state, formAction, isPending] = useActionState(memberLoginAction, null);
 
@@ -23,116 +24,155 @@ export default function GymBrandedLoginPage() {
     }
   }, [state, router]);
 
+  const gymDisplayName = gymSlug ? gymSlug.replace(/-/g, " ") : "Gym";
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+    <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-8 sm:p-6 md:p-8 relative overflow-y-auto selection:bg-emerald-500 selection:text-white">
+      {/* Background Decorative Ambient Glows */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-emerald-600/15 via-teal-600/10 to-transparent blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-[450px] h-[320px] bg-indigo-900/10 blur-3xl pointer-events-none" />
+
+      {/* Main Centered Container */}
+      <div className="w-full max-w-md relative z-10 flex flex-col items-center my-auto">
         <Link
           href={`/g/${gymSlug}`}
-          className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold mb-4"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Gym Website</span>
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to gym public site</span>
         </Link>
 
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="size-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-600/30">
-            <Dumbbell className="size-6" />
-          </div>
-        </div>
-
-        <h1 className="text-xl sm:text-2xl font-black text-white capitalize">
-          {gymSlug.replace(/-/g, " ")} Member Portal
-        </h1>
-        <p className="mt-1 text-xs text-slate-400">
-          Sign in to access your digital membership pass, workouts, and attendance.
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card className="border-slate-800 bg-slate-900/90 shadow-2xl backdrop-blur-md text-slate-100">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-bold text-white">Member Sign In</CardTitle>
-            <CardDescription className="text-xs text-slate-400">
-              Enter your registered member email and password.
-            </CardDescription>
+        {/* Centered Member Login Card */}
+        <Card className="w-full border-slate-800/80 bg-slate-900/85 shadow-2xl shadow-emerald-950/40 backdrop-blur-2xl text-slate-100 rounded-3xl overflow-hidden relative before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-emerald-500/60 before:to-transparent">
+          <CardHeader className="space-y-3 pb-4 text-center border-b border-slate-800/60 bg-slate-950/50">
+            <div className="size-13 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center mx-auto mb-1 shadow-lg shadow-emerald-600/25 ring-1 ring-white/10">
+              <Dumbbell className="size-7 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-black tracking-tight text-white capitalize">
+                {gymDisplayName} Member Access
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-400 mt-1">
+                Sign in to access your digital membership pass, training routines, and attendance ledger.
+              </CardDescription>
+            </div>
           </CardHeader>
 
           <form action={formAction}>
             <input type="hidden" name="gymSlug" value={gymSlug} />
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6 px-6">
               {state?.error && (
-                <div className="rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-300 flex items-start gap-2.5">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
-                  <span>{state.error}</span>
+                <div className="rounded-xl bg-rose-950/40 border border-rose-500/30 p-3.5 text-xs text-rose-300 flex items-start gap-2.5 animate-in fade-in duration-200">
+                  <AlertCircle className="size-4 shrink-0 text-rose-400 mt-0.5" />
+                  <span className="leading-relaxed">{state.error}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">
-                  Gym Workspace
+                <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
+                  <span>Gym Workspace</span>
+                  <span className="text-[10px] text-emerald-400 font-mono font-medium">Verified Tenant</span>
                 </label>
-                <Input
-                  disabled
-                  value={`/g/${gymSlug}`}
-                  className="bg-slate-950 border-slate-700 text-slate-400 text-xs h-9 font-mono"
-                />
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                    <Building2 className="size-4" />
+                  </div>
+                  <Input
+                    disabled
+                    value={`/g/${gymSlug}`}
+                    className="pl-10 h-11 text-xs bg-slate-950/70 border-slate-800 text-slate-300 font-mono rounded-xl"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300" htmlFor="email">
-                  Member Email Address
+                <label className="text-xs font-semibold text-slate-200" htmlFor="email">
+                  Registered Member Email
                 </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="member@gmail.com"
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
-                  disabled={isPending}
-                />
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                    <Mail className="size-4" />
+                  </div>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    placeholder="member@example.com"
+                    className="pl-10 h-11 text-xs bg-slate-950/70 border-slate-800 text-white placeholder-slate-500 rounded-xl focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-all"
+                    disabled={isPending}
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300" htmlFor="password">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="bg-slate-950 border-slate-700 text-white text-xs h-9"
-                  disabled={isPending}
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-200" htmlFor="password">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                    <Lock className="size-4" />
+                  </div>
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    placeholder="••••••••••••"
+                    className="pl-10 pr-10 h-11 text-xs bg-slate-950/70 border-slate-800 text-white placeholder-slate-500 rounded-xl font-mono focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-all"
+                    disabled={isPending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
               </div>
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-3 pt-2">
+            <CardFooter className="flex flex-col gap-3 pt-3 pb-6 px-6">
               <Button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs h-10 cursor-pointer shadow-md shadow-indigo-600/30"
+                className="w-full h-11 font-bold text-xs cursor-pointer bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-600/30 rounded-xl transition-all duration-200 active:scale-[0.99]"
               >
                 {isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Authenticating...
-                  </>
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" />
+                    <span>Verifying Member Pass...</span>
+                  </span>
                 ) : (
-                  "Access Member Portal"
+                  <span className="flex items-center justify-center gap-1.5">
+                    <Lock className="size-3.5" />
+                    <span>Enter Member Portal</span>
+                    <ArrowRight className="size-3.5 ml-1" />
+                  </span>
                 )}
               </Button>
-
-              <div className="text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5 pt-2">
-                <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
-                <span>Secured by FIXIA GymOS &bull; gms.fixia.in</span>
-              </div>
             </CardFooter>
           </form>
         </Card>
+
+        {/* Security Subtext */}
+        <div className="mt-6 text-center text-xs text-slate-500 space-y-1">
+          <p className="flex items-center justify-center gap-1.5">
+            <Sparkles className="size-3 text-emerald-400" />
+            <span>Cryptographic Member Identity • Anti-Passback QR Protection</span>
+          </p>
+          <p className="text-[11px] text-slate-600">
+            Powered by FIXIA GymOS &bull; <strong className="text-slate-400">gms.fixia.in</strong>
+          </p>
+        </div>
       </div>
     </div>
   );

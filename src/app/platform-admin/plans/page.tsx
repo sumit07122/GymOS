@@ -10,3 +10,4 @@ export default async function PlatformAdminPlansPage() {
 
   return <SaasPlansManager initialPlans={plans} />;
 }
+

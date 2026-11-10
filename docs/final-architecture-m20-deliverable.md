@@ -461,3 +461,4 @@ Gym onboarding is executed entirely by FIXIA Super Administrators via `onboardGy
 - **Hardware Camera Scanners on Desktop:** Native QR camera scanning requires browser HTTPS camera permissions; front-desk kiosks on non-HTTPS local networks must use standard USB barcode/QR wedge scanners.
 - **WhatsApp Provider Credentials:** Production message dispatch requires live Meta Cloud API access tokens or Twilio credentials configured in gym settings; simulated logging mode is active when credentials are unset.
 - **Payment Gateway Webhooks:** Direct bank wire and cash transactions are recorded directly in the platform ledger; automatic reconciliation for Razorpay/Stripe requires setting `STRIPE_WEBHOOK_SECRET` and `RAZORPAY_WEBHOOK_SECRET` in environment variables.
+

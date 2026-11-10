@@ -11,3 +11,4 @@ export default async function OwnerReportsPage({ searchParams }: OwnerReportsPag
   const { gym } = await requireOwnerSession("/owner/reports");
   return <GymReportsPage params={Promise.resolve({ gymSlug: gym.slug })} searchParams={searchParams} />;
 }
+

@@ -6,3 +6,4 @@ export default async function OwnerFitnessPage() {
   const { gym } = await requireOwnerSession("/owner/fitness");
   return <GymWorkoutsPage params={Promise.resolve({ gymSlug: gym.slug })} />;
 }
+

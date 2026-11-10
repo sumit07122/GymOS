@@ -386,14 +386,14 @@ export async function getRegisteredGymsList(
       owner: g.userRoles[0]?.user || null,
       subscription: g.subscription
         ? {
-            id: g.subscription.id,
-            status: g.subscription.status,
-            billingPeriod: g.subscription.billingPeriod,
-            planName: g.subscription.plan.name,
-            planCode: g.subscription.plan.code,
-            currentPeriodEnd: g.subscription.currentPeriodEnd.toISOString(),
-            trialEndsAt: g.subscription.trialEndsAt?.toISOString() || null,
-          }
+          id: g.subscription.id,
+          status: g.subscription.status,
+          billingPeriod: g.subscription.billingPeriod,
+          planName: g.subscription.plan.name,
+          planCode: g.subscription.plan.code,
+          currentPeriodEnd: g.subscription.currentPeriodEnd.toISOString(),
+          trialEndsAt: g.subscription.trialEndsAt?.toISOString() || null,
+        }
         : null,
     })),
   };
@@ -473,27 +473,27 @@ export async function getGymAdminDetails(adminUserId: string, gymId: string) {
     })),
     subscription: gym.subscription
       ? {
-          id: gym.subscription.id,
-          status: gym.subscription.status,
-          billingPeriod: gym.subscription.billingPeriod,
-          currentPeriodStart: gym.subscription.currentPeriodStart.toISOString(),
-          currentPeriodEnd: gym.subscription.currentPeriodEnd.toISOString(),
-          trialEndsAt: gym.subscription.trialEndsAt?.toISOString() || null,
-          gracePeriodEndsAt: gym.subscription.gracePeriodEndsAt?.toISOString() || null,
-          customFeatureOverrides: gym.subscription.customFeatureOverrides,
-          notes: gym.subscription.notes,
-          plan: {
-            id: gym.subscription.plan.id,
-            name: gym.subscription.plan.name,
-            code: gym.subscription.plan.code,
-            monthlyPrice: Number(gym.subscription.plan.monthlyPrice),
-            yearlyPrice: Number(gym.subscription.plan.yearlyPrice),
-            maxMembers: gym.subscription.plan.maxMembers,
-            maxStaff: gym.subscription.plan.maxStaff,
-            maxClasses: gym.subscription.plan.maxClasses,
-            features: gym.subscription.plan.features,
-          },
-        }
+        id: gym.subscription.id,
+        status: gym.subscription.status,
+        billingPeriod: gym.subscription.billingPeriod,
+        currentPeriodStart: gym.subscription.currentPeriodStart.toISOString(),
+        currentPeriodEnd: gym.subscription.currentPeriodEnd.toISOString(),
+        trialEndsAt: gym.subscription.trialEndsAt?.toISOString() || null,
+        gracePeriodEndsAt: gym.subscription.gracePeriodEndsAt?.toISOString() || null,
+        customFeatureOverrides: gym.subscription.customFeatureOverrides,
+        notes: gym.subscription.notes,
+        plan: {
+          id: gym.subscription.plan.id,
+          name: gym.subscription.plan.name,
+          code: gym.subscription.plan.code,
+          monthlyPrice: Number(gym.subscription.plan.monthlyPrice),
+          yearlyPrice: Number(gym.subscription.plan.yearlyPrice),
+          maxMembers: gym.subscription.plan.maxMembers,
+          maxStaff: gym.subscription.plan.maxStaff,
+          maxClasses: gym.subscription.plan.maxClasses,
+          features: gym.subscription.plan.features,
+        },
+      }
       : null,
     availablePlans: allPlans.map((p) => ({
       id: p.id,
@@ -569,8 +569,8 @@ export async function updateGymAccountStatus(
       newStatus === GymStatus.SUSPENDED
         ? "GYM_SUSPENDED"
         : newStatus === GymStatus.ACTIVE
-        ? "GYM_REACTIVATED"
-        : "GYM_STATUS_CHANGED";
+          ? "GYM_REACTIVATED"
+          : "GYM_STATUS_CHANGED";
 
     const auditLog = await tx.platformAuditLog.create({
       data: {
@@ -896,10 +896,10 @@ export async function getPlatformAuditLogs(
     },
     gym: log.gym
       ? {
-          id: log.gym.id,
-          name: log.gym.name,
-          slug: log.gym.slug,
-        }
+        id: log.gym.id,
+        name: log.gym.name,
+        slug: log.gym.slug,
+      }
       : null,
   }));
 }
