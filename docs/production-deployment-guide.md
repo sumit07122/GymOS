@@ -165,3 +165,4 @@ Verify critical system paths on live production:
 - **Performance Monitoring:** Vercel Speed Insights and Web Analytics monitor Core Web Vitals (LCP, INP, CLS).
 - **Database Metrics:** Neon Console monitors compute CPU utilization, active connections, and cache hit ratios.
 - **Audit Logs:** All administrative actions, role assignments, financial refunds, and gym status updates write immutable entries to `PlatformAuditLog` and `MembershipAuditLog`.
+

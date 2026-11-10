@@ -8,6 +8,9 @@ import {
   createSaasPlan,
   updateSaasPlan,
   assignGymSubscription,
+  onboardGymTransactional,
+  createSubscriptionAddon,
+  recordSubscriptionPayment,
 } from "@/lib/services/platform-admin.service";
 import {
   gymStatusUpdateSchema,
@@ -18,6 +21,12 @@ import {
   AssignSubscriptionInput,
   gymSupportNotesSchema,
   GymSupportNotesInput,
+  onboardGymSchema,
+  OnboardGymInput,
+  subscriptionAddonSchema,
+  SubscriptionAddonInput,
+  recordSubscriptionPaymentSchema,
+  RecordSubscriptionPaymentInput,
 } from "@/lib/validations/saas-admin";
 import { revalidatePath } from "next/cache";
 
@@ -154,6 +163,76 @@ export async function assignGymSubscriptionAction(
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to assign subscription.";
+    return {
+      success: false,
+      error: message,
+    };
+  }
+}
+
+export async function onboardGymAction(input: OnboardGymInput) {
+  try {
+    const session = await requireSuperAdminSession();
+    const parsed = onboardGymSchema.parse(input);
+
+    const result = await onboardGymTransactional(session.user.id, parsed);
+
+    revalidatePath("/platform-admin");
+    revalidatePath("/platform-admin/gyms");
+    revalidatePath("/admin");
+    revalidatePath("/admin/gyms");
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to onboard gym.";
+    return {
+      success: false,
+      error: message,
+    };
+  }
+}
+
+export async function createSubscriptionAddonAction(input: SubscriptionAddonInput) {
+  try {
+    const session = await requireSuperAdminSession();
+    const parsed = subscriptionAddonSchema.parse(input);
+
+    const addon = await createSubscriptionAddon(session.user.id, parsed);
+
+    revalidatePath("/platform-admin/addons");
+
+    return {
+      success: true,
+      addon,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to create subscription add-on.";
+    return {
+      success: false,
+      error: message,
+    };
+  }
+}
+
+export async function recordSubscriptionPaymentAction(input: RecordSubscriptionPaymentInput) {
+  try {
+    const session = await requireSuperAdminSession();
+    const parsed = recordSubscriptionPaymentSchema.parse(input);
+
+    const payment = await recordSubscriptionPayment(session.user.id, parsed);
+
+    revalidatePath("/platform-admin/payments");
+    revalidatePath(`/platform-admin/gyms/${parsed.gymId}`);
+
+    return {
+      success: true,
+      payment,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to record subscription payment.";
     return {
       success: false,
       error: message,

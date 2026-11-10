@@ -1,15 +1,24 @@
 import { db } from "@/lib/db";
+import crypto from "crypto";
 import {
   SystemRole,
+  GymRole,
   GymStatus,
   SaasSubscriptionStatus,
   SaasBillingPeriod,
+  PaymentMethod,
+  InvoiceStatus,
+  PaymentStatus,
 } from "@prisma/client";
 import {
   SaasPlanInput,
   AssignSubscriptionInput,
+  OnboardGymInput,
+  SubscriptionAddonInput,
+  RecordSubscriptionPaymentInput,
 } from "@/lib/validations/saas-admin";
 import { SaasFeature } from "@/lib/saas/entitlements";
+import { hashPassword } from "@/lib/auth/password";
 
 // ==============================================================================
 // FIXIA GymOS — Platform Administration Service (M19)
@@ -87,6 +96,7 @@ export async function seedDefaultSaasPlansIfEmpty() {
         code: "STARTER",
         description: "Essential gym operations for boutique gyms and single studios.",
         monthlyPrice: 29.0,
+        quarterlyPrice: 79.0,
         yearlyPrice: 290.0,
         trialDays: 14,
         gracePeriodDays: 7,
@@ -97,28 +107,30 @@ export async function seedDefaultSaasPlansIfEmpty() {
         isActive: true,
       },
       {
-        name: "Professional Gym",
-        code: "PRO",
-        description: "Complete fitness operating system with CRM, scheduling, and website.",
-        monthlyPrice: 79.0,
-        yearlyPrice: 790.0,
+        name: "Growth Athletic",
+        code: "GROWTH",
+        description: "Scale operations with CRM leads, group classes, inventory, and website.",
+        monthlyPrice: 59.0,
+        quarterlyPrice: 159.0,
+        yearlyPrice: 590.0,
         trialDays: 14,
         gracePeriodDays: 7,
-        maxMembers: 500,
-        maxStaff: 10,
-        maxClasses: 50,
+        maxMembers: 300,
+        maxStaff: 6,
+        maxClasses: 30,
         features: JSON.stringify(proFeatures),
         isActive: true,
       },
       {
-        name: "Enterprise Multi-Club",
-        code: "ENTERPRISE",
-        description: "Unlimited scale with WhatsApp notifications, business analytics, and priority.",
-        monthlyPrice: 199.0,
-        yearlyPrice: 1990.0,
+        name: "Professional Pro",
+        code: "PRO",
+        description: "Full-scale fitness management with WhatsApp automation, analytics, and priority.",
+        monthlyPrice: 99.0,
+        quarterlyPrice: 269.0,
+        yearlyPrice: 990.0,
         trialDays: 30,
         gracePeriodDays: 14,
-        maxMembers: -1, // Unlimited
+        maxMembers: -1,
         maxStaff: -1,
         maxClasses: -1,
         features: JSON.stringify(enterpriseFeatures),
@@ -126,6 +138,41 @@ export async function seedDefaultSaasPlansIfEmpty() {
       },
     ],
   });
+
+  const addonCount = await db.subscriptionAddon.count();
+  if (addonCount === 0) {
+    await db.subscriptionAddon.createMany({
+      data: [
+        {
+          name: "WhatsApp Pro Automation",
+          code: "WHATSAPP_PRO",
+          description: "Automated WhatsApp payment receipts, renewal reminders, and alerts.",
+          monthlyPrice: 19.0,
+          yearlyPrice: 190.0,
+          featureKey: SaasFeature.WHATSAPP_NOTIFICATIONS,
+          isActive: true,
+        },
+        {
+          name: "Advanced Business Analytics",
+          code: "ADVANCED_ANALYTICS",
+          description: "Executive P&L reporting, churn analytics, and CSV financial exports.",
+          monthlyPrice: 25.0,
+          yearlyPrice: 250.0,
+          featureKey: SaasFeature.BUSINESS_ANALYTICS,
+          isActive: true,
+        },
+        {
+          name: "Custom Branded Domain",
+          code: "CUSTOM_DOMAIN",
+          description: "Host member portal and public site on custom domain e.g. gym.com.",
+          monthlyPrice: 15.0,
+          yearlyPrice: 150.0,
+          featureKey: SaasFeature.PUBLIC_WEBSITE,
+          isActive: true,
+        },
+      ],
+    });
+  }
 }
 
 /**
@@ -615,6 +662,7 @@ export async function listSaasPlans(adminUserId: string, includeInactive = false
     code: p.code,
     description: p.description,
     monthlyPrice: Number(p.monthlyPrice),
+    quarterlyPrice: p.quarterlyPrice ? Number(p.quarterlyPrice) : null,
     yearlyPrice: Number(p.yearlyPrice),
     trialDays: p.trialDays,
     gracePeriodDays: p.gracePeriodDays,
@@ -854,5 +902,398 @@ export async function getPlatformAuditLogs(
         }
       : null,
   }));
+}
+
+// ==============================================================================
+// 9. FIXIA-CONTROLLED ONBOARDING ENGINE (M20)
+// ==============================================================================
+
+export async function onboardGymTransactional(
+  adminUserId: string,
+  input: OnboardGymInput,
+  ipAddress?: string
+) {
+  await assertSuperAdminUser(adminUserId);
+
+  // 1. Slug collision check
+  const existingSlug = await db.gym.findUnique({
+    where: { slug: input.slug.toLowerCase().trim() },
+    select: { id: true },
+  });
+  if (existingSlug) {
+    throw new Error(`Gym slug "${input.slug}" is already registered. Please choose a unique slug.`);
+  }
+
+  // 2. Resolve Plan
+  const plan = await db.saasPlan.findFirst({
+    where: {
+      OR: [
+        { id: input.planId },
+        { code: input.planId.toUpperCase() },
+      ],
+      isActive: true,
+    },
+  });
+  if (!plan) {
+    throw new Error(`Selected SaaS Plan "${input.planId}" does not exist or is inactive.`);
+  }
+
+  // 3. Password & Secrets
+  const rawPassword = input.ownerPassword || crypto.randomBytes(8).toString("hex") + "#2026!";
+  const passwordHash = await hashPassword(rawPassword);
+  const qrSigningSecret = crypto.randomBytes(32).toString("hex");
+  const invitationToken = crypto.randomUUID();
+
+  // 4. Calculate Billing End Dates
+  const now = new Date();
+  const trialDays = input.trialDays ?? plan.trialDays;
+  const trialEndsAt = trialDays > 0 ? new Date(now.getTime() + trialDays * 86400000) : null;
+  const gracePeriodEndsAt = new Date(now.getTime() + plan.gracePeriodDays * 86400000);
+
+  const currentPeriodEnd = new Date(now);
+  if (input.billingPeriod === SaasBillingPeriod.YEARLY) {
+    currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 365);
+  } else if (input.billingPeriod === SaasBillingPeriod.QUARTERLY) {
+    currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 90);
+  } else {
+    currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 30);
+  }
+
+  // Determine effective pricing
+  let effectivePrice = Number(plan.monthlyPrice);
+  if (input.customPricingOverride !== undefined && input.customPricingOverride !== null) {
+    effectivePrice = Number(input.customPricingOverride);
+  } else if (input.billingPeriod === SaasBillingPeriod.YEARLY) {
+    effectivePrice = Number(plan.yearlyPrice);
+  } else if (input.billingPeriod === SaasBillingPeriod.QUARTERLY && plan.quarterlyPrice) {
+    effectivePrice = Number(plan.quarterlyPrice);
+  }
+
+  // 5. Execute Atomic Provisioning Transaction
+  return await db.$transaction(async (tx) => {
+    // 5.1 Create Gym Workspace
+    const gym = await tx.gym.create({
+      data: {
+        name: input.name.trim(),
+        slug: input.slug.toLowerCase().trim(),
+        phone: input.phone.trim(),
+        email: input.email.toLowerCase().trim(),
+        city: input.city.trim(),
+        country: input.country || "IN",
+        currency: input.currency || "INR",
+        timezone: input.timezone || "Asia/Kolkata",
+        openingHours: input.openingHours?.trim() || "Mon - Sat: 06:00 - 22:00 | Sun: 07:00 - 13:00",
+        status: GymStatus.ACTIVE,
+        qrSigningSecret,
+      },
+    });
+
+    // 5.2 Create or Resolve Owner User
+    let ownerUser = await tx.user.findUnique({
+      where: { email: input.ownerEmail.toLowerCase().trim() },
+    });
+
+    if (ownerUser) {
+      await tx.userGymRole.upsert({
+        where: {
+          userId_gymId_role: {
+            userId: ownerUser.id,
+            gymId: gym.id,
+            role: GymRole.OWNER,
+          },
+        },
+        create: {
+          userId: ownerUser.id,
+          gymId: gym.id,
+          role: GymRole.OWNER,
+          isPrimary: true,
+        },
+        update: {},
+      });
+    } else {
+      ownerUser = await tx.user.create({
+        data: {
+          name: input.ownerName.trim(),
+          email: input.ownerEmail.toLowerCase().trim(),
+          passwordHash,
+          role: SystemRole.GYM_OWNER,
+          status: "ACTIVE",
+          gymRoles: {
+            create: {
+              gymId: gym.id,
+              role: GymRole.OWNER,
+              isPrimary: true,
+            },
+          },
+        },
+      });
+    }
+
+    // 5.3 Provision SaaS Subscription
+    const subscription = await tx.gymSubscription.create({
+      data: {
+        gymId: gym.id,
+        planId: plan.id,
+        status: trialEndsAt ? SaasSubscriptionStatus.TRIALING : SaasSubscriptionStatus.ACTIVE,
+        billingPeriod: input.billingPeriod,
+        currentPeriodStart: now,
+        currentPeriodEnd,
+        trialEndsAt,
+        gracePeriodEndsAt,
+        customMonthlyPrice: input.customPricingOverride !== undefined && input.customPricingOverride !== null && input.billingPeriod === SaasBillingPeriod.MONTHLY ? input.customPricingOverride : null,
+        customQuarterlyPrice: input.customPricingOverride !== undefined && input.customPricingOverride !== null && input.billingPeriod === SaasBillingPeriod.QUARTERLY ? input.customPricingOverride : null,
+        customYearlyPrice: input.customPricingOverride !== undefined && input.customPricingOverride !== null && input.billingPeriod === SaasBillingPeriod.YEARLY ? input.customPricingOverride : null,
+        customFeatureOverrides: input.featureOverrides ? JSON.stringify(input.featureOverrides) : null,
+        maxMembersOverride: input.maxMembersOverride ?? null,
+        notes: input.notes?.trim() || `Onboarded manually by FIXIA admin on ${now.toISOString().split("T")[0]}`,
+      },
+    });
+
+    // 5.4 Initial Subscription Invoice
+    const invoiceNumber = `FIXIA-INV-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const invoice = await tx.subscriptionInvoice.create({
+      data: {
+        gymId: gym.id,
+        subscriptionId: subscription.id,
+        invoiceNumber,
+        subtotal: effectivePrice,
+        taxAmount: 0.0,
+        totalAmount: effectivePrice,
+        status: trialEndsAt ? InvoiceStatus.DRAFT : InvoiceStatus.ISSUED,
+        billingPeriod: input.billingPeriod,
+        periodStart: now,
+        periodEnd: currentPeriodEnd,
+        dueDate: new Date(now.getTime() + 7 * 86400000),
+        notes: `Initial ${plan.name} (${input.billingPeriod}) subscription invoice.`,
+      },
+    });
+
+    // 5.5 Provision Gym Website Config
+    await tx.gymWebsiteConfig.create({
+      data: {
+        gymId: gym.id,
+        isPublished: true,
+        headline: `Forge Strength & Peak Vitality at ${gym.name}`,
+        subheadline: `Premier fitness and athletic performance facility in ${gym.city}.`,
+        tagline: "Built for Consistency. Engineered for Results.",
+      },
+    });
+
+    // 5.6 Provision Gym WhatsApp Config
+    await tx.gymWhatsAppConfig.create({
+      data: {
+        gymId: gym.id,
+        provider: "MOCK_SANDBOX",
+        isEnabled: false,
+      },
+    });
+
+    // 5.7 Initialize Usage Limits
+    await tx.gymUsageRecord.create({
+      data: {
+        gymId: gym.id,
+        metricKey: "ACTIVE_MEMBERS",
+        currentValue: 0,
+        limitValue: input.maxMembersOverride ?? plan.maxMembers,
+      },
+    });
+
+    // 5.8 Generate Invitation Token
+    const invitation = await tx.gymInvitation.create({
+      data: {
+        gymId: gym.id,
+        email: ownerUser.email!,
+        role: GymRole.OWNER,
+        token: invitationToken,
+        expiresAt: new Date(now.getTime() + 14 * 86400000),
+        invitedByUserId: adminUserId,
+      },
+    });
+
+    // 5.9 Audit Log
+    await tx.platformAuditLog.create({
+      data: {
+        userId: adminUserId,
+        gymId: gym.id,
+        action: "GYM_ONBOARDED",
+        targetType: "GYM",
+        targetId: gym.id,
+        details: JSON.stringify({
+          gymName: gym.name,
+          slug: gym.slug,
+          ownerEmail: ownerUser.email,
+          planName: plan.name,
+          billingPeriod: input.billingPeriod,
+          effectivePrice,
+        }),
+        ipAddress: ipAddress || null,
+      },
+    });
+
+    return {
+      success: true,
+      gym: {
+        id: gym.id,
+        name: gym.name,
+        slug: gym.slug,
+        city: gym.city,
+      },
+      owner: {
+        id: ownerUser.id,
+        name: ownerUser.name,
+        email: ownerUser.email,
+        temporaryPassword: rawPassword,
+      },
+      subscription: {
+        id: subscription.id,
+        planName: plan.name,
+        status: subscription.status,
+        billingPeriod: subscription.billingPeriod,
+        effectivePrice,
+        currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+      },
+      invoice: {
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        totalAmount: Number(invoice.totalAmount),
+      },
+      invitationToken: invitation.token,
+      loginUrl: `/g/${gym.slug}/login`,
+    };
+  });
+}
+
+// ==============================================================================
+// 10. SAAS ADD-ONS & SUBSCRIPTION BILLING (M20)
+// ==============================================================================
+
+export async function listSubscriptionAddons(adminUserId: string) {
+  await assertSuperAdminUser(adminUserId);
+  return db.subscriptionAddon.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      _count: { select: { gymAddons: true } },
+    },
+  });
+}
+
+export async function createSubscriptionAddon(
+  adminUserId: string,
+  input: SubscriptionAddonInput
+) {
+  await assertSuperAdminUser(adminUserId);
+  return db.subscriptionAddon.create({
+    data: {
+      name: input.name.trim(),
+      code: input.code.toUpperCase().trim(),
+      description: input.description?.trim() || null,
+      monthlyPrice: input.monthlyPrice,
+      yearlyPrice: input.yearlyPrice,
+      featureKey: input.featureKey.trim(),
+      isActive: input.isActive ?? true,
+    },
+  });
+}
+
+export async function listSubscriptionInvoices(adminUserId: string, gymId?: string) {
+  await assertSuperAdminUser(adminUserId);
+  const where: Record<string, unknown> = {};
+  if (gymId) where.gymId = gymId;
+
+  return db.subscriptionInvoice.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      gym: { select: { id: true, name: true, slug: true } },
+      subscription: { include: { plan: { select: { name: true, code: true } } } },
+      payments: true,
+    },
+  });
+}
+
+export async function recordSubscriptionPayment(
+  adminUserId: string,
+  input: RecordSubscriptionPaymentInput,
+  ipAddress?: string
+) {
+  await assertSuperAdminUser(adminUserId);
+
+  const invoice = await db.subscriptionInvoice.findUnique({
+    where: { id: input.invoiceId },
+    include: { gym: true, subscription: true },
+  });
+
+  if (!invoice) {
+    throw new Error("Subscription invoice not found.");
+  }
+
+  const paymentNumber = `FIXIA-PAY-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  return await db.$transaction(async (tx) => {
+    const payment = await tx.subscriptionPayment.create({
+      data: {
+        gymId: invoice.gymId,
+        invoiceId: invoice.id,
+        paymentNumber,
+        amount: input.amount,
+        method: (input.method as PaymentMethod) || PaymentMethod.BANK_TRANSFER,
+        status: PaymentStatus.COMPLETED,
+        gatewayRef: input.gatewayRef?.trim() || null,
+        recordedByUserId: adminUserId,
+        notes: input.notes?.trim() || null,
+      },
+    });
+
+    await tx.subscriptionInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: InvoiceStatus.PAID,
+        paidAt: new Date(),
+      },
+    });
+
+    // If subscription was past due or trialing, mark ACTIVE
+    await tx.gymSubscription.update({
+      where: { id: invoice.subscriptionId },
+      data: {
+        status: SaasSubscriptionStatus.ACTIVE,
+      },
+    });
+
+    await tx.platformAuditLog.create({
+      data: {
+        userId: adminUserId,
+        gymId: invoice.gymId,
+        action: "SUBSCRIPTION_PAYMENT_RECORDED",
+        targetType: "SUBSCRIPTION_PAYMENT",
+        targetId: payment.id,
+        details: JSON.stringify({
+          invoiceNumber: invoice.invoiceNumber,
+          amount: input.amount,
+          gymName: invoice.gym.name,
+        }),
+        ipAddress: ipAddress || null,
+      },
+    });
+
+    return payment;
+  });
+}
+
+export async function getGymUsageMetrics(adminUserId: string, gymId: string) {
+  await assertSuperAdminUser(adminUserId);
+
+  const [activeMembers, totalClasses, records] = await Promise.all([
+    db.member.count({ where: { gymId, status: "ACTIVE" } }),
+    db.class.count({ where: { gymId } }),
+    db.gymUsageRecord.findMany({ where: { gymId } }),
+  ]);
+
+  return {
+    gymId,
+    activeMembers,
+    totalClasses,
+    usageRecords: records,
+  };
 }
 

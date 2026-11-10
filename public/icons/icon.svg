@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+  </defs>
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="100" fill="url(#bg)" />
+  <rect width="504" height="504" x="4" y="4" rx="96" fill="none" stroke="#312e81" stroke-width="8" opacity="0.5" />
+  
+  <!-- Dumbbell / Athletic Icon -->
+  <g transform="translate(106, 126)">
+    <!-- Left Weight -->
+    <rect x="0" y="70" width="36" height="120" rx="14" fill="url(#accent)" />
+    <rect x="36" y="90" width="24" height="80" rx="8" fill="#818cf8" />
+    <!-- Bar -->
+    <rect x="60" y="115" width="180" height="30" rx="6" fill="#e0e7ff" />
+    <!-- Grip Rings -->
+    <rect x="120" y="115" width="10" height="30" fill="#a5b4fc" />
+    <rect x="150" y="115" width="10" height="30" fill="#a5b4fc" />
+    <rect x="170" y="115" width="10" height="30" fill="#a5b4fc" />
+    <!-- Right Weight -->
+    <rect x="240" y="90" width="24" height="80" rx="8" fill="#818cf8" />
+    <rect x="264" y="70" width="36" height="120" rx="14" fill="url(#accent)" />
+  </g>
+  <!-- FIXIA Text Wordmark -->
+  <text x="256" y="380" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle" letter-spacing="6">FIXIA</text>
+  <text x="256" y="420" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="22" fill="#818cf8" text-anchor="middle" letter-spacing="4">GymOS</text>
+</svg>

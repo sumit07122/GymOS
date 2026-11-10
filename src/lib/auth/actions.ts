@@ -247,19 +247,163 @@ export async function loginAction(
   await createDatabaseSession(user.id);
 
   // Compute redirect based on role
-  let redirectUrl = "/";
+  let redirectUrl = "/owner/dashboard";
   if (user.role === SystemRole.SUPER_ADMIN) {
-    redirectUrl = "/admin";
-  } else if (user.gymRoles.length > 0) {
-    const primaryGym = user.gymRoles.find((r) => r.isPrimary) || user.gymRoles[0];
-    redirectUrl = `/${primaryGym.gym.slug}`;
+    redirectUrl = "/platform-admin";
+  } else if (user.gymRoles.some((r) => r.role === GymRole.OWNER)) {
+    redirectUrl = "/owner/dashboard";
+  } else if (user.gymRoles.some((r) => r.role === GymRole.MEMBER)) {
+    redirectUrl = "/member/home";
   } else {
-    redirectUrl = "/portal";
+    const member = await db.member.findFirst({ where: { userId: user.id } });
+    if (member) {
+      redirectUrl = "/member/home";
+    } else if (user.gymRoles.length > 0) {
+      redirectUrl = `/${user.gymRoles[0].gym.slug}`;
+    }
   }
 
   return {
     success: true,
     redirectUrl,
+  };
+}
+
+/**
+ * Action: Gym Member Login (Scoped by Gym Slug or Code)
+ */
+export async function memberLoginAction(
+  _prevState: AuthActionResult | null,
+  formData: FormData
+): Promise<AuthActionResult> {
+  const gymSlug = (formData.get("gymSlug") as string)?.trim().toLowerCase();
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+
+  if (!gymSlug || !email || !password) {
+    return {
+      success: false,
+      error: "Please provide Gym Slug, Member Email, and Password.",
+    };
+  }
+
+  // 1. Resolve Gym
+  const gym = await db.gym.findFirst({
+    where: {
+      OR: [{ slug: gymSlug }, { id: gymSlug }],
+    },
+  });
+
+  if (!gym) {
+    return {
+      success: false,
+      error: `Gym workspace "${gymSlug}" not found. Please verify your gym code or URL.`,
+    };
+  }
+
+  // 2. Validate User Credentials
+  const user = await db.user.findUnique({
+    where: { email },
+    include: {
+      gymRoles: true,
+    },
+  });
+
+  if (!user || !user.passwordHash) {
+    return {
+      success: false,
+      error: "Invalid member credentials or gym mismatch.",
+    };
+  }
+
+  const isValidPassword = await verifyPassword(user.passwordHash, password);
+  if (!isValidPassword) {
+    return {
+      success: false,
+      error: "Invalid member credentials or gym mismatch.",
+    };
+  }
+
+  // 3. Verify Membership in this Gym
+  const memberRecord = await db.member.findFirst({
+    where: {
+      gymId: gym.id,
+      OR: [
+        { userId: user.id },
+        { email: user.email },
+      ],
+    },
+  });
+
+  const hasGymMemberRole = user.gymRoles.some(
+    (gr) => gr.gymId === gym.id && gr.role === GymRole.MEMBER
+  );
+
+  if (!memberRecord && !hasGymMemberRole && user.role !== SystemRole.SUPER_ADMIN) {
+    return {
+      success: false,
+      error: `No active member profile found for ${email} at ${gym.name}.`,
+    };
+  }
+
+  // Auto-link user to member record if not yet linked
+  if (memberRecord && !memberRecord.userId) {
+    await db.member.update({
+      where: { id: memberRecord.id },
+      data: { userId: user.id },
+    });
+  }
+
+  // 4. Create Session
+  await createDatabaseSession(user.id);
+
+  return {
+    success: true,
+    redirectUrl: "/member/home",
+  };
+}
+
+/**
+ * Action: FIXIA Platform Super Admin Login
+ */
+export async function superAdminLoginAction(
+  _prevState: AuthActionResult | null,
+  formData: FormData
+): Promise<AuthActionResult> {
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return {
+      success: false,
+      error: "Please enter your administrator email and password.",
+    };
+  }
+
+  const user = await db.user.findUnique({
+    where: { email },
+  });
+
+  if (!user || !user.passwordHash || user.role !== SystemRole.SUPER_ADMIN) {
+    return {
+      success: false,
+      error: "Access Denied: Platform Super Administrator credentials required.",
+    };
+  }
+
+  const isValidPassword = await verifyPassword(user.passwordHash, password);
+  if (!isValidPassword) {
+    return {
+      success: false,
+      error: "Invalid credentials.",
+    };
+  }
+
+  await createDatabaseSession(user.id);
+
+  return {
+    success: true,
+    redirectUrl: "/platform-admin",
   };
 }
 

@@ -8,20 +8,29 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = [
   "/",
   "/login",
+  "/platform-admin/login",
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/offline",
   "/api/auth",
+  "/manifest.json",
+  "/sw.js",
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow static files, Next internals, and public endpoints
+  // Allow static files, Next internals, icons, and public endpoints
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/g/") ||
+    pathname.startsWith("/gym/") ||
+    pathname.startsWith("/icons/") ||
+    pathname === "/sw.js" ||
+    pathname === "/manifest.json" ||
     PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
   ) {
     return NextResponse.next();
@@ -36,6 +45,13 @@ export function middleware(request: NextRequest) {
 
   // Protected paths require an active session token
   if (!sessionToken) {
+    // If accessing platform-admin, redirect to platform-admin login
+    if (pathname.startsWith("/platform-admin")) {
+      const adminLoginUrl = new URL("/platform-admin/login", request.url);
+      adminLoginUrl.searchParams.set("returnUrl", pathname);
+      return NextResponse.redirect(adminLoginUrl);
+    }
+
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("returnUrl", pathname);
     return NextResponse.redirect(loginUrl);

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getDatabaseSession, AuthenticatedSession } from "./session";
-import { SystemRole, GymRole } from "@prisma/client";
+import { SystemRole, GymRole, Gym, Member } from "@prisma/client";
 import { TenantContext, createTenantContext } from "@/lib/tenant/context";
+import { db } from "@/lib/db";
 
 // ==============================================================================
 // FIXIA GymOS — Server-Side Role-Based Authorization Guards
@@ -89,6 +90,119 @@ export async function requireGymAccess(
       role: matchingRole.role,
       userEmail: session.user.email ?? undefined,
     }),
+  };
+}
+
+/**
+ * Enforces that the authenticated user is a SUPER_ADMIN.
+ */
+export async function requireSuperAdmin(returnUrl = "/platform-admin"): Promise<AuthenticatedSession> {
+  const session = await requireAuth(returnUrl);
+  if (session.user.role !== SystemRole.SUPER_ADMIN) {
+    redirect(`/platform-admin/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+  }
+  return session;
+}
+
+/**
+ * Enforces that the user is an authorized GYM OWNER and resolves their primary Gym workspace.
+ */
+export async function requireOwnerSession(returnUrl = "/owner/dashboard"): Promise<{
+  session: AuthenticatedSession;
+  gym: Gym;
+  context: TenantContext;
+}> {
+  const session = await requireAuth(returnUrl);
+
+  // Super Admins have system authority to preview owner dashboard
+  if (session.user.role === SystemRole.SUPER_ADMIN) {
+    const gym = session.user.gymRoles[0]?.gym || (await db.gym.findFirst({ where: { status: "ACTIVE" } }));
+    if (!gym) {
+      redirect("/platform-admin");
+    }
+    return {
+      session,
+      gym,
+      context: createTenantContext({
+        gymId: gym.id,
+        userId: session.user.id,
+        role: GymRole.OWNER,
+        userEmail: session.user.email ?? undefined,
+      }),
+    };
+  }
+
+  // Find owner role in gymRoles
+  const ownerRole = session.user.gymRoles.find((gr) => gr.role === GymRole.OWNER);
+  if (!ownerRole) {
+    // If user is a member, redirect to member portal
+    const isMember = session.user.gymRoles.some((gr) => gr.role === GymRole.MEMBER);
+    if (isMember) {
+      redirect("/member/home");
+    }
+    throw new AuthorizationError("Access denied: You do not possess Gym Owner privileges.");
+  }
+
+  return {
+    session,
+    gym: ownerRole.gym,
+    context: createTenantContext({
+      gymId: ownerRole.gymId,
+      userId: session.user.id,
+      role: GymRole.OWNER,
+      userEmail: session.user.email ?? undefined,
+    }),
+  };
+}
+
+/**
+ * Enforces that the user is an authenticated MEMBER and resolves their Member profile and Gym.
+ */
+export async function requireMemberSession(returnUrl = "/member/home"): Promise<{
+  session: AuthenticatedSession;
+  gym: Gym;
+  member: Member;
+}> {
+  const session = await requireAuth(returnUrl);
+
+  // 1. Direct link by userId
+  let member = await db.member.findFirst({
+    where: { userId: session.user.id },
+    include: { gym: true },
+  });
+
+  // 2. Auto-claim by email if staff pre-created member record before account registration
+  if (!member && session.user.email) {
+    const claimable = await db.member.findFirst({
+      where: {
+        email: session.user.email.toLowerCase().trim(),
+        userId: null,
+      },
+      include: { gym: true },
+    });
+
+    if (claimable) {
+      member = await db.member.update({
+        where: { id: claimable.id },
+        data: { userId: session.user.id },
+        include: { gym: true },
+      });
+    }
+  }
+
+  if (!member) {
+    // If user is actually an owner, redirect to owner dashboard
+    const isOwner = session.user.gymRoles.some((gr) => gr.role === GymRole.OWNER);
+    if (isOwner) {
+      redirect("/owner/dashboard");
+    }
+    throw new AuthorizationError("No active gym member profile linked to this account.");
+  }
+
+  return {
+    session,
+    gym: member.gym,
+    member,
   };
 }
 

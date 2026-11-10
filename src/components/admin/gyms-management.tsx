@@ -199,7 +199,7 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
                     <tr key={gym.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-5 py-3.5">
                         <Link
-                          href={`/admin/gyms/${gym.id}`}
+                          href={`/platform-admin/gyms/${gym.id}`}
                           className="font-bold text-slate-900 hover:text-indigo-600 transition-colors block"
                         >
                           {gym.name}
@@ -256,7 +256,7 @@ export function GymsManagement({ initialGyms }: GymsManagementProps) {
 
                       <td className="px-5 py-3.5 text-right space-x-2">
                         <Link
-                          href={`/admin/gyms/${gym.id}`}
+                          href={`/platform-admin/gyms/${gym.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
                         >
                           <span>Manage</span>

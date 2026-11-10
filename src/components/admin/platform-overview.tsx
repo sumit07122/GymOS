@@ -198,7 +198,7 @@ export function PlatformOverview({ data }: PlatformOverviewProps) {
               </div>
 
               <Link
-                href="/admin/gyms"
+                href="/platform-admin/gyms"
                 className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
               >
                 <span>View All Gyms</span>
@@ -224,7 +224,7 @@ export function PlatformOverview({ data }: PlatformOverviewProps) {
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                           <Link
-                            href={`/admin/gyms/${g.id}`}
+                            href={`/platform-admin/gyms/${g.id}`}
                             className="font-bold text-xs text-slate-900 hover:text-indigo-600 transition-colors"
                           >
                             {g.name}
@@ -244,7 +244,7 @@ export function PlatformOverview({ data }: PlatformOverviewProps) {
                           {g.memberCount} members
                         </div>
                         <Link
-                          href={`/admin/gyms/${g.id}`}
+                          href={`/platform-admin/gyms/${g.id}`}
                           className="text-[11px] text-indigo-600 font-semibold hover:underline"
                         >
                           Manage Gym →
@@ -314,7 +314,7 @@ export function PlatformOverview({ data }: PlatformOverviewProps) {
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-slate-500">Tier Management:</span>
             <Link
-              href="/admin/plans"
+              href="/platform-admin/plans"
               className="font-semibold text-indigo-600 hover:text-indigo-800"
             >
               Configure SaaS Plans →
@@ -337,7 +337,7 @@ export function PlatformOverview({ data }: PlatformOverviewProps) {
           </div>
 
           <Link
-            href="/admin/audit"
+            href="/platform-admin/audit-logs"
             className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
           >
             <span>Full Audit Log</span>

@@ -64,3 +64,70 @@ export const gymSupportNotesSchema = z.object({
 
 export type GymSupportNotesInput = z.infer<typeof gymSupportNotesSchema>;
 
+// ==============================================================================
+// FIXIA ONBOARDING & ADD-ONS VALIDATIONS
+// ==============================================================================
+
+export const onboardGymSchema = z.object({
+  // Gym Details
+  name: z.string().trim().min(2, "Gym name must be at least 2 characters").max(100),
+  slug: z
+    .string()
+    .trim()
+    .min(2, "Slug must be at least 2 characters")
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+  phone: z.string().trim().min(5, "Phone is required").max(30),
+  email: z.string().trim().email("Invalid gym email format"),
+  city: z.string().trim().min(1, "City is required").max(80),
+  country: z.string().trim().default("IN"),
+  currency: z.string().trim().default("INR"),
+  timezone: z.string().trim().default("Asia/Kolkata"),
+  openingHours: z.string().trim().optional().nullable(),
+
+  // Owner Details
+  ownerName: z.string().trim().min(2, "Owner name must be at least 2 characters").max(80),
+  ownerEmail: z.string().trim().email("Invalid owner email format"),
+  ownerPassword: z.string().min(8, "Password must be at least 8 characters").optional(),
+
+  // Subscription Configuration
+  planId: z.string().min(1, "Subscription plan is required"),
+  billingPeriod: z.nativeEnum(SaasBillingPeriod).default(SaasBillingPeriod.MONTHLY),
+  customPricingOverride: z.coerce.number().min(0).optional().nullable(),
+  trialDays: z.coerce.number().int().min(0).max(365).default(14),
+  featureOverrides: z.record(z.string(), z.boolean()).optional().nullable(),
+  maxMembersOverride: z.coerce.number().int().optional().nullable(),
+  notes: z.string().trim().max(1000).optional().nullable(),
+});
+
+export type OnboardGymInput = z.infer<typeof onboardGymSchema>;
+
+export const subscriptionAddonSchema = z.object({
+  name: z.string().trim().min(2, "Add-on name must be at least 2 characters").max(100),
+  code: z
+    .string()
+    .trim()
+    .min(2)
+    .max(50)
+    .regex(/^[A-Z0-9_]+$/, "Code must be uppercase alphanumeric and underscores"),
+  description: z.string().trim().max(500).optional().nullable(),
+  monthlyPrice: z.coerce.number().min(0, "Monthly price cannot be negative"),
+  yearlyPrice: z.coerce.number().min(0, "Yearly price cannot be negative"),
+  featureKey: z.string().min(1, "Feature key is required"),
+  isActive: z.boolean().default(true),
+});
+
+export type SubscriptionAddonInput = z.infer<typeof subscriptionAddonSchema>;
+
+export const recordSubscriptionPaymentSchema = z.object({
+  gymId: z.string().uuid("Invalid gym identifier"),
+  invoiceId: z.string().uuid("Invalid invoice identifier"),
+  amount: z.coerce.number().positive("Payment amount must be greater than zero"),
+  method: z.string().default("BANK_TRANSFER"),
+  gatewayRef: z.string().trim().max(100).optional().nullable(),
+  notes: z.string().trim().max(500).optional().nullable(),
+});
+
+export type RecordSubscriptionPaymentInput = z.infer<typeof recordSubscriptionPaymentSchema>;
+
+

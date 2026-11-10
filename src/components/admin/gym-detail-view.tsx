@@ -243,7 +243,7 @@ export function GymDetailView({ data }: GymDetailViewProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
           <Link
-            href="/admin/gyms"
+            href="/platform-admin/gyms"
             className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold mb-2"
           >
             <ArrowLeft className="h-3.5 w-3.5" />

@@ -192,6 +192,7 @@ enum SaasSubscriptionStatus {
 
 enum SaasBillingPeriod {
   MONTHLY
+  QUARTERLY
   YEARLY
 }
 
@@ -343,6 +344,13 @@ model Gym {
   whatsAppTemplates WhatsAppTemplate[]
   whatsAppNotifications WhatsAppNotification[]
   subscription    GymSubscription?
+  addons          GymAddon[]
+  subscriptionInvoices SubscriptionInvoice[]
+  subscriptionPayments SubscriptionPayment[]
+  usageRecords    GymUsageRecord[]
+  invitations     GymInvitation[]
+  challenges      GymChallenge[]
+  challengeParticipants ChallengeParticipant[]
   platformAuditLogs PlatformAuditLog[]
 
   @@index([slug])
@@ -416,6 +424,7 @@ model Member {
   measurements          MemberMeasurement[]
   workoutAssignments    MemberWorkoutAssignment[]
   whatsAppNotifications WhatsAppNotification[]
+  challengeParticipants ChallengeParticipant[]
 
   @@unique([gymId, memberCode])
   @@index([gymId, status])
@@ -1212,10 +1221,11 @@ model WhatsAppNotification {
 
 model SaasPlan {
   id              String             @id @default(uuid())
-  name            String             // e.g. "Starter", "Professional", "Enterprise"
-  code            String             @unique // e.g. "STARTER", "PRO", "ENTERPRISE"
+  name            String             // e.g. "Starter", "Growth", "Pro"
+  code            String             @unique // e.g. "STARTER", "GROWTH", "PRO"
   description     String?            @db.Text
   monthlyPrice    Decimal            @db.Decimal(10, 2)
+  quarterlyPrice  Decimal?           @db.Decimal(10, 2)
   yearlyPrice     Decimal            @db.Decimal(10, 2)
   trialDays       Int                @default(14)
   gracePeriodDays Int                @default(7)
@@ -1245,6 +1255,11 @@ model GymSubscription {
   trialEndsAt            DateTime?
   gracePeriodEndsAt      DateTime?
   cancelledAt            DateTime?
+  customMonthlyPrice     Decimal?               @db.Decimal(10, 2)
+  customQuarterlyPrice   Decimal?               @db.Decimal(10, 2)
+  customYearlyPrice      Decimal?               @db.Decimal(10, 2)
+  maxMembersOverride     Int?
+  maxClassesOverride     Int?
   customFeatureOverrides String?                @db.Text // JSON object of manual feature overrides: { [featureKey: string]: boolean }
   notes                  String?                @db.Text // Internal support notes
 
@@ -1253,10 +1268,187 @@ model GymSubscription {
 
   gym                    Gym                    @relation(fields: [gymId], references: [id], onDelete: Cascade)
   plan                   SaasPlan               @relation(fields: [planId], references: [id], onDelete: Restrict)
+  addons                 GymAddon[]
+  invoices               SubscriptionInvoice[]
 
   @@index([gymId])
   @@index([status])
   @@index([planId])
+}
+
+model SubscriptionAddon {
+  id           String     @id @default(uuid())
+  name         String     // e.g. "WhatsApp Pro Automation", "Custom Branded Domain", "Extra Member Capacity"
+  code         String     @unique // e.g. "WHATSAPP_PRO", "CUSTOM_DOMAIN", "EXTRA_MEMBERS_500"
+  description  String?    @db.Text
+  monthlyPrice Decimal    @db.Decimal(10, 2)
+  yearlyPrice  Decimal    @db.Decimal(10, 2)
+  featureKey   String     // Feature entitlement key unlocked by this add-on
+  isActive     Boolean    @default(true)
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  gymAddons    GymAddon[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model GymAddon {
+  id             String                 @id @default(uuid())
+  gymId          String
+  addonId        String
+  subscriptionId String
+  status         SaasSubscriptionStatus @default(ACTIVE)
+  currentPrice   Decimal                @db.Decimal(10, 2)
+  billingPeriod  SaasBillingPeriod      @default(MONTHLY)
+  startDate      DateTime               @default(now())
+  endDate        DateTime
+
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  gym            Gym                    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  addon          SubscriptionAddon      @relation(fields: [addonId], references: [id], onDelete: Restrict)
+  subscription   GymSubscription        @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, addonId])
+  @@index([gymId])
+}
+
+model SubscriptionInvoice {
+  id             String                @id @default(uuid())
+  gymId          String
+  subscriptionId String
+  invoiceNumber  String                @unique // Sequential e.g. "FIXIA-INV-2026-0001"
+  subtotal       Decimal               @db.Decimal(10, 2)
+  taxAmount      Decimal               @default(0.00) @db.Decimal(10, 2)
+  totalAmount    Decimal               @db.Decimal(10, 2)
+  status         InvoiceStatus         @default(ISSUED)
+  billingPeriod  SaasBillingPeriod     @default(MONTHLY)
+  periodStart    DateTime
+  periodEnd      DateTime
+  dueDate        DateTime
+  paidAt         DateTime?
+  notes          String?               @db.Text
+
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  gym            Gym                   @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  subscription   GymSubscription       @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  payments       SubscriptionPayment[]
+
+  @@index([gymId, status])
+  @@index([subscriptionId])
+}
+
+model SubscriptionPayment {
+  id               String              @id @default(uuid())
+  gymId            String
+  invoiceId        String
+  paymentNumber    String              @unique // Sequential e.g. "FIXIA-PAY-2026-0001"
+  amount           Decimal             @db.Decimal(10, 2)
+  method           PaymentMethod       @default(BANK_TRANSFER)
+  status           PaymentStatus       @default(COMPLETED)
+  gatewayRef       String?
+  receivedAt       DateTime            @default(now())
+  recordedByUserId String?
+  notes            String?             @db.Text
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  gym              Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  invoice          SubscriptionInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, receivedAt])
+  @@index([invoiceId])
+}
+
+model GymUsageRecord {
+  id           String   @id @default(uuid())
+  gymId        String
+  metricKey    String   // e.g. "ACTIVE_MEMBERS", "CLASSES_COUNT", "WHATSAPP_SENT_MONTH"
+  currentValue Int      @default(0)
+  limitValue   Int?     // null = unlimited
+  recordedDate DateTime @default(now())
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gym          Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, metricKey])
+  @@index([gymId])
+}
+
+model GymInvitation {
+  id              String    @id @default(uuid())
+  gymId           String
+  email           String
+  role            GymRole   @default(OWNER)
+  token           String    @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  invitedByUserId String
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  gym             Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, email])
+  @@index([token])
+}
+
+model PlatformSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GymChallenge {
+  id          String                 @id @default(uuid())
+  gymId       String
+  title       String
+  description String?                @db.Text
+  startDate   DateTime
+  endDate     DateTime
+  rewardBadge String?
+  isActive    Boolean                @default(true)
+
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  gym          Gym                   @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  participants ChallengeParticipant[]
+
+  @@index([gymId, isActive])
+}
+
+model ChallengeParticipant {
+  id          String       @id @default(uuid())
+  gymId       String
+  challengeId String
+  memberId    String
+  progress    Decimal      @default(0.00) @db.Decimal(5, 2)
+  isCompleted Boolean      @default(false)
+  completedAt DateTime?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  gym         Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  challenge   GymChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  member      Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, memberId])
+  @@index([gymId, memberId])
 }
 
 model PlatformAuditLog {

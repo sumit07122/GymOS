@@ -9,6 +9,17 @@ import {
 export { SaasFeature, ALL_SAAS_FEATURES };
 export type { SaasFeatureKey };
 
+export function isFeatureIncludedInPlan(plan: { features?: unknown }, featureKey: string): boolean {
+  if (!plan || !plan.features) return false;
+  if (Array.isArray(plan.features)) return plan.features.includes(featureKey);
+  try {
+    const parsed = typeof plan.features === "string" ? JSON.parse(plan.features) : plan.features;
+    return Array.isArray(parsed) && parsed.includes(featureKey);
+  } catch {
+    return false;
+  }
+}
+
 // ==============================================================================
 // FIXIA GymOS — Centralized SaaS Feature Entitlements System (M19)
 // ==============================================================================
@@ -201,6 +212,31 @@ export async function checkGymEntitlement(
   const isIncluded = planFeatures.includes(feature) || planFeatures.includes("*");
 
   if (!isIncluded) {
+    // Check if an active purchased add-on unlocks this feature
+    try {
+      const activeAddon = await db.gymAddon.findFirst({
+        where: {
+          gymId,
+          status: SaasSubscriptionStatus.ACTIVE,
+          addon: { featureKey: feature, isActive: true },
+          endDate: { gte: referenceNow },
+        },
+        include: { addon: true },
+      });
+
+      if (activeAddon) {
+        return {
+          allowed: true,
+          feature,
+          gymStatus: gym.status,
+          subscriptionStatus: sub.status,
+          planName: `${sub.plan.name} + Add-on (${activeAddon.addon.name})`,
+        };
+      }
+    } catch {
+      // Safe fallback if addon model is unmocked or table unavailable
+    }
+
     return {
       allowed: false,
       reason: `The "${sub.plan.name}" plan does not include the ${feature} feature.`,
@@ -287,4 +323,67 @@ export async function getGymEntitlementsSummary(gymId: string) {
       : null,
     features: results as Record<SaasFeatureKey, boolean>,
   };
+}
+
+/**
+ * Checks if a tenant is within its configured usage limits.
+ */
+export async function checkUsageLimit(
+  gymId: string,
+  metric: "ACTIVE_MEMBERS" | "CLASSES_COUNT"
+): Promise<{ withinLimit: boolean; current: number; limit: number; remaining: number }> {
+  const gym = await db.gym.findUnique({
+    where: { id: gymId },
+    include: {
+      subscription: { include: { plan: true } },
+    },
+  });
+
+  if (!gym || !gym.subscription) {
+    return { withinLimit: true, current: 0, limit: -1, remaining: -1 };
+  }
+
+  const sub = gym.subscription;
+  let limit = -1;
+
+  if (metric === "ACTIVE_MEMBERS") {
+    limit = sub.maxMembersOverride ?? sub.plan.maxMembers;
+    if (limit === -1) return { withinLimit: true, current: 0, limit: -1, remaining: -1 };
+    const current = await db.member.count({ where: { gymId, status: "ACTIVE" } });
+    return {
+      withinLimit: current < limit,
+      current,
+      limit,
+      remaining: Math.max(0, limit - current),
+    };
+  }
+
+  if (metric === "CLASSES_COUNT") {
+    limit = sub.maxClassesOverride ?? sub.plan.maxClasses;
+    if (limit === -1) return { withinLimit: true, current: 0, limit: -1, remaining: -1 };
+    const current = await db.class.count({ where: { gymId } });
+    return {
+      withinLimit: current < limit,
+      current,
+      limit,
+      remaining: Math.max(0, limit - current),
+    };
+  }
+
+  return { withinLimit: true, current: 0, limit: -1, remaining: -1 };
+}
+
+/**
+ * Asserts that a tenant has capacity to add a resource, or throws Error.
+ */
+export async function assertUsageLimit(
+  gymId: string,
+  metric: "ACTIVE_MEMBERS" | "CLASSES_COUNT"
+): Promise<void> {
+  const res = await checkUsageLimit(gymId, metric);
+  if (!res.withinLimit) {
+    throw new Error(
+      `SaaS subscription usage limit reached: current ${metric} is ${res.current} (limit: ${res.limit}). Please request a limit increase from FIXIA administration.`
+    );
+  }
 }

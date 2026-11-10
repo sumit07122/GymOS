@@ -22,10 +22,11 @@ import { PortalProfileTab } from "./portal-profile-tab";
 interface PortalHubProps {
   initialData: any;
   isStaffOrAdmin?: boolean;
+  initialTab?: PortalTab;
 }
 
-export function PortalHub({ initialData, isStaffOrAdmin = false }: PortalHubProps) {
-  const [activeTab, setActiveTab] = React.useState<PortalTab>("home");
+export function PortalHub({ initialData, isStaffOrAdmin = false, initialTab = "home" }: PortalHubProps) {
+  const [activeTab, setActiveTab] = React.useState<PortalTab>(initialTab);
 
   // Fallback state if user does not have an active Member profile linked to this gym
   if (!initialData.hasLinkedProfile || !initialData.member) {
