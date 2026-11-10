@@ -11,6 +11,7 @@ import {
   Dumbbell,
   Smartphone,
   Globe,
+  MessageSquareText,
   BarChart3,
   Settings,
   type LucideIcon,
@@ -116,6 +117,14 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     milestone: "M16",
     isAvailable: true,
     description: "Branded public website, hero banner, facilities, and enquiry form.",
+  },
+  {
+    title: "WhatsApp & Alerts",
+    href: "/whatsapp",
+    icon: MessageSquareText,
+    milestone: "M17",
+    isAvailable: true,
+    description: "WhatsApp Business notifications, automated reminders, templates, and delivery logs.",
   },
   {
     title: "Reports & Analytics",

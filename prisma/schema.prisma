@@ -157,6 +157,31 @@ enum StockMovementType {
   RETURN
 }
 
+enum WhatsAppProviderType {
+  META_CLOUD_API
+  TWILIO
+  MOCK_SANDBOX
+}
+
+enum WhatsAppNotificationEvent {
+  MEMBERSHIP_CONFIRMATION
+  MEMBERSHIP_EXPIRY_REMINDER
+  PAYMENT_RECEIPT
+  DUES_REMINDER
+  CLASS_BOOKING_CONFIRMATION
+  BOOKING_CANCELLATION
+  GYM_ANNOUNCEMENT
+}
+
+enum WhatsAppNotificationStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
 // ------------------------------------------------------------------------------
 // 1. AUTH.JS V5 MODELS & CORE USER MANAGEMENT
 // ------------------------------------------------------------------------------
@@ -300,6 +325,9 @@ model Gym {
   memberMeasurements MemberMeasurement[]
   memberWorkoutAssignments MemberWorkoutAssignment[]
   websiteConfig   GymWebsiteConfig?
+  whatsAppConfig  GymWhatsAppConfig?
+  whatsAppTemplates WhatsAppTemplate[]
+  whatsAppNotifications WhatsAppNotification[]
 
   @@index([slug])
   @@index([status])
@@ -348,6 +376,9 @@ model Member {
   status                MemberStatus  @default(ACTIVE)
   archivedAt            DateTime?
   archivedReason        String?
+  whatsappConsent       Boolean       @default(false)
+  whatsappConsentAt     DateTime?
+  whatsappConsentSource String?
 
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
@@ -368,6 +399,7 @@ model Member {
   weightLogs            MemberWeightLog[]
   measurements          MemberMeasurement[]
   workoutAssignments    MemberWorkoutAssignment[]
+  whatsAppNotifications WhatsAppNotification[]
 
   @@unique([gymId, memberCode])
   @@index([gymId, status])
@@ -1064,5 +1096,99 @@ model GymWebsiteConfig {
 
   gym             Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 }
+
+// ------------------------------------------------------------------------------
+// 17. WHATSAPP BUSINESS NOTIFICATIONS & TEMPLATES (M17)
+// ------------------------------------------------------------------------------
+
+model GymWhatsAppConfig {
+  id                         String               @id @default(uuid())
+  gymId                      String               @unique
+  provider                   WhatsAppProviderType @default(MOCK_SANDBOX)
+  isEnabled                  Boolean              @default(false)
+  isLiveDelivery             Boolean              @default(false) // Verified live credentials vs sandbox
+  phoneNumberId              String?              // Meta Cloud API Phone Number ID
+  wabaId                     String?              // Meta WhatsApp Business Account ID
+  accessToken                String?              @db.Text // Meta System User Access Token
+  accountSid                 String?              // Twilio Account SID
+  authToken                  String?              @db.Text // Twilio Auth Token
+  senderPhoneNumber          String?              // E.g. "+15550100"
+  webhookVerifyToken         String?              // Webhook verification challenge token
+
+  // Notification Preferences & Automated Reminders
+  notifyOnMembershipCreated  Boolean              @default(true)
+  notifyOnMembershipExpiring Boolean              @default(true)
+  expiryReminderDays         Int                  @default(3)
+  notifyOnPaymentReceived    Boolean              @default(true)
+  notifyOnDuesOverdue        Boolean              @default(true)
+  notifyOnBookingConfirmed   Boolean              @default(true)
+  notifyOnBookingCancelled   Boolean              @default(true)
+  
+  customHeader               String?
+  customFooter               String?
+
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+
+  gym                        Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+}
+
+model WhatsAppTemplate {
+  id           String                    @id @default(uuid())
+  gymId        String
+  eventType    WhatsAppNotificationEvent
+  templateName String
+  languageCode String                    @default("en_US")
+  headerText   String?
+  bodyText     String                    @db.Text
+  footerText   String?
+  status       String                    @default("APPROVED") // APPROVED, PENDING, REJECTED
+  variables    String?                   @db.Text             // JSON array of variable placeholder names
+
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+
+  gym          Gym                       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, eventType])
+  @@index([gymId])
+}
+
+model WhatsAppNotification {
+  id                 String                     @id @default(uuid())
+  gymId              String
+  memberId           String?
+  recipientPhone     String
+  recipientName      String?
+  eventType          WhatsAppNotificationEvent
+  templateName       String
+  parameters         String?                    @db.Text // JSON object/array of parameters
+  messageBody        String                     @db.Text // Rendered message body
+  status             WhatsAppNotificationStatus @default(PENDING)
+  provider           WhatsAppProviderType
+  providerMessageId  String?                    // Meta wamid or Twilio SID
+  providerResponse   String?                    @db.Text // Raw provider response JSON
+  idempotencyKey     String?                    // Unique per event to prevent duplicate notifications
+  retryCount         Int                        @default(0)
+  maxRetries         Int                        @default(3)
+  lastRetryAt        DateTime?
+  errorMessage       String?                    @db.Text
+  sentAt             DateTime?
+  deliveredAt        DateTime?
+  readAt             DateTime?
+
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+
+  gym                Gym                        @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member             Member?                    @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@unique([gymId, idempotencyKey])
+  @@index([gymId, status])
+  @@index([gymId, eventType])
+  @@index([recipientPhone])
+  @@index([createdAt])
+}
+
 
 

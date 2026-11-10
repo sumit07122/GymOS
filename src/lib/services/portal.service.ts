@@ -636,6 +636,20 @@ export async function updatePortalMemberProfile(
       address: data.address?.trim() || null,
       emergencyContactName: data.emergencyContactName?.trim() || null,
       emergencyContactPhone: data.emergencyContactPhone?.trim() || null,
+      whatsappConsent:
+        data.whatsappConsent !== undefined ? data.whatsappConsent : undefined,
+      whatsappConsentAt:
+        data.whatsappConsent !== undefined
+          ? data.whatsappConsent
+            ? new Date()
+            : null
+          : undefined,
+      whatsappConsentSource:
+        data.whatsappConsent !== undefined
+          ? data.whatsappConsent
+            ? "MEMBER_PORTAL"
+            : null
+          : undefined,
     },
   });
 

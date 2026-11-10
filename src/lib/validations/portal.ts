@@ -9,6 +9,7 @@ export const memberProfileUpdateSchema = z.object({
   address: z.string().max(255).optional().nullable(),
   emergencyContactName: z.string().max(100).optional().nullable(),
   emergencyContactPhone: z.string().max(30).optional().nullable(),
+  whatsappConsent: z.boolean().optional(),
 });
 
 export type MemberProfileUpdateInput = z.infer<typeof memberProfileUpdateSchema>;
