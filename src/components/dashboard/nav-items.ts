@@ -95,8 +95,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: "Workouts & Fitness",
     href: "/workouts",
     icon: Dumbbell,
-    milestone: "Planned",
-    isAvailable: false,
+    milestone: "M14",
+    isAvailable: true,
     description: "Workout logs, exercise benchmarks, and client fitness assessments.",
   },
   {
