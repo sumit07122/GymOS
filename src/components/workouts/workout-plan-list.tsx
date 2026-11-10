@@ -80,3 +80,4 @@ export function WorkoutPlanList({ plans, onAssign, canManage }: WorkoutPlanListP
     </div>
   );
 }
+

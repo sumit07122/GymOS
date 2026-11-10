@@ -10,3 +10,4 @@ export default async function DashboardPortalRedirect({
   const { gymSlug } = await params;
   redirect(`/portal/${gymSlug}`);
 }
+

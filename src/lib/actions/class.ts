@@ -322,3 +322,4 @@ export async function markAttendanceAction(
     return { success: false, error: err?.message ?? "Failed to mark attendance." };
   }
 }
+

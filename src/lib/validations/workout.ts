@@ -86,3 +86,4 @@ export type WorkoutAssignmentInput = z.input<typeof workoutAssignmentSchema>;
 export type FitnessProfileUpdateInput = z.input<typeof fitnessProfileUpdateSchema>;
 export type WeightLogCreateInput = z.input<typeof weightLogCreateSchema>;
 export type MeasurementCreateInput = z.input<typeof measurementCreateSchema>;
+

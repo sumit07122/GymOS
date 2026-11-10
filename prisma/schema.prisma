@@ -299,6 +299,7 @@ model Gym {
   memberWeightLogs MemberWeightLog[]
   memberMeasurements MemberMeasurement[]
   memberWorkoutAssignments MemberWorkoutAssignment[]
+  websiteConfig   GymWebsiteConfig?
 
   @@index([slug])
   @@index([status])
@@ -1031,4 +1032,37 @@ model MemberActivity {
 
   @@index([gymId, memberId, createdAt])
 }
+
+// ------------------------------------------------------------------------------
+// 12. PUBLIC GYM-BRANDED WEBSITE CONFIGURATION (M16)
+// ------------------------------------------------------------------------------
+
+model GymWebsiteConfig {
+  id              String   @id @default(uuid())
+  gymId           String   @unique
+  isPublished     Boolean  @default(true)
+  headline        String?
+  subheadline     String?
+  tagline         String?
+  heroImageUrl    String?
+  aboutText       String?  @db.Text
+  primaryColor    String   @default("#4f46e5") // Brand accent color
+  secondaryColor  String   @default("#0f172a") // Background/dark shade
+  facilities      String?  @db.Text           // JSON string array of facilities
+  galleryUrls     String?  @db.Text           // JSON string array of gallery image URLs
+  featuredTrainers String? @db.Text           // JSON string array of featured trainer profiles
+  whatsAppNumber  String?
+  instagramHandle String?
+  facebookUrl     String?
+  googleMapsUrl   String?
+  seoTitle        String?
+  seoDescription  String?  @db.Text
+  customNotice    String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  gym             Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+}
+
 

@@ -53,3 +53,4 @@ export function ExerciseLibraryTable({ exercises }: ExerciseLibraryTableProps) {
     </div>
   );
 }
+

@@ -10,6 +10,7 @@ import {
   Package,
   Dumbbell,
   Smartphone,
+  Globe,
   BarChart3,
   Settings,
   type LucideIcon,
@@ -109,6 +110,14 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     description: "Mobile-first member home, digital membership card, and self-service portal.",
   },
   {
+    title: "Public Website",
+    href: "/website",
+    icon: Globe,
+    milestone: "M16",
+    isAvailable: true,
+    description: "Branded public website, hero banner, facilities, and enquiry form.",
+  },
+  {
     title: "Reports & Analytics",
     href: "/reports",
     icon: BarChart3,
@@ -124,4 +133,3 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     description: "Gym profile, operating hours, tax rules, and currency preferences.",
   },
 ];
-

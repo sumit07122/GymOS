@@ -44,3 +44,4 @@ export const memberBookClassSchema = z.object({
 export const memberCancelBookingSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
 });
+

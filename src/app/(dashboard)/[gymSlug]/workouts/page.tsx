@@ -73,3 +73,4 @@ export default function WorkoutsPage({ params }: WorkoutsPageProps) {
     </Suspense>
   );
 }
+

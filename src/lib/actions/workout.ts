@@ -295,3 +295,4 @@ export async function logCompletedWorkoutAction(
     return { success: false, error: err?.message ?? "Failed to record workout." };
   }
 }
+

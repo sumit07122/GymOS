@@ -83,3 +83,4 @@ export type ItemCreateInput = z.input<typeof itemCreateSchema>;
 export type ItemUpdateInput = z.input<typeof itemUpdateSchema>;
 export type StockMovementCreateInput = z.input<typeof stockMovementCreateSchema>;
 export type InventoryFilterParams = z.input<typeof inventoryFilterSchema>;
+
