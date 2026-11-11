@@ -50,12 +50,12 @@ const STEPS = [
 export function cleanErrorMessage(raw: string | null): string {
   if (!raw) return "";
   const trimmed = raw.trim();
-  if ((trimmed.startsWith("[") || trimmed.startsWith("{")) && trimmed.includes('"message"')) {
+  if ((trimmed.startsWith("[") || trimmed.startsWith("{")) && (trimmed.includes('"message"') || trimmed.includes('"code"') || trimmed.includes('"path"'))) {
     try {
       const parsed = JSON.parse(trimmed);
       if (Array.isArray(parsed)) {
         return parsed
-          .map((item: any) => item.message || JSON.stringify(item))
+          .map((item: any) => item.message || (item.path ? `${item.path.join(".")}: ${item.code}` : JSON.stringify(item)))
           .filter(Boolean)
           .join(". ");
       } else if (parsed && typeof parsed === "object" && parsed.message) {

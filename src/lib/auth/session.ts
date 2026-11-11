@@ -241,6 +241,9 @@ export async function createDatabaseSession(
       updatedAt: new Date(),
       user: targetUser,
     };
+  }
+
+  if (session) {
     inMemorySessionStore.set(sessionToken, session);
   }
 
@@ -257,6 +260,17 @@ export async function createDatabaseSession(
 }
 
 /**
+ * Safely removes a cookie without throwing in Server Component read-only contexts.
+ */
+function safeDeleteCookie(cookieStore: any, name: string) {
+  try {
+    cookieStore.delete(name);
+  } catch {
+    // Silently ignore in read-only Server Component contexts where cookie modification is forbidden
+  }
+}
+
+/**
  * Retrieves and validates the current active database session from the request cookie.
  * Returns null if unauthenticated, session token missing, or session expired.
  */
@@ -269,12 +283,12 @@ export async function getDatabaseSession(): Promise<AuthenticatedSession | null>
       return null;
     }
 
-    // 1. Check in-memory store (offline resilience)
+    // 1. Check in-memory store (offline resilience and fast path)
     const memorySession = inMemorySessionStore.get(token);
     if (memorySession) {
       if (memorySession.expires < new Date()) {
         inMemorySessionStore.delete(token);
-        cookieStore.delete(SESSION_COOKIE_NAME);
+        safeDeleteCookie(cookieStore, SESSION_COOKIE_NAME);
         return null;
       }
       return memorySession;
@@ -304,18 +318,21 @@ export async function getDatabaseSession(): Promise<AuthenticatedSession | null>
       // Check expiration
       if (session.expires < new Date()) {
         await db.session.delete({ where: { sessionToken: token } }).catch(() => {});
-        cookieStore.delete(SESSION_COOKIE_NAME);
+        safeDeleteCookie(cookieStore, SESSION_COOKIE_NAME);
         return null;
       }
 
       // Check if user is suspended
       if (session.user.status === "SUSPENDED") {
         await db.session.delete({ where: { sessionToken: token } }).catch(() => {});
-        cookieStore.delete(SESSION_COOKIE_NAME);
+        safeDeleteCookie(cookieStore, SESSION_COOKIE_NAME);
         return null;
       }
 
-      return session;
+      // Cache validated session in memory for performance and resilience
+      inMemorySessionStore.set(token, session as AuthenticatedSession);
+
+      return session as AuthenticatedSession;
     } catch {
       console.warn("Database offline while reading session. Defaulting to demo owner session for preview.");
       const fallbackOwner = DEMO_USERS["owner@ironforge.dev"];
@@ -347,7 +364,7 @@ export async function invalidateDatabaseSession(): Promise<void> {
     if (token) {
       inMemorySessionStore.delete(token);
       await db.session.delete({ where: { sessionToken: token } }).catch(() => {});
-      cookieStore.delete(SESSION_COOKIE_NAME);
+      safeDeleteCookie(cookieStore, SESSION_COOKIE_NAME);
     }
   } catch (err) {
     console.error("Error invalidating session:", err);

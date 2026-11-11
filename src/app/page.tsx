@@ -1,350 +1,375 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
 import Link from "next/link";
 import {
   QrCode,
+  Users,
+  CreditCard,
   MessageSquare,
-  Dumbbell,
-  ArrowRight,
+  TrendingUp,
   CheckCircle2,
-  Sparkles,
-  Smartphone,
-  Building2,
+  ArrowRight,
   ShieldCheck,
+  Building2,
+  Smartphone,
+  Sparkles,
+  Dumbbell,
+  Clock,
+  Layers,
+  ChevronRight,
+  ExternalLink,
+  Zap,
 } from "lucide-react";
+import { MarketingNav } from "@/components/marketing/navbar";
+import { MarketingFooter } from "@/components/marketing/footer";
+import { PricingSection } from "@/components/marketing/pricing-section";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { CtaBanner } from "@/components/marketing/cta-banner";
+import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { RoiCalculator } from "@/components/marketing/roi-calculator";
 
-type PersonaKey = "owner" | "kiosk" | "member" | "whatsapp";
-
-const SHOWCASE_TABS: Record<
-  PersonaKey,
-  {
-    badge: string;
-    title: string;
-    subtitle: string;
-    metrics: { label: string; value: string; delta: string }[];
-    highlights: string[];
-  }
-> = {
-  owner: {
-    badge: "Owner ERP & Financial Command",
-    title: "Real-Time Revenue, Dues & Retention in One View",
-    subtitle:
-      "Track MRR, expiring memberships, trainer class occupancy, and net profit after gym expenses without spreadsheets.",
-    metrics: [
-      { label: "Monthly Collection", value: "₹4,82,500", delta: "+18.4% vs last mo" },
-      { label: "Active Members", value: "642 / 750", delta: "85.6% capacity" },
-      { label: "Overdue Recovery", value: "94.2%", delta: "Via WhatsApp Auto-Dues" },
-    ],
-    highlights: [
-      "Automated invoice generation, partial payment tracking, and GST-ready receipts",
-      "Kanban lead pipeline with walk-in trial follow-ups and 1-click member conversion",
-      "Role-based access control for Managers, Trainers, and Front-Desk Receptionists",
-    ],
-  },
-  kiosk: {
-    badge: "Anti-Passback QR Reception Kiosk",
-    title: "Sub-Second Cryptographic QR Check-Ins",
-    subtitle:
-      "Prevent screenshot sharing with HMAC-signed rotating QR passes and instant membership status verification at the gate.",
-    metrics: [
-      { label: "Scan Verification", value: "140 ms", delta: "HMAC-SHA256 Signed" },
-      { label: "Peak Hour Throughput", value: "180+ / hr", delta: "Zero queue bottleneck" },
-      { label: "Blocked Expired Passes", value: "23 this wk", delta: "₹34,500 dues collected" },
-    ],
-    highlights: [
-      "Instant visual + audio alert if a member scans with unpaid dues or expired plan",
-      "Anti-passback cooldown prevents two people from entering on the same pass",
-      "Works on any reception tablet, webcam, or dedicated 2D barcode scanner",
-    ],
-  },
-  member: {
-    badge: "Installable Member PWA Portal",
-    title: "A Branded Fitness App Experience—Zero App Store Friction",
-    subtitle:
-      "Members install your gym's portal directly to their home screen for QR entry, workout logging, and 1-tap renewal.",
-    metrics: [
-      { label: "Member Adoption", value: "91%", delta: "Instant PWA install" },
-      { label: "Workout Adherence", value: "+32%", delta: "Streak & Challenge badges" },
-      { label: "Self-Serve Renewals", value: "68%", delta: "Paid before expiry date" },
-    ],
-    highlights: [
-      "Digital membership card with live attendance streak calendar",
-      "Assigned daily workout plans with exercise video/form notes and PR tracking",
-      "Body weight, muscle mass, and measurement progress charts",
-    ],
-  },
-  whatsapp: {
-    badge: "WhatsApp Retention & Broadcast Engine",
-    title: "Put Membership Renewals & Lead Follow-Ups on Autopilot",
-    subtitle:
-      "Built-in consent management, approved template variables, and delivery tracking for T-7, T-3, and T-0 expiry alerts.",
-    metrics: [
-      { label: "Message Open Rate", value: "96.8%", delta: "3x higher than email/SMS" },
-      { label: "On-Time Renewal Lift", value: "+27%", delta: "Automated T-3 reminders" },
-      { label: "Delivery Audit Log", value: "100%", delta: "Full opt-in compliance" },
-    ],
-    highlights: [
-      "Automated payment receipts, renewal reminders, and absent-member nudges",
-      "Targeted broadcasts for festive offers, new batch launches, or holiday hours",
-      "Built-in opt-in/opt-out ledger so your gym number stays compliant",
-    ],
-  },
-};
-
-export default function LandingShowcasePage() {
-  const [activePersona, setActivePersona] = useState<PersonaKey>("owner");
-  const [memberCount, setMemberCount] = useState<number>(300);
-  const [avgFee, setAvgFee] = useState<number>(2000);
-
-  // Estimated 8% revenue leakage recovered through automated dues & QR gate enforcement
-  const estimatedMonthlyRecovery = Math.round(memberCount * avgFee * 0.08);
-  const currentTab = SHOWCASE_TABS[activePersona];
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 bg-grid-pattern selection:bg-emerald-500/30 selection:text-emerald-200">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400">
-              <Dumbbell className="h-5 w-5" />
-            </div>
-            <span className="font-display text-xl font-bold tracking-tight">
-              Gym<span className="text-emerald-400">OS</span>
-            </span>
+    <div className="min-h-screen bg-[#F7FAF8] text-[#171C19] flex flex-col font-sans selection:bg-[#E8F9EE] selection:text-[#16A34A]">
+      {/* 1. Header Navigation */}
+      <MarketingNav />
+
+      {/* 2. Hero Section */}
+      <section className="relative pt-16 sm:pt-24 pb-16 overflow-hidden">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 gymos-grid-subtle opacity-80 pointer-events-none" />
+
+        {/* Ambient gentle green lighting */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#1BC95A]/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          {/* Top Pill Announcement */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[#E7ECE9] px-3.5 py-1 text-xs font-semibold shadow-xs hover:border-[#1BC95A]/40 transition">
+            <span className="flex h-2 w-2 rounded-full bg-[#1BC95A]" />
+            <span className="text-[#171C19]">GymOS 2.4 is Live</span>
+            <span className="text-[#69736E]">&bull;</span>
+            <span className="text-[#16A34A] font-bold">Now with AI Churn Radar</span>
+            <ChevronRight className="h-3 w-3 text-[#69736E]" />
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
-            <a href="#showcase" className="hover:text-white transition">Product Showcase</a>
-            <a href="#roi" className="hover:text-white transition">ROI Calculator</a>
-            <Link href="/g/spartan-athletics" className="hover:text-white transition">
-              Live Public Gym Demo
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/platform-admin/login"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition"
-            >
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Admin</span>
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-white/5 transition"
-            >
-              Sign In
-            </Link>
+
+          {/* Main Hero Headline */}
+          <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#171C19] max-w-4xl mx-auto leading-[1.08]">
+            Run your gym. <br />
+            <span className="text-[#1BC95A]">Grow your business.</span>
+          </h1>
+
+          {/* Supporting Subheadline */}
+          <p className="text-base sm:text-xl text-[#69736E] max-w-2xl mx-auto leading-relaxed font-normal">
+            Manage members, memberships, attendance and payments from one simple platform built for modern gyms.
+          </p>
+
+          {/* Hero Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               href="/register"
-              className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#1BC95A] hover:bg-[#16A34A] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#1BC95A]/25 transition active:scale-[0.98]"
             >
-              Launch Your Gym
+              <span>Get started</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/features"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-[#F7FAF8] px-6 py-3.5 text-sm font-bold text-[#171C19] border border-[#E7ECE9] shadow-xs transition"
+            >
+              <span>Explore features</span>
             </Link>
           </div>
-        </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="relative mx-auto max-w-7xl px-6 pt-20 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-medium text-emerald-300 mb-8">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Multi-Tenant Fitness ERP + Member PWA + WhatsApp Automation</span>
-        </div>
+          {/* Trust Guarantees */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-[#69736E]">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+              <span>14-day free trial</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+              <span>Zero-lock in</span>
+            </div>
+          </div>
 
-        <h1 className="font-display mx-auto max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-          Run Your Entire Gym on{" "}
-          <span className="bg-gradient-to-r from-emerald-400 via-lime-300 to-teal-400 bg-clip-text text-transparent">
-            Autopilot.
-          </span>
-        </h1>
-
-        <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-400 leading-relaxed">
-          Stop losing 15–20% of your gym revenue to missed WhatsApp follow-ups, shared QR screenshots, and messy spreadsheets. Built for single-location studios and multi-branch fitness chains.
-        </p>
-
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition"
-          >
-            Start 14-Day Free Trial <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/g/spartan-athletics"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-zinc-900/80 px-6 py-3.5 text-sm font-semibold text-white hover:bg-zinc-800 transition"
-          >
-            Explore Sample Gym Microsite
-          </Link>
+          {/* 3. Interactive Product Showcase Mockup */}
+          <div className="pt-8 max-w-5xl mx-auto">
+            <ProductShowcase />
+          </div>
         </div>
       </section>
 
-      {/* Interactive 4-Persona Workspace Showcase */}
-      <section id="showcase" className="mx-auto max-w-7xl px-6 py-12">
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
-          {[
-            { id: "owner", label: "1. Owner ERP", icon: Building2 },
-            { id: "kiosk", label: "2. QR Gate Kiosk", icon: QrCode },
-            { id: "member", label: "3. Member PWA", icon: Smartphone },
-            { id: "whatsapp", label: "4. WhatsApp Engine", icon: MessageSquare },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const active = activePersona === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActivePersona(tab.id as PersonaKey)}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
-                  active
-                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20 font-semibold"
-                    : "border border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
+      {/* 4. Social Proof Trust Bar */}
+      <section className="py-12 border-y border-[#E7ECE9] bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#69736E]">
+            Trusted by 120+ High-Performance Gyms, Fitness Clubs & Strength Studios
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-75 grayscale hover:grayscale-0 transition-all text-xs font-extrabold text-[#171C19]">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#1BC95A]" />
+              <span>IRONFORGE ATHLETICS</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Dumbbell className="h-4 w-4 text-[#1BC95A]" />
+              <span>SPARTAN STRENGTH LAB</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-[#1BC95A]" />
+              <span>KORAMANGALA FITNESS CO.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#1BC95A]" />
+              <span>ELEVATE CROSSFIT</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-[#1BC95A]" />
+              <span>TITAN GYM FRANCHISE</span>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="saas-glass-card rounded-3xl p-8 sm:p-10">
-          <div className="grid gap-10 lg:grid-cols-12 items-center">
-            <div className="lg:col-span-7 space-y-6">
-              <span className="inline-block rounded-md bg-emerald-500/15 px-3 py-1 font-mono text-xs font-medium text-emerald-400">
-                {currentTab.badge}
-              </span>
-              <h2 className="font-display text-2xl sm:text-4xl font-bold text-white">
-                {currentTab.title}
-              </h2>
-              <p className="text-zinc-400 leading-relaxed">{currentTab.subtitle}</p>
-              <ul className="space-y-3 pt-2">
-                {currentTab.highlights.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-zinc-200">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
+      {/* 5. Main Benefits (3 Pillars) */}
+      <section className="py-20 sm:py-28 bg-[#F7FAF8]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F9EE] px-3.5 py-1 text-xs font-bold text-[#16A34A] border border-[#1BC95A]/30">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Engineered for Retention & Growth</span>
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171C19]">
+              Everything you need to run an <br />
+              <span className="text-[#1BC95A]">effortless gym business</span>
+            </h2>
+            <p className="text-sm sm:text-base text-[#69736E] leading-relaxed">
+              Eliminate manual attendance tracking, stop chasing renewals over calls, and deliver a modern fitness experience that members love.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Benefit 1 */}
+            <div className="rounded-2xl border border-[#E7ECE9] bg-white p-7 sm:p-8 space-y-4 shadow-xs hover:border-[#1BC95A]/40 transition">
+              <div className="h-12 w-12 rounded-xl bg-[#E8F9EE] text-[#16A34A] flex items-center justify-center">
+                <QrCode className="h-6 w-6 text-[#1BC95A]" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-[#171C19]">
+                Anti-Passback QR Kiosk
+              </h3>
+              <p className="text-xs sm:text-sm text-[#69736E] leading-relaxed">
+                Sub-second 140ms verification on any tablet or webcam. Rotating HMAC tokens prevent screenshot sharing, and automated cooldowns stop two people entering on one pass.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-[#171C19]">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>Works on any tablet, iPad, or webcam</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>Audio & visual gate feedback</span>
+                </li>
               </ul>
             </div>
 
-            <div className="lg:col-span-5 grid gap-4">
-              {currentTab.metrics.map((m) => (
-                <div
-                  key={m.label}
-                  className="rounded-2xl border border-white/10 bg-zinc-900/90 p-5 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-zinc-400">{m.label}</p>
-                    <p className="font-mono text-2xl sm:text-3xl font-bold text-white mt-1">
-                      {m.value}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 font-mono text-xs text-emerald-300">
-                    {m.delta}
-                  </span>
-                </div>
-              ))}
+            {/* Benefit 2 */}
+            <div className="rounded-2xl border border-[#E7ECE9] bg-white p-7 sm:p-8 space-y-4 shadow-xs hover:border-[#1BC95A]/40 transition">
+              <div className="h-12 w-12 rounded-xl bg-[#E8F9EE] text-[#16A34A] flex items-center justify-center">
+                <MessageSquare className="h-6 w-6 text-[#1BC95A]" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-[#171C19]">
+                WhatsApp Auto-Dues Engine
+              </h3>
+              <p className="text-xs sm:text-sm text-[#69736E] leading-relaxed">
+                Connect official Meta Cloud API to automatically notify members 7 days, 3 days, and on the day of expiry with direct 1-tap UPI payment links.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-[#171C19]">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>96.8% message open rate</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>GST-compliant auto receipt dispatch</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Benefit 3 */}
+            <div className="rounded-2xl border border-[#E7ECE9] bg-white p-7 sm:p-8 space-y-4 shadow-xs hover:border-[#1BC95A]/40 transition">
+              <div className="h-12 w-12 rounded-xl bg-[#E8F9EE] text-[#16A34A] flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-[#1BC95A]" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-[#171C19]">
+                AI Churn & Ghosting Radar
+              </h3>
+              <p className="text-xs sm:text-sm text-[#69736E] leading-relaxed">
+                Automatically detects members who haven&apos;t attended in 10+ days before they cancel. Launch 1-click re-engagement broadcasts to bring them back.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-[#171C19]">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>Attendance streak monitoring</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#1BC95A]" />
+                  <span>Proactive retention outreach</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive ROI & Revenue Leakage Calculator */}
-      <section id="roi" className="mx-auto max-w-5xl px-6 py-16">
-        <div className="saas-glass-card rounded-3xl p-8 sm:p-10 border border-emerald-500/20">
-          <div className="grid gap-8 md:grid-cols-2 items-center">
-            <div>
-              <span className="font-mono text-xs uppercase tracking-wider text-emerald-400">
-                Revenue Leakage Estimator
-              </span>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold mt-2 text-white">
-                How Much Uncollected Dues Can GymOS Recover?
-              </h3>
-              <p className="text-sm text-zinc-400 mt-2">
-                Adjust your active member count and average monthly fee to estimate revenue recovered from automated WhatsApp reminders and QR gate enforcement.
+      {/* 6. How GymOS Works (3 Simple Steps) */}
+      <section className="py-20 border-t border-[#E7ECE9] bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-display text-3xl font-extrabold text-[#171C19]">
+              How GymOS works in 3 simple steps
+            </h2>
+            <p className="text-xs sm:text-sm text-[#69736E]">
+              Get your entire gym operational in under 5 minutes with zero technical overhead.
+            </p>
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div className="space-y-3 text-center sm:text-left">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1BC95A] text-white font-display font-extrabold text-base shadow-xs mx-auto sm:mx-0">
+                1
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Register & Upload Roster
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                Register your gym in 60 seconds and bulk-upload existing member records from Excel/CSV with one click.
               </p>
+            </div>
 
-              <div className="mt-6 space-y-5">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-zinc-300">Active Gym Members</span>
-                    <span className="font-mono font-bold text-emerald-400">{memberCount} members</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={50}
-                    max={2000}
-                    step={25}
-                    value={memberCount}
-                    onChange={(e) => setMemberCount(Number(e.target.value))}
-                    className="w-full accent-emerald-500 cursor-pointer"
-                  />
-                </div>
+            <div className="space-y-3 text-center sm:text-left">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1BC95A] text-white font-display font-extrabold text-base shadow-xs mx-auto sm:mx-0">
+                2
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Place Kiosk at Reception
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                Open the Anti-Passback Reception Kiosk on any tablet or browser. Members scan their digital QR pass for instant entry.
+              </p>
+            </div>
 
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-zinc-300">Avg. Monthly Membership Fee</span>
-                    <span className="font-mono font-bold text-emerald-400">₹{avgFee.toLocaleString("en-IN")}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={500}
-                    max={10000}
-                    step={250}
-                    value={avgFee}
-                    onChange={(e) => setAvgFee(Number(e.target.value))}
-                    className="w-full accent-emerald-500 cursor-pointer"
-                  />
-                </div>
+            <div className="space-y-3 text-center sm:text-left">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1BC95A] text-white font-display font-extrabold text-base shadow-xs mx-auto sm:mx-0">
+                3
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Automate Dues & Retention
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                GymOS runs automated daily expiry sweeps, dispatches WhatsApp renewal notices, and deposits payments to your bank.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Gym-Size Suitability Section */}
+      <section className="py-20 sm:py-24 bg-[#F7FAF8] border-t border-[#E7ECE9]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-display text-3xl font-extrabold text-[#171C19]">
+              Tailored for every gym size & business model
+            </h2>
+            <p className="text-xs sm:text-sm text-[#69736E]">
+              From boutique yoga studios to multi-location commercial fitness franchises.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-[#E7ECE9] bg-white p-6 space-y-3 shadow-xs">
+              <div className="text-[11px] font-bold uppercase text-[#16A34A] tracking-wider">
+                Single Floor Studios (50 - 200 Members)
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Boutique Fitness & Yoga
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                Replace unorganized spreadsheets with clean attendance tracking, simple membership plans, and digital receipts.
+              </p>
+              <div className="pt-2 text-xs font-semibold text-[#16A34A]">
+                Recommended: Starter Studio Plan
               </div>
             </div>
 
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-6 text-center space-y-4">
-              <p className="text-xs uppercase tracking-widest text-emerald-300 font-medium">
-                Estimated Recovered Revenue / Month
+            <div className="rounded-2xl border-2 border-[#1BC95A] bg-white p-6 space-y-3 shadow-md">
+              <div className="text-[11px] font-bold uppercase text-[#16A34A] tracking-wider">
+                Full-Service Gyms (200 - 800 Members)
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Strength & Athletic Clubs
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                Full lead pipeline CRM, class schedules, trainer assignments, inventory POS, and automated WhatsApp reminders.
               </p>
-              <p className="font-mono text-4xl sm:text-5xl font-bold text-white">
-                ₹{estimatedMonthlyRecovery.toLocaleString("en-IN")}
+              <div className="pt-2 text-xs font-semibold text-[#16A34A]">
+                Recommended: Growth Athletic Plan
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#E7ECE9] bg-white p-6 space-y-3 shadow-xs">
+              <div className="text-[11px] font-bold uppercase text-[#16A34A] tracking-wider">
+                Franchises & Chains (800+ Members)
+              </div>
+              <h4 className="font-display text-lg font-bold text-[#171C19]">
+                Multi-Branch Fitness Chains
+              </h4>
+              <p className="text-xs text-[#69736E] leading-relaxed">
+                Unified multi-tenant dashboard, AI member churn radar, custom domain mapping, dedicated SLA and unlimited capacity.
               </p>
-              <p className="font-mono text-xs text-zinc-400">
-                ~₹{(estimatedMonthlyRecovery * 12).toLocaleString("en-IN")} additional annual cashflow
-              </p>
-              <Link
-                href="/register"
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition"
-              >
-                Claim Your Gym Workspace <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="pt-2 text-xs font-semibold text-[#16A34A]">
+                Recommended: Pro Enterprise Plan
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Production Footer with Legal & Compliance Trust Links */}
-      <footer className="border-t border-white/10 py-12 bg-zinc-950 text-zinc-400 text-xs">
-        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs">
-              G
-            </div>
-            <span className="text-white font-semibold">GymOS</span>
-            <span>&bull;</span>
-            <span>Enterprise Multi-Tenant SaaS Platform</span>
+      {/* 8. Revenue Recovery ROI Calculator */}
+      <section className="py-20 border-t border-[#E7ECE9] bg-white">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <RoiCalculator />
+        </div>
+      </section>
+
+      {/* 9. Live Pricing Section */}
+      <PricingSection showComparisonLink={true} />
+
+      {/* 10. Frequently Asked Questions */}
+      <section className="py-20 sm:py-28 bg-white border-t border-[#E7ECE9]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-[#171C19]">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xs sm:text-sm text-[#69736E]">
+              Everything you need to know about switching your gym to GymOS.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-            <Link href="/privacy" className="hover:text-emerald-400 transition">Privacy Policy</Link>
-            <span>&bull;</span>
-            <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>
-            <span>&bull;</span>
-            <Link href="/security" className="hover:text-emerald-400 transition">Security Architecture</Link>
-            <span>&bull;</span>
-            <Link href="/login" className="hover:text-emerald-400 transition">Sign In</Link>
-            <span>&bull;</span>
-            <Link href="/platform-admin/login" className="hover:text-emerald-400 transition">Platform Admin</Link>
-          </div>
+          <FaqAccordion />
         </div>
-      </footer>
+      </section>
+
+      {/* 11. Final High-Impact CTA Banner */}
+      <CtaBanner />
+
+      {/* 12. Global Marketing Footer */}
+      <MarketingFooter />
     </div>
   );
 }

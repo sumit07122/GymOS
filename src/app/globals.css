@@ -9,20 +9,31 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Geist Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-heading: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+  --font-sans: var(--font-sans), 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-heading: var(--font-display), 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-display), 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --color-pine: #0B6B4F;
-  --color-pine-deep: #062E23;
-  --color-pine-soft: #E4F2EB;
-  --color-canvas: #F5F6F4;
-  --color-ink: #111613;
-  --color-faint: #94A099;
-  --color-line: #E3E7E4;
-  --color-muted: #5F6B65;
-  --color-muted-foreground: #5F6B65;
+  /* FIXIA GymOS New Brand Identity System */
+  --color-gymos-primary: #1BC95A;
+  --color-gymos-deep: #16A34A;
+  --color-gymos-soft: #E8F9EE;
+  --color-gymos-bg: #F7FAF8;
+  --color-gymos-white: #FFFFFF;
+  --color-gymos-text: #171C19;
+  --color-gymos-muted: #69736E;
+  --color-gymos-border: #E7ECE9;
+
+  /* Seamless backward compatibility tokens mapped directly to new brand identity */
+  --color-pine: #1BC95A;
+  --color-pine-deep: #16A34A;
+  --color-pine-soft: #E8F9EE;
+  --color-canvas: #F7FAF8;
+  --color-ink: #171C19;
+  --color-faint: #69736E;
+  --color-line: #E7ECE9;
+  --color-muted: #69736E;
+  --color-muted-foreground: #69736E;
 
   --color-midnight: #0F172A;
   --color-midnight-navy: #1E293B;
@@ -273,5 +284,22 @@
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.7);
+  }
+
+  /* GymOS Light Precision Grid & Micro-Dot Patterns */
+  .gymos-grid-subtle {
+    background-size: 28px 28px;
+    background-image:
+      linear-gradient(to right, rgba(23, 28, 25, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(23, 28, 25, 0.04) 1px, transparent 1px);
+  }
+
+  .gymos-dot-pattern {
+    background-image: radial-gradient(rgba(27, 201, 90, 0.18) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .gymos-text-highlight {
+    color: #1BC95A;
   }
 }

@@ -1,19 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 
-const fontSans = Plus_Jakarta_Sans({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const fontDisplay = Space_Grotesk({
+const fontDisplay = Manrope({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -26,15 +25,15 @@ const fontMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "GymOS — The Operating System for Modern Fitness Studios",
+    default: "GymOS — Run Your Gym. Grow Your Business.",
     template: "%s | GymOS",
   },
   description:
-    "Multi-tenant gym management SaaS with QR check-in, automated WhatsApp retention, billing, CRM, and member PWA.",
+    "Manage members, memberships, attendance and payments from one simple platform built for modern gyms.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "GymOS",
   },
   icons: {
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#09090B",
+  themeColor: "#1BC95A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -56,10 +55,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable} dark`}
+      className={`${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-zinc-950 font-sans text-zinc-50 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+      <body className="min-h-screen bg-[#F7FAF8] font-sans text-[#171C19] antialiased selection:bg-[#E8F9EE] selection:text-[#16A34A]">
         <PwaRegister />
         {children}
       </body>

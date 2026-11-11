@@ -41,17 +41,31 @@ function formatErrorMessage(err: unknown, fallback = "Operation failed."): strin
   }
   if (err instanceof Error) {
     const msg = err.message.trim();
-    if ((msg.startsWith("[") || msg.startsWith("{")) && msg.includes('"message"')) {
+    if ((msg.startsWith("[") || msg.startsWith("{")) && (msg.includes('"message"') || msg.includes('"code"'))) {
       try {
         const parsed = JSON.parse(msg);
         if (Array.isArray(parsed)) {
-          return parsed.map((i: any) => i.message).filter(Boolean).join(". ");
+          return parsed.map((i: any) => i.message || i.code).filter(Boolean).join(". ");
         } else if (parsed && typeof parsed === "object" && parsed.message) {
           return String(parsed.message);
         }
       } catch {}
     }
-    return err.message;
+    return msg;
+  }
+  if (typeof err === "string") {
+    const trimmed = err.trim();
+    if ((trimmed.startsWith("[") || trimmed.startsWith("{")) && (trimmed.includes('"message"') || trimmed.includes('"code"'))) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map((i: any) => i.message || i.code).filter(Boolean).join(". ");
+        } else if (parsed && typeof parsed === "object" && parsed.message) {
+          return String(parsed.message);
+        }
+      } catch {}
+    }
+    return trimmed;
   }
   return fallback;
 }

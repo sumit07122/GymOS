@@ -1,12 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
+import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { listSaasPlans, seedDefaultSaasPlansIfEmpty, DEFAULT_FALLBACK_PLANS } from "@/lib/services/platform-admin.service";
 import { OnboardGymForm } from "@/components/admin/onboard-gym-form";
 import { PageHeader } from "@/components/design-system/page-header";
 
 export default async function OnboardNewGymPage() {
-  const session = await requireSuperAdmin("/platform-admin/gyms/new");
+  let session;
+  try {
+    session = await requireSuperAdmin("/platform-admin/gyms/new");
+  } catch (err: any) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw err;
+    }
+    console.warn("Auth exception in OnboardNewGymPage:", err);
+    redirect("/platform-admin/login");
+  }
+
   let plans: any = DEFAULT_FALLBACK_PLANS;
   try {
     await seedDefaultSaasPlansIfEmpty().catch(() => {});
