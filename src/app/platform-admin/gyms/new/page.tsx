@@ -1,13 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { requireSuperAdmin } from "@/lib/auth/guards";
-import { listSaasPlans, seedDefaultSaasPlansIfEmpty } from "@/lib/services/platform-admin.service";
+import { listSaasPlans, seedDefaultSaasPlansIfEmpty, DEFAULT_FALLBACK_PLANS } from "@/lib/services/platform-admin.service";
 import { OnboardGymForm } from "@/components/admin/onboard-gym-form";
 import { PageHeader } from "@/components/design-system/page-header";
 
 export default async function OnboardNewGymPage() {
   const session = await requireSuperAdmin("/platform-admin/gyms/new");
-  await seedDefaultSaasPlansIfEmpty();
-  const plans = await listSaasPlans(session.user.id, true);
+  let plans: any = DEFAULT_FALLBACK_PLANS;
+  try {
+    await seedDefaultSaasPlansIfEmpty().catch(() => {});
+    plans = await listSaasPlans(session.user.id, true);
+  } catch (err) {
+    console.warn("Could not query SaaS plans from database, using fallback plans:", err);
+  }
 
   return (
     <div className="space-y-6">

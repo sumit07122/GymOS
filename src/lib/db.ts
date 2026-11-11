@@ -19,6 +19,11 @@ function createPrismaClient(): PrismaClient {
     process.env.DATABASE_URL ||
     "postgresql://postgres:postgres@localhost:5432/fixia_gymos?schema=public";
 
+  const isRemotePostgres =
+    connectionString.includes("neon.tech") ||
+    connectionString.includes("amazonaws.com") ||
+    connectionString.includes("sslmode=require");
+
   // Configure pg connection pool
   const pool =
     globalForPrisma.pool ??
@@ -27,6 +32,7 @@ function createPrismaClient(): PrismaClient {
       max: process.env.NODE_ENV === "production" ? 10 : 5,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,
+      ...(isRemotePostgres ? { ssl: { rejectUnauthorized: false } } : {}),
     });
 
   if (process.env.NODE_ENV !== "production") {

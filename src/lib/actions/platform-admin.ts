@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { getDatabaseSession } from "@/lib/auth/session";
@@ -35,7 +36,21 @@ function formatErrorMessage(err: unknown, fallback = "Operation failed."): strin
   if (err instanceof ZodError) {
     return err.issues.map((i) => i.message).join(". ");
   }
+  if (err && typeof err === "object" && "issues" in err && Array.isArray((err as any).issues)) {
+    return (err as any).issues.map((i: any) => i.message || JSON.stringify(i)).join(". ");
+  }
   if (err instanceof Error) {
+    const msg = err.message.trim();
+    if ((msg.startsWith("[") || msg.startsWith("{")) && msg.includes('"message"')) {
+      try {
+        const parsed = JSON.parse(msg);
+        if (Array.isArray(parsed)) {
+          return parsed.map((i: any) => i.message).filter(Boolean).join(". ");
+        } else if (parsed && typeof parsed === "object" && parsed.message) {
+          return String(parsed.message);
+        }
+      } catch {}
+    }
     return err.message;
   }
   return fallback;

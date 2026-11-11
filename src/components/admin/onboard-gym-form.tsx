@@ -49,11 +49,17 @@ const STEPS = [
 
 export function cleanErrorMessage(raw: string | null): string {
   if (!raw) return "";
-  if (raw.trim().startsWith("[") && raw.includes('"message"')) {
+  const trimmed = raw.trim();
+  if ((trimmed.startsWith("[") || trimmed.startsWith("{")) && trimmed.includes('"message"')) {
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(trimmed);
       if (Array.isArray(parsed)) {
-        return parsed.map((item: any) => item.message || JSON.stringify(item)).join(". ");
+        return parsed
+          .map((item: any) => item.message || JSON.stringify(item))
+          .filter(Boolean)
+          .join(". ");
+      } else if (parsed && typeof parsed === "object" && parsed.message) {
+        return String(parsed.message);
       }
     } catch {
       // fallback
@@ -239,7 +245,8 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
   const [copied, setCopied] = React.useState(false);
   const copyCredentials = () => {
     if (!resultData) return;
-    const text = `FIXIA GymOS Workspace Provisioned!\nGym: ${resultData.gym.name}\nDashboard URL: https://gms.fixia.in/owner/dashboard\nGym Website: https://gms.fixia.in/g/${resultData.gym.slug}\nOwner Email: ${resultData.owner.email}\nTemporary Password: ${resultData.temporaryPassword || "(as configured)"}\nInvitation Code: ${resultData.invitation?.token || "N/A"}`;
+    const tempPassword = resultData.owner?.temporaryPassword || resultData.temporaryPassword || "(as configured)";
+    const text = `FIXIA GymOS Workspace Provisioned!\nGym: ${resultData.gym.name}\nDashboard URL: https://gms.fixia.in/owner/dashboard\nGym Website: https://gms.fixia.in/g/${resultData.gym.slug}\nOwner Email: ${resultData.owner.email}\nTemporary Password: ${tempPassword}\nInvitation Code: ${resultData.invitation?.token || "N/A"}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -269,8 +276,8 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted">Gym Workspace</div>
               <div className="font-semibold text-ink text-sm">{resultData.gym.name}</div>
               <div className="text-muted">Slug: <span className="font-mono text-pine">/{resultData.gym.slug}</span></div>
-              <div className="text-muted">Plan: <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30">{resultData.subscription.plan.name}</Badge></div>
-              <div className="text-muted">Trial Period: <strong className="text-ink">{resultData.subscription.trialEndsAt ? new Date(resultData.subscription.trialEndsAt).toLocaleDateString() : "None"}</strong></div>
+              <div className="text-muted">Plan: <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30">{resultData.subscription?.plan?.name || resultData.subscription?.planName || "SaaS Plan"}</Badge></div>
+              <div className="text-muted">Trial Period: <strong className="text-ink">{resultData.subscription?.trialEndsAt ? new Date(resultData.subscription.trialEndsAt).toLocaleDateString() : "None"}</strong></div>
             </div>
 
             <div className="rounded-lg border border-line bg-canvas p-4 space-y-2">
@@ -278,7 +285,7 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
               <div className="font-semibold text-ink text-sm">{resultData.owner.name}</div>
               <div className="text-muted">Email: <span className="font-mono text-ink">{resultData.owner.email}</span></div>
               <div className="text-muted">
-                Password: <span className="font-mono bg-white px-2 py-0.5 rounded text-amber-700 border border-line">{resultData.temporaryPassword || "(Entered during onboarding)"}</span>
+                Password: <span className="font-mono bg-white px-2 py-0.5 rounded text-amber-700 border border-line">{resultData.owner?.temporaryPassword || resultData.temporaryPassword || "(Entered during onboarding)"}</span>
               </div>
               <div className="text-muted">Role: <Badge variant="outline" className="bg-pine-soft text-pine border-pine/30">OWNER</Badge></div>
             </div>
