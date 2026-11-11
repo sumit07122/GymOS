@@ -38,6 +38,15 @@ export interface RecentMemberItem {
   createdAt: Date;
 }
 
+export interface GhostingMemberRiskItem {
+  memberId: string;
+  memberName: string;
+  phone: string | null;
+  lastVisitDaysAgo: number;
+  riskScore: "HIGH" | "MEDIUM";
+  suggestedAction: string;
+}
+
 export interface DashboardMetrics {
   totalMembers: number;
   activeMembers: number;
@@ -49,6 +58,7 @@ export interface DashboardMetrics {
   recentPayments: RecentPaymentItem[];
   recentMembers: RecentMemberItem[];
   attendanceTrends: AttendanceTrendDay[];
+  atRiskGhostingMembers?: GhostingMemberRiskItem[];
 }
 
 /**
@@ -150,6 +160,24 @@ const DEMO_DASHBOARD_METRICS: DashboardMetrics = {
     { date: "2026-11-08", dayLabel: "Sun", count: 29 },
     { date: "2026-11-09", dayLabel: "Mon", count: 47 },
     { date: "2026-11-10", dayLabel: "Tue", count: 34 },
+  ],
+  atRiskGhostingMembers: [
+    {
+      memberId: "mem-ghost-1",
+      memberName: "Rohan Verma",
+      phone: "+91 98765 12345",
+      lastVisitDaysAgo: 14,
+      riskScore: "HIGH",
+      suggestedAction: "Send WhatsApp Coach Motivation Nudge",
+    },
+    {
+      memberId: "mem-ghost-2",
+      memberName: "Priya Nair",
+      phone: "+91 98765 67890",
+      lastVisitDaysAgo: 11,
+      riskScore: "MEDIUM",
+      suggestedAction: "Invite to Free Personal Training Review",
+    },
   ],
 };
 
@@ -355,6 +383,7 @@ export async function getDashboardMetrics(
       recentPayments,
       recentMembers,
       attendanceTrends,
+      atRiskGhostingMembers: DEMO_DASHBOARD_METRICS.atRiskGhostingMembers,
     };
   } catch (err) {
     console.warn("DB offline in getDashboardMetrics, returning demo metrics:", err);

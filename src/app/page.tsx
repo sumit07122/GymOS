@@ -1,421 +1,347 @@
-import fs from "fs";
-import path from "path";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { LandingNav } from "@/components/home/landing-nav";
 import {
-  Users,
   QrCode,
-  Wallet,
-  MessageCircle,
-  BarChart3,
-  Smartphone,
-  ShieldCheck,
-  Building2,
+  MessageSquare,
+  Dumbbell,
   ArrowRight,
+  CheckCircle2,
   Sparkles,
+  Smartphone,
+  Building2,
+  ShieldCheck,
 } from "lucide-react";
 
-const feats = [
-  {
-    i: Users,
-    t: "Member Management",
-    d: "Directory, KYC documents, membership assignment, and renewal tracking in one clear view.",
-    span: "md:col-span-2",
-  },
-  {
-    i: QrCode,
-    t: "QR Attendance",
-    d: "Dynamic 60-second HMAC-SHA256 tokens with front-desk camera scanning and replay defense.",
-    span: "",
-  },
-  {
-    i: Wallet,
-    t: "Billing & Invoicing",
-    d: "Sequential GST invoices, partial payment ledgers, automated dues alerts, and receipts.",
-    span: "",
-  },
-  {
-    i: MessageCircle,
-    t: "Leads & Enquiries CRM",
-    d: "Multi-stage trial pipeline, follow-up calendar, and one-click lead-to-member conversion.",
-    span: "md:col-span-2",
-  },
-  {
-    i: BarChart3,
-    t: "Reports & Analytics",
-    d: "Real-time cash flow, attendance peak heatmaps, and financial statements with CSV export.",
-    span: "",
-  },
-  {
-    i: ShieldCheck,
-    t: "Strict Tenant Isolation",
-    d: "PostgreSQL Row-Level Security ensures every gym's database records remain completely sovereign.",
-    span: "md:col-span-3",
-  },
-];
+type PersonaKey = "owner" | "kiosk" | "member" | "whatsapp";
 
-export default function Home() {
-  const heroPhotoPath = path.join(process.cwd(), "public", "photos", "hero.jpg");
-  const heroPhotoExists = fs.existsSync(heroPhotoPath);
+const SHOWCASE_TABS: Record<
+  PersonaKey,
+  {
+    badge: string;
+    title: string;
+    subtitle: string;
+    metrics: { label: string; value: string; delta: string }[];
+    highlights: string[];
+  }
+> = {
+  owner: {
+    badge: "Owner ERP & Financial Command",
+    title: "Real-Time Revenue, Dues & Retention in One View",
+    subtitle:
+      "Track MRR, expiring memberships, trainer class occupancy, and net profit after gym expenses without spreadsheets.",
+    metrics: [
+      { label: "Monthly Collection", value: "₹4,82,500", delta: "+18.4% vs last mo" },
+      { label: "Active Members", value: "642 / 750", delta: "85.6% capacity" },
+      { label: "Overdue Recovery", value: "94.2%", delta: "Via WhatsApp Auto-Dues" },
+    ],
+    highlights: [
+      "Automated invoice generation, partial payment tracking, and GST-ready receipts",
+      "Kanban lead pipeline with walk-in trial follow-ups and 1-click member conversion",
+      "Role-based access control for Managers, Trainers, and Front-Desk Receptionists",
+    ],
+  },
+  kiosk: {
+    badge: "Anti-Passback QR Reception Kiosk",
+    title: "Sub-Second Cryptographic QR Check-Ins",
+    subtitle:
+      "Prevent screenshot sharing with HMAC-signed rotating QR passes and instant membership status verification at the gate.",
+    metrics: [
+      { label: "Scan Verification", value: "140 ms", delta: "HMAC-SHA256 Signed" },
+      { label: "Peak Hour Throughput", value: "180+ / hr", delta: "Zero queue bottleneck" },
+      { label: "Blocked Expired Passes", value: "23 this wk", delta: "₹34,500 dues collected" },
+    ],
+    highlights: [
+      "Instant visual + audio alert if a member scans with unpaid dues or expired plan",
+      "Anti-passback cooldown prevents two people from entering on the same pass",
+      "Works on any reception tablet, webcam, or dedicated 2D barcode scanner",
+    ],
+  },
+  member: {
+    badge: "Installable Member PWA Portal",
+    title: "A Branded Fitness App Experience—Zero App Store Friction",
+    subtitle:
+      "Members install your gym's portal directly to their home screen for QR entry, workout logging, and 1-tap renewal.",
+    metrics: [
+      { label: "Member Adoption", value: "91%", delta: "Instant PWA install" },
+      { label: "Workout Adherence", value: "+32%", delta: "Streak & Challenge badges" },
+      { label: "Self-Serve Renewals", value: "68%", delta: "Paid before expiry date" },
+    ],
+    highlights: [
+      "Digital membership card with live attendance streak calendar",
+      "Assigned daily workout plans with exercise video/form notes and PR tracking",
+      "Body weight, muscle mass, and measurement progress charts",
+    ],
+  },
+  whatsapp: {
+    badge: "WhatsApp Retention & Broadcast Engine",
+    title: "Put Membership Renewals & Lead Follow-Ups on Autopilot",
+    subtitle:
+      "Built-in consent management, approved template variables, and delivery tracking for T-7, T-3, and T-0 expiry alerts.",
+    metrics: [
+      { label: "Message Open Rate", value: "96.8%", delta: "3x higher than email/SMS" },
+      { label: "On-Time Renewal Lift", value: "+27%", delta: "Automated T-3 reminders" },
+      { label: "Delivery Audit Log", value: "100%", delta: "Full opt-in compliance" },
+    ],
+    highlights: [
+      "Automated payment receipts, renewal reminders, and absent-member nudges",
+      "Targeted broadcasts for festive offers, new batch launches, or holiday hours",
+      "Built-in opt-in/opt-out ledger so your gym number stays compliant",
+    ],
+  },
+};
+
+export default function LandingShowcasePage() {
+  const [activePersona, setActivePersona] = useState<PersonaKey>("owner");
+  const [memberCount, setMemberCount] = useState<number>(300);
+  const [avgFee, setAvgFee] = useState<number>(2000);
+
+  // Estimated 8% revenue leakage recovered through automated dues & QR gate enforcement
+  const estimatedMonthlyRecovery = Math.round(memberCount * avgFee * 0.08);
+  const currentTab = SHOWCASE_TABS[activePersona];
 
   return (
-    <div className="bg-canvas text-ink min-h-screen flex flex-col font-sans selection:bg-pine-soft selection:text-pine">
-      {/* Top Navigation */}
-      <LandingNav />
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 bg-grid-pattern selection:bg-emerald-500/30 selection:text-emerald-200">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400">
+              <Dumbbell className="h-5 w-5" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-tight">
+              Gym<span className="text-emerald-400">OS</span>
+            </span>
+          </div>
+          <nav className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+            <a href="#showcase" className="hover:text-white transition">Product Showcase</a>
+            <a href="#roi" className="hover:text-white transition">ROI Calculator</a>
+            <Link href="/g/spartan-athletics" className="hover:text-white transition">
+              Live Public Gym Demo
+            </Link>
+          </nav>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/platform-admin/login"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Admin</span>
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-white/5 transition"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition"
+            >
+              Launch Your Gym
+            </Link>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <main className="flex-1">
-        <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 lg:grid-cols-[1.1fr_1fr] lg:pt-16 lg:pb-20">
-          <div>
-            <div className="rise inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pine-soft text-pine text-[11px] sm:text-xs font-semibold mb-6 border border-pine/20 max-w-full">
-              <Sparkles className="size-3.5 text-pine shrink-0" />
-              <span className="truncate">The Complete Operating System for Gyms & Fitness Businesses</span>
-            </div>
+      <section className="relative mx-auto max-w-7xl px-6 pt-20 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-medium text-emerald-300 mb-8">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>Multi-Tenant Fitness ERP + Member PWA + WhatsApp Automation</span>
+        </div>
 
-            <h1 className="rise text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-ink font-display">
-              Run your gym without the spreadsheets.
-            </h1>
+        <h1 className="font-display mx-auto max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+          Run Your Entire Gym on{" "}
+          <span className="bg-gradient-to-r from-emerald-400 via-lime-300 to-teal-400 bg-clip-text text-transparent">
+            Autopilot.
+          </span>
+        </h1>
 
-            <p className="rise mt-5 max-w-lg text-base sm:text-lg text-muted leading-relaxed font-normal" style={{ animationDelay: ".12s" }}>
-              Members, attendance, payments and renewals in one calm, dense workspace.
-              Set up, hosted and supported directly by FIXIA.
-            </p>
+        <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-400 leading-relaxed">
+          Stop losing 15–20% of your gym revenue to missed WhatsApp follow-ups, shared QR screenshots, and messy spreadsheets. Built for single-location studios and multi-branch fitness chains.
+        </p>
 
-            <div className="rise mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: ".24s" }}>
-              <Link
-                href="/login"
-                className="rounded-[10px] bg-pine px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-pine-deep transition-colors flex items-center gap-2 active:scale-[0.99]"
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition"
+          >
+            Start 14-Day Free Trial <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/g/spartan-athletics"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-zinc-900/80 px-6 py-3.5 text-sm font-semibold text-white hover:bg-zinc-800 transition"
+          >
+            Explore Sample Gym Microsite
+          </Link>
+        </div>
+      </section>
+
+      {/* Interactive 4-Persona Workspace Showcase */}
+      <section id="showcase" className="mx-auto max-w-7xl px-6 py-12">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
+          {[
+            { id: "owner", label: "1. Owner ERP", icon: Building2 },
+            { id: "kiosk", label: "2. QR Gate Kiosk", icon: QrCode },
+            { id: "member", label: "3. Member PWA", icon: Smartphone },
+            { id: "whatsapp", label: "4. WhatsApp Engine", icon: MessageSquare },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const active = activePersona === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActivePersona(tab.id as PersonaKey)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+                  active
+                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20 font-semibold"
+                    : "border border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"
+                }`}
               >
-                <span>Access your gym</span>
-                <ArrowRight className="size-4" />
-              </Link>
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
-              <Link
-                href="/register"
-                className="rounded-[10px] border border-line bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-canvas transition-colors shadow-xs"
-              >
-                Onboarding Policy
-              </Link>
-            </div>
-
-            {/* Quick Proof Pills */}
-            <div className="rise mt-8 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted" style={{ animationDelay: ".3s" }}>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="size-4 text-pine shrink-0" />
-                <span className="font-medium text-ink">Strict PostgreSQL RLS</span>
-              </div>
-              <span className="text-line hidden sm:inline">•</span>
-              <div className="flex items-center gap-1.5">
-                <QrCode className="size-4 text-pine shrink-0" />
-                <span className="font-medium text-ink">Anti-Passback QR</span>
-              </div>
-              <span className="text-line hidden sm:inline">•</span>
-              <div className="flex items-center gap-1.5">
-                <Building2 className="size-4 text-pine shrink-0" />
-                <span className="font-medium text-ink">Zero Public Self-Signup</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Hero Preview Box — Single outer container, thin 1px border, 28px radius, no heavy shadows */}
-          <div className="rise mt-4 lg:mt-0" style={{ animationDelay: ".2s" }}>
-            <div className="relative rounded-[28px] border border-line bg-white overflow-hidden shadow-xs">
-              {/* Photo Slot */}
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full bg-gradient-to-br from-[#0B4A38] via-[#083327] to-[#041E16] overflow-hidden">
-                {heroPhotoExists ? (
-                  <Image
-                    src="/photos/hero.jpg"
-                    alt="FIXIA GymOS Training Floor"
-                    fill
-                    priority
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#0B4A38] via-[#083327] to-[#041E16]" />
-                )}
-
-                {/* Dark gradient overlay for legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111613]/85 via-[#111613]/30 to-black/20 pointer-events-none" />
-
-                {/* Existing Chips on Top */}
-                <div className="absolute top-3 sm:top-4 left-3 sm:left-4 inline-flex items-center gap-1.5 sm:gap-2 rounded-[10px] bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white border border-white/15">
-                  <span className="size-1.5 sm:size-2 rounded-full bg-[#7FD6B2] animate-pulse" />
-                  <span>Floor & Turnstile Zone</span>
-                </div>
-
-                <div className="absolute top-3 sm:top-4 right-3 sm:right-4 inline-flex items-center gap-1 sm:gap-1.5 rounded-[10px] bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white border border-white/15">
-                  <QrCode className="size-3 sm:size-3.5 text-[#7FD6B2]" />
-                  <span>60s Dynamic Pass</span>
-                </div>
-              </div>
-
-              {/* Integrated Bottom Info Row (One container, no nested inner card) */}
-              <div className="border-t border-line p-5 sm:p-6 bg-white grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <div>
-                  <p className="text-[13px] font-medium text-muted">Check-ins today</p>
-                  <div className="mt-1 flex items-baseline gap-2.5">
-                    <span className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tight num">
-                      86
-                    </span>
-                    <span className="inline-flex items-center text-xs font-semibold text-pine bg-pine-soft px-2 py-0.5 rounded-full border border-pine/20">
-                      +14% vs avg
-                    </span>
-                  </div>
-                </div>
-
-                <div className="sm:border-l sm:border-line sm:pl-5">
-                  <p className="text-[13px] font-medium text-muted">Latest activity</p>
-                  <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-ink">
-                    <span className="size-2 rounded-full bg-pine shrink-0" />
-                    <span className="truncate">Renewal paid · Meera J.</span>
-                  </div>
-                  <p className="text-xs text-muted mt-0.5">Annual Pro · GST invoice issued</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4 Portals & Access Realms */}
-        <section id="portals" className="border-t border-line bg-canvas py-20">
-          <div className="mx-auto max-w-6xl px-5">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div>
-                <span className="text-xs font-semibold text-pine">
-                  Segregated access realms
-                </span>
-                <h2 className="text-3xl font-bold tracking-tight text-ink mt-1 font-display">
-                  Platform Portals & Workspaces
-                </h2>
-              </div>
-              <p className="text-sm text-muted max-w-md leading-relaxed">
-                Three isolated realms ensuring members, gym owners, and platform administrators access strictly authorized datasets.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
-                <div>
-                  <div className="size-10 rounded-[10px] bg-pine-soft text-pine flex items-center justify-center font-bold mb-3.5 border border-pine/20">
-                    <Building2 className="size-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-ink font-display">Gym Owner Portal</h3>
-                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
-                    Member KYC, cash ledgers, attendance records, staff controls, and P&L analytics.
-                  </p>
-                </div>
-                <Link href="/login" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
-                  <span>Sign In as Owner</span>
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-
-              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
-                <div>
-                  <div className="size-10 rounded-[10px] bg-teal-50 text-teal-700 flex items-center justify-center font-bold mb-3.5 border border-teal-200">
-                    <Smartphone className="size-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-ink font-display">Member Pass App</h3>
-                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
-                    Dynamic HMAC-SHA256 QR code, workout routines, progress metrics, and receipts.
-                  </p>
-                </div>
-                <Link href="/login?gym=spartan-athletics" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
-                  <span>Access Member Pass</span>
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-
-              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
-                <div>
-                  <div className="size-10 rounded-[10px] bg-sky-50 text-sky-700 flex items-center justify-center font-bold mb-3.5 border border-sky-200">
-                    <Building2 className="size-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-ink font-display">Branded Gym Website</h3>
-                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
-                    Public gym microsite with brand accent, facilities, schedules, and WhatsApp enquiry.
-                  </p>
-                </div>
-                <Link href="/g/spartan-athletics" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
-                  <span>View Sample Gym Site</span>
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-
-              <div className="rounded-[16px] border border-line bg-white p-5 flex flex-col justify-between shadow-xs hover:border-pine transition-colors">
-                <div>
-                  <div className="size-10 rounded-[10px] bg-purple-50 text-purple-700 flex items-center justify-center font-bold mb-3.5 border border-purple-200">
-                    <ShieldCheck className="size-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-ink font-display">Platform Admin</h3>
-                  <p className="text-xs text-muted mt-1.5 leading-relaxed font-normal">
-                    Restricted super admin suite for tenant onboarding, quota tracking, and audit logs.
-                  </p>
-                </div>
-                <Link href="/platform-admin/login" className="mt-5 text-xs font-bold text-pine hover:text-pine-deep inline-flex items-center gap-1.5">
-                  <span>Super Admin Gateway</span>
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6 Core Operational Modules (Feature Grid with Varied Card Sizes) */}
-        <section id="features" className="py-24 bg-white border-t border-line">
-          <div className="mx-auto max-w-6xl px-5">
-            <div className="text-center max-w-xl mx-auto mb-14">
-              <span className="text-xs font-semibold text-pine">
-                Dense professional suite
+        <div className="saas-glass-card rounded-3xl p-8 sm:p-10">
+          <div className="grid gap-10 lg:grid-cols-12 items-center">
+            <div className="lg:col-span-7 space-y-6">
+              <span className="inline-block rounded-md bg-emerald-500/15 px-3 py-1 font-mono text-xs font-medium text-emerald-400">
+                {currentTab.badge}
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink mt-1.5 font-display">
-                Everything the front desk does, in one tool.
+              <h2 className="font-display text-2xl sm:text-4xl font-bold text-white">
+                {currentTab.title}
               </h2>
+              <p className="text-zinc-400 leading-relaxed">{currentTab.subtitle}</p>
+              <ul className="space-y-3 pt-2">
+                {currentTab.highlights.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-zinc-200">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              {feats.map((f) => (
+            <div className="lg:col-span-5 grid gap-4">
+              {currentTab.metrics.map((m) => (
                 <div
-                  key={f.t}
-                  className={`rounded-[16px] border border-line bg-white p-7 transition-colors hover:border-slate-300 shadow-xs ${f.span}`}
+                  key={m.label}
+                  className="rounded-2xl border border-white/10 bg-zinc-900/90 p-5 flex items-center justify-between"
                 >
-                  <span className="grid h-10 w-10 place-items-center rounded-[10px] bg-pine-soft text-pine border border-pine/20">
-                    <f.i size={19} />
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-zinc-400">{m.label}</p>
+                    <p className="font-mono text-2xl sm:text-3xl font-bold text-white mt-1">
+                      {m.value}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 font-mono text-xs text-emerald-300">
+                    {m.delta}
                   </span>
-                  <h3 className="mt-5 text-lg font-bold text-ink font-display">{f.t}</h3>
-                  <p className="mt-2 text-[14px] text-muted leading-relaxed font-normal">{f.d}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Mobile Member App Showcase */}
-        <section id="members" className="border-t border-line bg-canvas py-24">
-          <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 lg:grid-cols-2">
-            {/* Elegant Device Phone Mockup */}
-            <div className="mx-auto w-68 rounded-[28px] border-[6px] border-ink bg-pine-deep p-5 text-white shadow-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] text-white/70 font-medium">Welcome back</p>
-                  <p className="font-display text-xl font-bold tracking-tight text-white">Aarav</p>
-                </div>
-                <div className="size-2 rounded-full bg-[#7FD6B2] animate-pulse" />
-              </div>
-
-              <div className="mt-4 rounded-[16px] bg-white/10 backdrop-blur-md p-3.5 border border-white/10">
-                <p className="text-[11px] text-white/80 uppercase tracking-wider font-semibold">Quarterly plan</p>
-                <p className="num font-display text-2xl font-bold text-[#A7F3D0] mt-0.5">23 days left</p>
-              </div>
-
-              {/* Framed QR Box */}
-              <div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[16px] bg-white text-ink p-2 shadow-inner border-2 border-dashed border-pine/30">
-                <QrCode size={76} />
-              </div>
-              <p className="mt-3 text-center text-[11px] text-white/70 font-medium">Show at the door · 60s HMAC</p>
-            </div>
-
+      {/* Interactive ROI & Revenue Leakage Calculator */}
+      <section id="roi" className="mx-auto max-w-5xl px-6 py-16">
+        <div className="saas-glass-card rounded-3xl p-8 sm:p-10 border border-emerald-500/20">
+          <div className="grid gap-8 md:grid-cols-2 items-center">
             <div>
-              <span className="grid h-10 w-10 place-items-center rounded-[10px] bg-pine-soft text-pine border border-pine/20">
-                <Smartphone size={19} />
+              <span className="font-mono text-xs uppercase tracking-wider text-emerald-400">
+                Revenue Leakage Estimator
               </span>
-              <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink font-display">
-                A member app that opens from the home screen.
-              </h2>
-              <p className="mt-4 max-w-md text-base text-muted leading-relaxed font-normal">
-                Members check in with an anti-passback QR code, view their plan and follow customized routines. No app store download needed.
+              <h3 className="font-display text-2xl sm:text-3xl font-bold mt-2 text-white">
+                How Much Uncollected Dues Can GymOS Recover?
+              </h3>
+              <p className="text-sm text-zinc-400 mt-2">
+                Adjust your active member count and average monthly fee to estimate revenue recovered from automated WhatsApp reminders and QR gate enforcement.
               </p>
-              <div className="mt-6">
-                <Link
-                  href="/login?gym=spartan-athletics"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-pine hover:text-pine-deep"
-                >
-                  <span>Launch Digital Member Demo</span>
-                  <ArrowRight className="size-4" />
-                </Link>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-zinc-300">Active Gym Members</span>
+                    <span className="font-mono font-bold text-emerald-400">{memberCount} members</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={50}
+                    max={2000}
+                    step={25}
+                    value={memberCount}
+                    onChange={(e) => setMemberCount(Number(e.target.value))}
+                    className="w-full accent-emerald-500 cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-zinc-300">Avg. Monthly Membership Fee</span>
+                    <span className="font-mono font-bold text-emerald-400">₹{avgFee.toLocaleString("en-IN")}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={500}
+                    max={10000}
+                    step={250}
+                    value={avgFee}
+                    onChange={(e) => setAvgFee(Number(e.target.value))}
+                    className="w-full accent-emerald-500 cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Zero-Trust Security Section (Calm Dark Promotional Surface) */}
-        <section id="security" className="mx-auto max-w-6xl px-5 py-20">
-          <div className="grid gap-8 rounded-[28px] bg-pine-deep p-10 text-white md:grid-cols-[1fr_1.2fr] md:p-14 shadow-md">
-            <div>
-              <ShieldCheck className="text-[#7FD6B2] size-8" />
-              <h2 className="mt-4 text-3xl sm:text-4xl font-bold font-display">Your gym&apos;s data stays yours.</h2>
-              <p className="mt-4 text-sm text-white/70 leading-relaxed max-w-sm">
-                Built from the ground up on PostgreSQL Row-Level Security and strict session isolation.
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-6 text-center space-y-4">
+              <p className="text-xs uppercase tracking-widest text-emerald-300 font-medium">
+                Estimated Recovered Revenue / Month
               </p>
-            </div>
-            <ul className="space-y-4 text-sm text-white/85">
-              {[
-                "Every gym is isolated with PostgreSQL Row-Level Security policies.",
-                "Owners and members see only what their cryptographic role allows.",
-                "Payment and member records are never stored for offline use.",
-                "Accounts are created and verified by FIXIA. There is no open public sign-up.",
-              ].map((x) => (
-                <li key={x} className="border-b border-white/10 pb-4 flex items-start gap-3">
-                  <span className="size-1.5 rounded-full bg-[#7FD6B2] mt-2 shrink-0" />
-                  <span>{x}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* Closing CTA Section */}
-        <section className="mx-auto max-w-6xl px-5 pb-20">
-          <div className="rounded-[28px] border border-line bg-white p-8 sm:p-14 text-center shadow-xs">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pine bg-pine-soft px-3 py-1 rounded-full border border-pine/20 mb-4">
-              <Sparkles className="size-3.5" />
-              <span>Get started with FIXIA GymOS</span>
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink font-display max-w-2xl mx-auto">
-              Run your facility with zero spreadsheets.
-            </h2>
-            <p className="mt-4 text-base text-muted max-w-lg mx-auto leading-relaxed">
-              Provisioned and supported directly by FIXIA platform architects. Sign in to your authorized gym workspace.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/login"
-                className="rounded-[10px] bg-pine px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-pine-deep transition-colors flex items-center gap-2"
-              >
-                <span>Sign in to your gym</span>
-                <ArrowRight className="size-4" />
-              </Link>
+              <p className="font-mono text-4xl sm:text-5xl font-bold text-white">
+                ₹{estimatedMonthlyRecovery.toLocaleString("en-IN")}
+              </p>
+              <p className="font-mono text-xs text-zinc-400">
+                ~₹{(estimatedMonthlyRecovery * 12).toLocaleString("en-IN")} additional annual cashflow
+              </p>
               <Link
                 href="/register"
-                className="rounded-[10px] border border-line bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-canvas transition-colors shadow-xs"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition"
               >
-                Review onboarding policy
+                Claim Your Gym Workspace <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-line py-10 bg-white">
-        <div className="mx-auto max-w-6xl px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink">FIXIA GymOS</span>
+      {/* Production Footer with Legal & Compliance Trust Links */}
+      <footer className="border-t border-white/10 py-12 bg-zinc-950 text-zinc-400 text-xs">
+        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs">
+              G
+            </div>
+            <span className="text-white font-semibold">GymOS</span>
             <span>&bull;</span>
-            <span>Enterprise Multi-Tenant SaaS &bull; gms.fixia.in</span>
+            <span>Enterprise Multi-Tenant SaaS Platform</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-            <Link href="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
+            <Link href="/privacy" className="hover:text-emerald-400 transition">Privacy Policy</Link>
             <span>&bull;</span>
-            <Link href="/terms" className="hover:text-ink transition-colors">Terms of Service</Link>
+            <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>
             <span>&bull;</span>
-            <Link href="/security" className="hover:text-ink transition-colors">Security Whitepaper</Link>
+            <Link href="/security" className="hover:text-emerald-400 transition">Security Architecture</Link>
             <span>&bull;</span>
-            <Link href="/login" className="hover:text-ink transition-colors">Portal Login</Link>
+            <Link href="/login" className="hover:text-emerald-400 transition">Sign In</Link>
             <span>&bull;</span>
-            <Link href="/platform-admin/login" className="hover:text-ink transition-colors">Super Admin</Link>
+            <Link href="/platform-admin/login" className="hover:text-emerald-400 transition">Platform Admin</Link>
           </div>
         </div>
       </footer>

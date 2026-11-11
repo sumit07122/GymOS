@@ -263,6 +263,59 @@ async function DashboardContent({ params, searchParams, basePath }: DashboardPag
         />
       </div>
 
+      {/* AI Member Churn & Ghosting Prevention Widget */}
+      {metrics.atRiskGhostingMembers && metrics.atRiskGhostingMembers.length > 0 && (
+        <div className="rounded-[16px] border border-amber-200 bg-amber-50/50 p-4 sm:p-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200/60">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800 font-bold">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-amber-950">
+                  AI Churn Risk & Ghosting Radar ({metrics.atRiskGhostingMembers.length} Members At Risk)
+                </h3>
+                <p className="text-[11px] text-amber-800">
+                  Members whose attendance frequency dropped sharply over the past 14 days. Re-engage before membership expiry.
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`${rootPath}/whatsapp`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-amber-600 text-white hover:bg-amber-700 shadow-xs transition shrink-0"
+            >
+              <span>1-Click Bulk WhatsApp Retention</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            {metrics.atRiskGhostingMembers.map((m) => (
+              <div
+                key={m.memberId}
+                className="flex items-center justify-between p-3 rounded-xl bg-white border border-amber-200/70 shadow-2xs"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-ink">{m.memberName}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                      {m.lastVisitDaysAgo}d inactive
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted mt-0.5">{m.suggestedAction}</p>
+                </div>
+                <Link
+                  href={`${rootPath}/members`}
+                  className="text-xs font-semibold text-pine hover:underline shrink-0"
+                >
+                  View Profile &rarr;
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Financial Overview & Attendance Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Financial Cards (1 col) */}

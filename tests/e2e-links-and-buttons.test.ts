@@ -98,6 +98,7 @@ describe("E2E Route & Link Integrity Verification", () => {
       "src/app/owner/reports/page.tsx",
       "src/app/owner/settings/page.tsx",
       "src/app/owner/subscription/page.tsx",
+      "src/app/api/cron/daily-lifecycle/route.ts",
       "src/app/member/home/page.tsx",
       "src/app/member/workouts/page.tsx",
       "src/app/member/progress/page.tsx",
@@ -108,5 +109,13 @@ describe("E2E Route & Link Integrity Verification", () => {
       const fullPath = path.resolve(process.cwd(), pagePath);
       expect(fs.existsSync(fullPath), `Missing required page: ${pagePath}`).toBe(true);
     }
+  });
+
+  it("guards demo preview mode from leaking in production", async () => {
+    const { isDemoPreviewAllowed } = await import("@/lib/tenant/transaction");
+    
+    // In normal environment without NEXT_PUBLIC_DEMO_MODE=true
+    expect(isDemoPreviewAllowed("matrix-gym")).toBe(false);
+    expect(isDemoPreviewAllowed("unknown-gym")).toBe(false);
   });
 });

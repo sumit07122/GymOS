@@ -2,6 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/cron/daily-lifecycle",
+      "schedule": "30 0 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // ==============================================================================
-// FIXIA GymOS — Edge Request & Route Protection Middleware
+// FIXIA GymOS — Route Canonicalization & Protection Middleware
 // ==============================================================================
 
 const PUBLIC_PATHS = [
@@ -12,8 +12,12 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/privacy",
+  "/terms",
+  "/security",
   "/offline",
   "/api/auth",
+  "/api/cron",
   "/manifest.json",
   "/sw.js",
 ];
@@ -21,13 +25,25 @@ const PUBLIC_PATHS = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 1. Canonicalize Legacy Platform Admin Routes: /admin/* -> /platform-admin/*
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const target = pathname === "/admin" ? "/platform-admin" : pathname.replace(/^\/admin/, "/platform-admin");
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
+  // 2. Canonicalize Legacy Public Gym Microsite Routes: /gym/[slug] -> /g/[slug]
+  if (pathname.startsWith("/gym/")) {
+    const target = pathname.replace(/^\/gym\//, "/g/");
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
   // Allow static files, Next internals, icons, and public endpoints
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/cron") ||
     pathname.startsWith("/g/") ||
-    pathname.startsWith("/gym/") ||
     pathname.startsWith("/icons/") ||
     pathname === "/sw.js" ||
     pathname === "/manifest.json" ||
@@ -36,22 +52,24 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie
+  // Session token lookup
   const sessionToken =
     request.cookies.get("__Secure-fixia_session_token")?.value ||
     request.cookies.get("fixia_session_token")?.value ||
     request.cookies.get("authjs.session-token")?.value ||
     request.cookies.get("__Secure-authjs.session-token")?.value;
 
-  // Protected paths require an active session token
-  if (!sessionToken) {
-    // If accessing platform-admin, redirect to platform-admin login
-    if (pathname.startsWith("/platform-admin")) {
+  // 3. Protected Platform Admin Routes
+  if (pathname.startsWith("/platform-admin") && !pathname.startsWith("/platform-admin/login")) {
+    if (!sessionToken) {
       const adminLoginUrl = new URL("/platform-admin/login", request.url);
       adminLoginUrl.searchParams.set("returnUrl", pathname);
       return NextResponse.redirect(adminLoginUrl);
     }
+  }
 
+  // 4. Protected Owner & Member Routes
+  if (!sessionToken) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("returnUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -62,14 +80,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/admin/:path*",
+    "/gym/:path*",
+    "/platform-admin/:path*",
+    "/owner/:path*",
+    "/member/:path*",
+    "/portal/:path*",
   ],
 };
-
