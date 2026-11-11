@@ -33,6 +33,7 @@ import {
 interface DashboardPageProps {
   params: Promise<{ gymSlug: string }>;
   searchParams: Promise<{ range?: string }>;
+  basePath?: string;
 }
 
 function DashboardSkeleton() {
@@ -46,8 +47,9 @@ function DashboardSkeleton() {
   );
 }
 
-async function DashboardContent({ params, searchParams }: DashboardPageProps) {
+async function DashboardContent({ params, searchParams, basePath }: DashboardPageProps) {
   const { gymSlug } = await params;
+  const rootPath = basePath || `/${gymSlug}`;
   const resolvedSearchParams = await searchParams;
   const range: DateRange =
     resolvedSearchParams.range === "today" ||
@@ -97,7 +99,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
               return (
                 <Link
                   key={tab.value}
-                  href={`/${gymSlug}/dashboard?range=${tab.value}`}
+                  href={`${rootPath}/dashboard?range=${tab.value}`}
                   className={`rounded-[8px] px-2.5 py-1.5 font-medium transition ${
                     isSelected
                       ? "bg-white text-ink shadow-xs font-semibold"
@@ -118,7 +120,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
           Quick actions:
         </span>
         <Link
-          href={`/${gymSlug}/members/new`}
+          href={`${rootPath}/members/new`}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-pine text-white hover:bg-pine/90 shadow-xs transition"
         >
           <UserPlus className="h-3.5 w-3.5" />
@@ -126,7 +128,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
         </Link>
 
         <Link
-          href={`/${gymSlug}/attendance`}
+          href={`${rootPath}/attendance`}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
         >
           <QrCode className="h-3.5 w-3.5 text-pine" />
@@ -134,7 +136,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
         </Link>
 
         <Link
-          href={`/${gymSlug}/payments`}
+          href={`${rootPath}/payments`}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
         >
           <Receipt className="h-3.5 w-3.5 text-pine" />
@@ -142,7 +144,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
         </Link>
 
         <Link
-          href={`/${gymSlug}/leads`}
+          href={`${rootPath}/leads`}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-canvas text-ink hover:bg-line/40 border border-line transition"
         >
           <Sparkles className="h-3.5 w-3.5 text-pine" />
@@ -172,7 +174,7 @@ async function DashboardContent({ params, searchParams }: DashboardPageProps) {
               </p>
             </div>
             <Link
-              href={`/${gymSlug}/settings`}
+              href={`${rootPath}/settings`}
               className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-pine px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-pine/90 transition shrink-0"
             >
               <span>Configure Settings & Hours</span>

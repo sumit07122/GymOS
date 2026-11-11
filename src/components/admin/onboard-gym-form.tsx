@@ -30,6 +30,7 @@ interface OnboardGymFormProps {
     id: string;
     name: string;
     code: string;
+    description?: string | null;
     monthlyPrice: number;
     quarterlyPrice: number | null;
     yearlyPrice: number;
@@ -45,6 +46,21 @@ const STEPS = [
   { id: 4, title: "Entitlements", desc: "Modules & flags", icon: Sliders },
   { id: 5, title: "Review & Provision", desc: "Confirm & launch", icon: ShieldCheck },
 ];
+
+export function cleanErrorMessage(raw: string | null): string {
+  if (!raw) return "";
+  if (raw.trim().startsWith("[") && raw.includes('"message"')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: any) => item.message || JSON.stringify(item)).join(". ");
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return raw;
+}
 
 export function OnboardGymForm({ plans }: OnboardGymFormProps) {
   const router = useRouter();
@@ -122,22 +138,6 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
       pass += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     setFormData((prev) => ({ ...prev, ownerPassword: pass }));
-  };
-
-  // Helper to format any raw JSON error into friendly plain text
-  const cleanErrorMessage = (raw: string | null): string => {
-    if (!raw) return "";
-    if (raw.trim().startsWith("[") && raw.includes('"message"')) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed.map((item: any) => item.message || JSON.stringify(item)).join(". ");
-        }
-      } catch {
-        // fallback
-      }
-    }
-    return raw;
   };
 
   // Step validation before advancing
@@ -606,19 +606,50 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ink">Base SaaS Tier *</label>
-                <select
-                  value={formData.planId}
-                  onChange={(e) => setFormData({ ...formData, planId: e.target.value })}
-                  className="w-full bg-white border border-line rounded-lg text-ink text-xs h-9 px-3 focus:ring-pine/30 focus:border-pine"
-                >
-                  {plans.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({formData.currency} {p.monthlyPrice}/mo &bull; {p.maxMembers ? `Max ${p.maxMembers} members` : "Unlimited"})
-                    </option>
-                  ))}
-                </select>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-ink">Select Commercial Plan *</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {plans.map((p) => {
+                    const isSelected = formData.planId === p.id;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setFormData({ ...formData, planId: p.id })}
+                        className={`p-3.5 rounded-xl border text-left cursor-pointer transition relative ${
+                          isSelected
+                            ? "border-pine bg-pine-soft/40 ring-1 ring-pine/30 shadow-xs"
+                            : "border-line bg-white hover:border-slate-300"
+                        }`}
+                      >
+                        {p.code === "GROWTH" && (
+                          <span className="absolute -top-2.5 right-3 bg-pine text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Recommended
+                          </span>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-bold text-ink">{p.name}</h4>
+                          <div
+                            className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              isSelected ? "bg-pine border-pine text-white" : "border-line bg-white"
+                            }`}
+                          >
+                            {isSelected && <CheckCircle2 className="h-3 w-3" />}
+                          </div>
+                        </div>
+                        <div className="mt-2 text-lg font-black text-ink">
+                          {formData.currency === "INR" ? "₹" : "$"}{p.monthlyPrice}
+                          <span className="text-[10px] font-normal text-muted">/mo</span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-muted line-clamp-2">
+                          {p.description || "Full operational access and features."}
+                        </p>
+                        <div className="mt-2 text-[10px] font-semibold text-pine">
+                          {p.maxMembers && p.maxMembers > 0 ? `Up to ${p.maxMembers} members` : "Unlimited members"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="space-y-1.5">

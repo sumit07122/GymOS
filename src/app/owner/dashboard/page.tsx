@@ -8,5 +8,11 @@ interface OwnerDashboardPageProps {
 
 export default async function OwnerDashboardPage({ searchParams }: OwnerDashboardPageProps) {
   const { gym } = await requireOwnerSession("/owner/dashboard");
-  return <GymDashboardPage params={Promise.resolve({ gymSlug: gym.slug })} searchParams={searchParams} />;
+  return (
+    <GymDashboardPage
+      params={Promise.resolve({ gymSlug: gym.slug })}
+      searchParams={searchParams}
+      basePath="/owner"
+    />
+  );
 }

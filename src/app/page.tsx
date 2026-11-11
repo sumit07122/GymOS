@@ -406,10 +406,14 @@ export default function Home() {
             <span>Enterprise Multi-Tenant SaaS &bull; gms.fixia.in</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/login" className="hover:text-ink transition-colors">Portal Login</Link>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+            <Link href="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
             <span>&bull;</span>
-            <Link href="/register" className="hover:text-ink transition-colors">Onboarding Policy</Link>
+            <Link href="/terms" className="hover:text-ink transition-colors">Terms of Service</Link>
+            <span>&bull;</span>
+            <Link href="/security" className="hover:text-ink transition-colors">Security Whitepaper</Link>
+            <span>&bull;</span>
+            <Link href="/login" className="hover:text-ink transition-colors">Portal Login</Link>
             <span>&bull;</span>
             <Link href="/platform-admin/login" className="hover:text-ink transition-colors">Super Admin</Link>
           </div>
