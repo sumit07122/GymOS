@@ -29,6 +29,17 @@ import {
   RecordSubscriptionPaymentInput,
 } from "@/lib/validations/saas-admin";
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
+
+function formatErrorMessage(err: unknown, fallback = "Operation failed."): string {
+  if (err instanceof ZodError) {
+    return err.issues.map((i) => i.message).join(". ");
+  }
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return fallback;
+}
 
 // ==============================================================================
 // FIXIA GymOS — Platform Administration Server Actions (M19)
@@ -198,7 +209,7 @@ export async function onboardGymAction(input: OnboardGymInput) {
       data: result,
     };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to onboard gym.";
+    const message = formatErrorMessage(err, "Failed to onboard gym.");
     return {
       success: false,
       error: message,

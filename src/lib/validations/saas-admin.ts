@@ -88,7 +88,16 @@ export const onboardGymSchema = z.object({
   // Owner Details
   ownerName: z.string().trim().min(2, "Owner name must be at least 2 characters").max(80),
   ownerEmail: z.string().trim().email("Invalid owner email format"),
-  ownerPassword: z.string().min(8, "Password must be at least 8 characters").optional(),
+  ownerPassword: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => (val && val.trim().length > 0 ? val.trim() : undefined))
+    .refine(
+      (val) => val === undefined || val.length >= 8,
+      "Password must be at least 8 characters if provided (or leave blank to auto-generate)"
+    )
+    .optional(),
 
   // Subscription Configuration
   planId: z.string().min(1, "Subscription plan is required"),

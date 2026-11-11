@@ -124,16 +124,53 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
     setFormData((prev) => ({ ...prev, ownerPassword: pass }));
   };
 
+  // Helper to format any raw JSON error into friendly plain text
+  const cleanErrorMessage = (raw: string | null): string => {
+    if (!raw) return "";
+    if (raw.trim().startsWith("[") && raw.includes('"message"')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item: any) => item.message || JSON.stringify(item)).join(". ");
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return raw;
+  };
+
   // Step validation before advancing
   const canAdvance = (step: number): boolean => {
     if (step === 1) {
-      return Boolean(formData.name.trim() && formData.slug.trim() && formData.phone.trim() && formData.email.trim() && formData.city.trim());
+      if (!formData.name.trim() || !formData.slug.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.city.trim()) {
+        setError("Please fill in all mandatory fields with valid values before proceeding.");
+        return false;
+      }
+      return true;
     }
     if (step === 2) {
-      return Boolean(formData.ownerName.trim() && formData.ownerEmail.trim());
+      if (!formData.ownerName.trim()) {
+        setError("Owner full name is required.");
+        return false;
+      }
+      if (!formData.ownerEmail.trim()) {
+        setError("Owner business email is required.");
+        return false;
+      }
+      const pass = formData.ownerPassword?.trim();
+      if (pass && pass.length > 0 && pass.length < 8) {
+        setError(`Password must be at least 8 characters (currently ${pass.length} characters). You can also leave it blank to auto-generate.`);
+        return false;
+      }
+      return true;
     }
     if (step === 3) {
-      return Boolean(formData.planId);
+      if (!formData.planId) {
+        setError("Please select a SaaS subscription plan.");
+        return false;
+      }
+      return true;
     }
     return true;
   };
@@ -141,7 +178,6 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
   const handleNext = () => {
     setError(null);
     if (!canAdvance(currentStep)) {
-      setError("Please fill in all mandatory fields with valid values before proceeding.");
       return;
     }
     setCurrentStep((prev) => Math.min(prev + 1, 5));
@@ -157,6 +193,14 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
     setIsPending(true);
     setError(null);
 
+    const trimmedPass = formData.ownerPassword?.trim();
+    if (trimmedPass && trimmedPass.length > 0 && trimmedPass.length < 8) {
+      setError(`Password must be at least 8 characters (currently ${trimmedPass.length} characters). You can also leave it blank to auto-generate.`);
+      setCurrentStep(2);
+      setIsPending(false);
+      return;
+    }
+
     try {
       const res = await onboardGymAction({
         name: formData.name,
@@ -170,7 +214,7 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
         openingHours: formData.openingHours || undefined,
         ownerName: formData.ownerName,
         ownerEmail: formData.ownerEmail,
-        ownerPassword: formData.ownerPassword || undefined,
+        ownerPassword: trimmedPass && trimmedPass.length >= 8 ? trimmedPass : undefined,
         planId: formData.planId,
         billingPeriod: formData.billingPeriod as any,
         customPricingOverride: formData.customPricingOverride ? parseFloat(formData.customPricingOverride) : undefined,
@@ -333,12 +377,28 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 flex items-start gap-2.5">
-          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
-          <div>
-            <div className="font-bold">Validation Error</div>
-            <p className="mt-0.5">{error}</p>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 flex items-start justify-between gap-3 shadow-xs">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+            <div>
+              <div className="font-bold text-rose-900">Validation Error</div>
+              <p className="mt-0.5 text-rose-800">{cleanErrorMessage(error)}</p>
+            </div>
           </div>
+          {error.toLowerCase().includes("password") && currentStep === 5 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setCurrentStep(2);
+                setError(null);
+              }}
+              className="border-rose-300 text-rose-800 hover:bg-rose-100 text-xs shrink-0 bg-white"
+            >
+              Fix Password in Step 2
+            </Button>
+          )}
         </div>
       )}
 
@@ -506,9 +566,28 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
                   type="text"
                   placeholder="Leave blank to auto-generate, or enter at least 8 characters"
                   value={formData.ownerPassword}
-                  onChange={(e) => setFormData({ ...formData, ownerPassword: e.target.value })}
-                  className="bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine"
+                  onChange={(e) => {
+                    setError(null);
+                    setFormData({ ...formData, ownerPassword: e.target.value });
+                  }}
+                  className={`bg-white border-line text-ink text-xs h-9 font-mono focus:ring-pine/30 focus:border-pine ${
+                    formData.ownerPassword && formData.ownerPassword.trim().length > 0 && formData.ownerPassword.trim().length < 8
+                      ? "border-amber-400 focus:border-amber-500"
+                      : ""
+                  }`}
                 />
+                {formData.ownerPassword && formData.ownerPassword.trim().length > 0 && formData.ownerPassword.trim().length < 8 && (
+                  <p className="text-[11px] text-amber-600 font-medium flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    <span>Password must be at least 8 characters (currently {formData.ownerPassword.trim().length} characters).</span>
+                  </p>
+                )}
+                {formData.ownerPassword && formData.ownerPassword.trim().length >= 8 && (
+                  <p className="text-[11px] text-emerald-600 font-medium flex items-center gap-1 mt-1">
+                    <CheckCircle2 className="h-3 w-3 shrink-0" />
+                    <span>Valid password ({formData.ownerPassword.trim().length} characters).</span>
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -676,7 +755,16 @@ export function OnboardGymForm({ plans }: OnboardGymFormProps) {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Owner Credentials</div>
                   <div className="font-bold text-sm text-ink">{formData.ownerName || "Unassigned"}</div>
                   <div className="text-muted font-mono">{formData.ownerEmail}</div>
-                  <div className="text-muted">Password: <span className="font-mono">{formData.ownerPassword ? "Custom password provided" : "Will auto-generate"}</span></div>
+                  <div className="text-muted">
+                    Password:{" "}
+                    <span className={`font-mono ${formData.ownerPassword && formData.ownerPassword.trim().length > 0 && formData.ownerPassword.trim().length < 8 ? "text-rose-600 font-bold" : ""}`}>
+                      {formData.ownerPassword && formData.ownerPassword.trim().length >= 8
+                        ? "Custom password provided"
+                        : formData.ownerPassword && formData.ownerPassword.trim().length > 0
+                        ? `Too short (${formData.ownerPassword.trim().length} chars - min 8 required)`
+                        : "Will auto-generate secure password"}
+                    </span>
+                  </div>
                   <div className="text-muted">Role: <span className="font-semibold text-pine">OWNER</span></div>
                 </div>
 
